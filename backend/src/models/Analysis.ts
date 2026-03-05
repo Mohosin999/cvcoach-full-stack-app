@@ -38,6 +38,27 @@ export interface IAnalysis extends Document {
     missing: string[];
     density: Record<string, number>;
   };
+  missingKeywords: {
+    programmingLanguages: string[];
+    frameworks: string[];
+    databases: string[];
+    tools: string[];
+    devops: string[];
+    softSkills: string[];
+  };
+  recommendedKeywords: string[];
+  howToUseKeywords: string[];
+  resumeImprovements: string[];
+  jobMatch?: {
+    score: number;
+    missingKeywords: string[];
+    suggestions: string[];
+  };
+  existingSections: {
+    experience: boolean;
+    education: boolean;
+    skills: boolean;
+  };
   createdAt: Date;
 }
 
@@ -56,7 +77,7 @@ const analysisSchema = new Schema<IAnalysis>(
     },
     jobDescription: {
       type: String,
-      required: true
+      default: ''
     },
     jobTitle: String,
     company: String,
@@ -97,6 +118,27 @@ const analysisSchema = new Schema<IAnalysis>(
       found: [String],
       missing: [String],
       density: Schema.Types.Mixed
+    },
+    missingKeywords: {
+      programmingLanguages: [String],
+      frameworks: [String],
+      databases: [String],
+      tools: [String],
+      devops: [String],
+      softSkills: [String]
+    },
+    recommendedKeywords: [String],
+    howToUseKeywords: [String],
+    resumeImprovements: [String],
+    jobMatch: {
+      score: Number,
+      missingKeywords: [String],
+      suggestions: [String]
+    },
+    existingSections: {
+      experience: { type: Boolean, default: false },
+      education: { type: Boolean, default: false },
+      skills: { type: Boolean, default: false }
     }
   },
   {

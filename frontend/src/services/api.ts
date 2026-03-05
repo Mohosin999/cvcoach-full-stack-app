@@ -1,5 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { ApiResponse } from '../types';
+import { ResumeContent } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -12,9 +13,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    return config;
-  },
+  (config: InternalAxiosRequestConfig) => config,
   (error) => Promise.reject(error)
 );
 
@@ -22,7 +21,6 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiResponse<any>>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-    
     if (!originalRequest) return Promise.reject(error);
 
     const isAuthRequest = originalRequest.url?.includes('/auth/login') || 
@@ -32,7 +30,6 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
       originalRequest._retry = true;
-
       try {
         await api.post('/auth/refresh');
         return api(originalRequest);
@@ -43,15 +40,12 @@ api.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   }
 );
 
 export const authApi = {
-  googleLogin: () => {
-    window.location.href = `${API_URL}/auth/google`;
-  },
+  googleLogin: () => window.location.href = `${API_URL}/auth/google`,
   getMe: () => api.get('/auth/me'),
   logout: () => api.post('/auth/logout'),
 };
@@ -69,8 +63,10 @@ export const resumeApi = {
   upload: (formData: FormData) => api.post('/resumes', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
+  createFromContent: (content: ResumeContent) => api.post('/resumes/content', { content }),
   update: (id: string, data: any) => api.put(`/resumes/${id}`, data),
   delete: (id: string) => api.delete(`/resumes/${id}`),
+  deleteAll: () => api.delete('/resumes/delete-all'),
 };
 
 export const analysisApi = {
@@ -79,6 +75,7 @@ export const analysisApi = {
   create: (data: { resumeId: string; jobDescription: string; jobTitle?: string; company?: string }) =>
     api.post('/analysis', data),
   delete: (id: string) => api.delete(`/analysis/${id}`),
+  deleteAll: () => api.delete('/analysis/delete-all'),
 };
 
 export const jobApi = {

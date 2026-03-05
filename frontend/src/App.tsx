@@ -8,6 +8,7 @@ import History from './pages/History';
 import Settings from './pages/Settings';
 import Builder from './pages/Builder';
 import SavedResumes from './pages/SavedResumes';
+import Plans from './pages/Plans';
 import LoadingSpinner from './components/LoadingSpinner';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -83,10 +84,26 @@ function App() {
         }
       />
       <Route
+        path="/my-resumes"
+        element={
+          <PrivateRoute>
+            <SavedResumes />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/saved-resumes"
         element={
           <PrivateRoute>
             <SavedResumes />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/plans"
+        element={
+          <PrivateRoute>
+            <Plans />
           </PrivateRoute>
         }
       />

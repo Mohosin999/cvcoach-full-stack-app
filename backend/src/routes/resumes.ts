@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { Resume } from '../models/Resume';
-import { authenticate, AuthRequest, requireCredits } from '../middleware/auth';
+import { authenticate, AuthRequest } from '../middlewares/auth';
 import { upload, uploadErrorHandler } from '../config/multer';
 import { parseResumeFile } from '../services/resumeParser';
 import fs from 'fs';
@@ -42,7 +42,6 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
 
 router.post('/', 
   authenticate, 
-  requireCredits,
   upload.single('resume'),
   uploadErrorHandler,
   async (req: AuthRequest, res: Response) => {
@@ -86,6 +85,44 @@ router.post('/',
       res.status(500).json({
         success: false,
         message: error.message || 'Error uploading resume'
+      });
+    }
+  }
+);
+
+router.post('/content', 
+  authenticate, 
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const { content } = req.body;
+
+      if (!content) {
+        return res.status(400).json({
+          success: false,
+          message: 'Content is required'
+        });
+      }
+
+      const resume = await Resume.create({
+        userId: req.user._id,
+        content,
+        metadata: {
+          filename: `resume_${Date.now()}.json`,
+          originalName: content.personalInfo?.name || 'Resume',
+          size: JSON.stringify(content).length,
+          type: 'application/json'
+        },
+        isActive: true
+      });
+
+      res.status(201).json({
+        success: true,
+        data: resume
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Error creating resume'
       });
     }
   }
@@ -167,6 +204,25 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting resume'
+    });
+  }
+});
+
+router.delete('/delete-all', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    await Resume.updateMany(
+      { userId: req.user._id },
+      { $set: { isActive: false } }
+    );
+
+    res.json({
+      success: true,
+      message: 'All resumes deleted successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting all resumes'
     });
   }
 });

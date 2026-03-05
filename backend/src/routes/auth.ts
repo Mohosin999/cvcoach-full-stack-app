@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
 import passport from "passport";
 import bcrypt from "bcryptjs";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, AuthRequest } from "../middlewares/auth";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -42,7 +42,7 @@ router.post("/register", async (req: AuthRequest, res: Response) => {
       },
       subscription: {
         plan: "free",
-        credits: 5,
+        credits: 100,
       },
     });
 

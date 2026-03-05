@@ -56,6 +56,8 @@ export interface ResumeContent {
   projects?: Project[];
   certifications?: Certification[];
   languages?: Language[];
+  awards?: Award[];
+  contributions?: Contribution[];
 }
 
 export interface Experience {
@@ -95,6 +97,41 @@ export interface Language {
   proficiency: string;
 }
 
+export interface Award {
+  title: string;
+  issuer: string;
+  date?: string;
+}
+
+export interface Contribution {
+  organization: string;
+  role: string;
+  description: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface MissingKeywords {
+  programmingLanguages: string[];
+  frameworks: string[];
+  databases: string[];
+  tools: string[];
+  devops: string[];
+  softSkills: string[];
+}
+
+export interface JobMatch {
+  score: number;
+  missingKeywords: string[];
+  suggestions: string[];
+}
+
+export interface ExistingSections {
+  experience: boolean;
+  education: boolean;
+  skills: boolean;
+}
+
 export interface Analysis {
   _id: string;
   userId: string;
@@ -107,6 +144,12 @@ export interface Analysis {
   feedback: Feedback;
   sectionScores: SectionScores;
   keywords: Keywords;
+  missingKeywords: MissingKeywords;
+  recommendedKeywords: string[];
+  howToUseKeywords: string[];
+  resumeImprovements: string[];
+  jobMatch?: JobMatch;
+  existingSections: ExistingSections;
   createdAt: string;
 }
 

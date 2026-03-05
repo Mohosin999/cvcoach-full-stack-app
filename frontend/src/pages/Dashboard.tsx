@@ -240,19 +240,17 @@ export default function Dashboard() {
                 </Link>
               </div>
 
-              {user?.subscription.plan === 'free' && (
-                <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                    Upgrade to Pro
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    Get unlimited analyses and advanced features.
-                  </p>
-                  <button className="w-full btn-secondary text-sm">
-                    View Plans
-                  </button>
-                </div>
-              )}
+              <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                  Upgrade Your Plan
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  Get more credits and advanced features.
+                </p>
+                <Link to="/plans" className="w-full btn-secondary text-sm inline-block text-center">
+                  View Plans
+                </Link>
+              </div>
             </motion.div>
           </div>
         </div>

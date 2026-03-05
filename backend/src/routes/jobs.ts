@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { JobDescription } from '../models/JobDescription';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { authenticate, AuthRequest } from '../middlewares/auth';
 import Joi from 'joi';
 
 const router = Router();

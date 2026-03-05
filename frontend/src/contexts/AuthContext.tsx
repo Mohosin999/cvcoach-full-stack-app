@@ -20,10 +20,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = async () => {
     try {
-      const response = await axios.get(`${API_URL}/auth/me`, { withCredentials: true });
+      const response = await axios.get(`${API_URL}/auth/me`, { 
+        withCredentials: true 
+      });
       setUser(response.data.data);
+      localStorage.setItem('user', JSON.stringify(response.data.data));
     } catch (error) {
       setUser(null);
+      localStorage.removeItem('user');
     }
   };
 
@@ -38,22 +42,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
+      localStorage.removeItem('user');
       window.location.href = '/';
     }
   };
 
   useEffect(() => {
     const initAuth = async () => {
-      try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser);
+          setUser(parsed);
+          await refreshUser();
+        } catch (e) {
+          localStorage.removeItem('user');
+          await refreshUser();
+        }
+      } else {
         await refreshUser();
-      } catch (error) {
-        console.error('Auth init error:', error);
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
 
     initAuth();
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'user') {
+        if (e.newValue) {
+          try {
+            setUser(JSON.parse(e.newValue));
+          } catch (err) {
+            console.error('Error parsing user from storage:', err);
+          }
+        } else {
+          setUser(null);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true });
+      } catch (error) {
+        console.log('Token refresh failed');
+      }
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (

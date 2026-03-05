@@ -1,0 +1,57 @@
+import helmet from "helmet";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
+import express, { Application } from "express";
+import cookieParser from "cookie-parser";
+import passport from "passport";
+import path from "path";
+import { configureGoogleStrategy } from "../config/passport";
+
+export { authenticate, optionalAuth, requireCredits, AuthRequest } from "./auth";
+export { errorHandler, createError, notFound, AppError } from "./errorHandler";
+
+export const setupMiddleware = (app: Application): void => {
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    })
+  );
+
+  app.use(
+    cors({
+      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
+
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+  app.use(cookieParser());
+
+  const uploadsDir = path.join(__dirname, "..", "..", "uploads");
+  app.use("/uploads", express.static(uploadsDir));
+
+  passport.use(configureGoogleStrategy());
+
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000,
+    message: { message: "Too many requests, please try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000,
+    message: { message: "Too many requests, please try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  app.use("/api/", apiLimiter);
+  app.use("/api/auth/login", authLimiter);
+  app.use("/api/auth/register", authLimiter);
+};
