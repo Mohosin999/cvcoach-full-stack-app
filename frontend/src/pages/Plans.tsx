@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Check, CreditCard, Zap, Crown, Star, Building } from 'lucide-react';
+import { Check, CreditCard, Zap, Crown, Star, Building, Gift, CheckCircle, Coins } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
-import { showUpgradePlan } from '../components/Toast';
+import { showUpgradePlan, addFreeCredits } from '../components/Toast';
+import { userApi } from '../services/api';
 import BackButton from '../components/BackButton';
 
 interface Plan {
@@ -66,6 +67,25 @@ export default function Plans() {
   const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState<string | null>(null);
+  const [canUseFreeCredits, setCanUseFreeCredits] = useState(true);
+  const [freeCreditsUsed, setFreeCreditsUsed] = useState(false);
+
+  useEffect(() => {
+    checkFreeCreditsStatus();
+  }, [user]);
+
+  const checkFreeCreditsStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const response = await userApi.getFreeCreditsStatus();
+      if (response.data.success) {
+        setCanUseFreeCredits(response.data.data.canUseFreeCredits);
+      }
+    } catch (error) {
+      console.error('Error checking free credits status:', error);
+    }
+  };
 
   const handleSelectPlan = (planId: string) => {
     if (planId === 'free') {
@@ -75,15 +95,39 @@ export default function Plans() {
     showUpgradePlan();
   };
 
-  const handleBuyCredits = async () => {
+  const handleBuyCredits = async (credits: number, price: number) => {
     if (!user) {
       navigate('/login');
       return;
     }
 
+    if (price === 0) {
+      if (!canUseFreeCredits) {
+        toast.info('You have already used your free credits for today. Come back tomorrow!');
+        return;
+      }
+
+      setLoading('freeCredits');
+      try {
+        const result = await addFreeCredits();
+        if (result) {
+          await refreshUser();
+          setCanUseFreeCredits(false);
+          setFreeCreditsUsed(true);
+          toast.success(result.message || 'Free credits added successfully!');
+        }
+      } catch (error: any) {
+        console.error('Failed to add free credits:', error);
+        toast.error(error.response?.data?.message || 'Failed to add free credits');
+      } finally {
+        setLoading(null);
+      }
+      return;
+    }
+
     setLoading('buyCredits');
     try {
-      toast.success('Credits purchased successfully! (Demo)');
+      toast.success(`Successfully purchased ${credits} credits! (Demo)`);
       await refreshUser();
     } catch (error) {
       toast.error('Failed to purchase credits');
@@ -98,6 +142,30 @@ export default function Plans() {
         <div className="mb-6">
           <BackButton />
         </div>
+
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-gradient-to-r from-primary/10 to-purple-10 dark:from-primary/20 dark:to-purple-20 rounded-xl p-4 flex items-center justify-between"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                <Coins className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Current Plan</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white capitalize">
+                  {user.subscription.plan} Plan
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Available Credits</p>
+              <p className="text-2xl font-bold text-primary">{user.subscription.credits}</p>
+            </div>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -207,7 +275,7 @@ export default function Plans() {
 
             <div className="grid grid-cols-3 gap-4 mb-6">
               <button
-                onClick={handleBuyCredits}
+                onClick={() => handleBuyCredits(50, 4.99)}
                 disabled={loading === 'buyCredits'}
                 className="p-4 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-primary transition-colors"
               >
@@ -215,7 +283,7 @@ export default function Plans() {
                 <div className="text-sm text-gray-500">$4.99</div>
               </button>
               <button
-                onClick={handleBuyCredits}
+                onClick={() => handleBuyCredits(150, 9.99)}
                 disabled={loading === 'buyCredits'}
                 className="p-4 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-primary transition-colors"
               >
@@ -223,12 +291,49 @@ export default function Plans() {
                 <div className="text-sm text-gray-500">$9.99</div>
               </button>
               <button
-                onClick={handleBuyCredits}
+                onClick={() => handleBuyCredits(500, 19.99)}
                 disabled={loading === 'buyCredits'}
                 className="p-4 bg-white dark:bg-gray-800 rounded-xl border-2 border-primary"
               >
                 <div className="text-2xl font-bold text-primary mb-1">500</div>
                 <div className="text-sm text-primary">$19.99</div>
+              </button>
+            </div>
+
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Gift className="w-5 h-5 text-green-500" />
+                    Free Daily Credits
+                  </h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Get 20 free credits (1 time per day)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => handleBuyCredits(20, 0)}
+                disabled={loading === 'freeCredits' || !canUseFreeCredits || freeCreditsUsed}
+                className={`w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
+                  canUseFreeCredits && !freeCreditsUsed
+                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                    : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {loading === 'freeCredits' ? (
+                  <>Processing...</>
+                ) : freeCreditsUsed || !canUseFreeCredits ? (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Free Credits Used Today
+                  </>
+                ) : (
+                  <>
+                    <Gift className="w-5 h-5" />
+                    Get 20 Free Credits
+                  </>
+                )}
               </button>
             </div>
 

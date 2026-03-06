@@ -8,6 +8,24 @@ export interface IAnalysis extends Document {
   company?: string;
   score: number;
   atsScore: number;
+  atsScoreBreakdown?: {
+    keywordMatching: { score: number; weight: number; details: string };
+    skillsMatch: { score: number; weight: number; details: string };
+    resumeSections: { score: number; weight: number; details: string };
+    experienceRelevance: { score: number; weight: number; details: string };
+    resumeFormatting: { score: number; weight: number; details: string };
+    achievementsImpact: { score: number; weight: number; details: string };
+    grammarReadability: { score: number; weight: number; details: string };
+  };
+  jobMatchingBreakdown?: {
+    requiredSkillsMatch: { score: number; details: string };
+    relevantWorkExperience: { score: number; details: string };
+    technologiesUsed: { score: number; details: string };
+    toolsFrameworks: { score: number; details: string };
+    industryRelevance: { score: number; details: string };
+    yearsExperienceAlignment: { score: number; details: string };
+    roleResponsibilitySimilarity: { score: number; details: string };
+  };
   feedback: {
     overall: string;
     strengths: string[];
@@ -88,6 +106,73 @@ const analysisSchema = new Schema<IAnalysis>(
     atsScore: {
       type: Number,
       default: 0
+    },
+    atsScoreBreakdown: {
+      keywordMatching: {
+        score: { type: Number, default: 0 },
+        weight: { type: Number, default: 30 },
+        details: String
+      },
+      skillsMatch: {
+        score: { type: Number, default: 0 },
+        weight: { type: Number, default: 20 },
+        details: String
+      },
+      resumeSections: {
+        score: { type: Number, default: 0 },
+        weight: { type: Number, default: 15 },
+        details: String
+      },
+      experienceRelevance: {
+        score: { type: Number, default: 0 },
+        weight: { type: Number, default: 15 },
+        details: String
+      },
+      resumeFormatting: {
+        score: { type: Number, default: 0 },
+        weight: { type: Number, default: 10 },
+        details: String
+      },
+      achievementsImpact: {
+        score: { type: Number, default: 0 },
+        weight: { type: Number, default: 5 },
+        details: String
+      },
+      grammarReadability: {
+        score: { type: Number, default: 0 },
+        weight: { type: Number, default: 5 },
+        details: String
+      }
+    },
+    jobMatchingBreakdown: {
+      requiredSkillsMatch: {
+        score: { type: Number, default: 0 },
+        details: String
+      },
+      relevantWorkExperience: {
+        score: { type: Number, default: 0 },
+        details: String
+      },
+      technologiesUsed: {
+        score: { type: Number, default: 0 },
+        details: String
+      },
+      toolsFrameworks: {
+        score: { type: Number, default: 0 },
+        details: String
+      },
+      industryRelevance: {
+        score: { type: Number, default: 0 },
+        details: String
+      },
+      yearsExperienceAlignment: {
+        score: { type: Number, default: 0 },
+        details: String
+      },
+      roleResponsibilitySimilarity: {
+        score: { type: Number, default: 0 },
+        details: String
+      }
     },
     feedback: {
       overall: String,

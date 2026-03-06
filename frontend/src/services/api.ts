@@ -55,6 +55,8 @@ export const userApi = {
   updateProfile: (data: any) => api.put('/users/profile', data),
   deleteAccount: () => api.delete('/users/account'),
   useCredit: () => api.post('/users/use-credit'),
+  addFreeCredits: () => api.post('/users/add-free-credits'),
+  getFreeCreditsStatus: () => api.get('/users/free-credits-status'),
 };
 
 export const resumeApi = {

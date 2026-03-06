@@ -113,4 +113,115 @@ router.post('/use-credit', authenticate, async (req: AuthRequest, res: Response)
   }
 });
 
+router.post('/add-free-credits', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = req.user;
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+
+    const FREE_CREDIT_AMOUNT = 20;
+    const MAX_FREE_CREDITS_PER_DAY = 1;
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    let canUseFreeCredits = true;
+    let usedToday = 0;
+
+    if (user.lastFreeCreditDate) {
+      const lastCreditDate = new Date(user.lastFreeCreditDate);
+      const lastCreditDay = new Date(lastCreditDate.getFullYear(), lastCreditDate.getMonth(), lastCreditDate.getDate());
+      
+      if (lastCreditDay.getTime() === todayStart.getTime()) {
+        usedToday = user.freeCreditsUsedToday || 0;
+        if (usedToday >= MAX_FREE_CREDITS_PER_DAY) {
+          canUseFreeCredits = false;
+        }
+      }
+    }
+
+    if (!canUseFreeCredits) {
+      return res.status(429).json({
+        success: false,
+        message: `You've already used your free credits for today. Come back tomorrow!`,
+        canUseFreeCredits: false,
+        remainingCredits: user.subscription.credits
+      });
+    }
+
+    user.subscription.credits += FREE_CREDIT_AMOUNT;
+    user.lastFreeCreditDate = now;
+    user.freeCreditsUsedToday = usedToday + 1;
+    await user.save();
+
+    const updatedUser = await User.findById(user._id).select('-__v');
+
+    res.json({
+      success: true,
+      data: {
+        credits: updatedUser?.subscription.credits || user.subscription.credits,
+        canUseFreeCredits: false,
+        message: `Added ${FREE_CREDIT_AMOUNT} free credits!`
+      }
+    });
+  } catch (error) {
+    console.error('Error adding free credits:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error adding free credits'
+    });
+  }
+});
+
+router.get('/free-credits-status', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = req.user;
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+
+    const MAX_FREE_CREDITS_PER_DAY = 1;
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    let canUseFreeCredits = true;
+    let usedToday = 0;
+
+    if (user.lastFreeCreditDate) {
+      const lastCreditDate = new Date(user.lastFreeCreditDate);
+      const lastCreditDay = new Date(lastCreditDate.getFullYear(), lastCreditDate.getMonth(), lastCreditDate.getDate());
+      
+      if (lastCreditDay.getTime() === todayStart.getTime()) {
+        usedToday = user.freeCreditsUsedToday || 0;
+        if (usedToday >= MAX_FREE_CREDITS_PER_DAY) {
+          canUseFreeCredits = false;
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        canUseFreeCredits,
+        usedToday,
+        remainingToday: Math.max(0, MAX_FREE_CREDITS_PER_DAY - usedToday)
+      }
+    });
+  } catch (error) {
+    console.error('Error checking free credits status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error checking free credits status'
+    });
+  }
+});
+
 export default router;

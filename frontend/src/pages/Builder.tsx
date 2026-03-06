@@ -10,6 +10,8 @@ import {
   ChevronDown,
   ChevronUp,
   PlusCircle,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import BackButton from '../components/BackButton';
@@ -58,6 +60,7 @@ export default function Builder() {
   const [content, setContent] = useState<ResumeContent>(defaultContent);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const [sections, setSections] = useState<Section[]>([
     { id: 'personal', title: 'Personal Information', icon: FileText, expanded: true },
     { id: 'summary', title: 'Professional Summary', icon: FileText, expanded: true },
@@ -75,6 +78,7 @@ export default function Builder() {
     if (passedResume) {
       setSelectedResume(passedResume);
       setContent(passedResume.content);
+      window.history.replaceState({}, document.title);
     }
     fetchResumes();
   }, [location.state]);
@@ -912,6 +916,14 @@ export default function Builder() {
               <p className="text-gray-600 dark:text-gray-400 mt-1">Create your professional resume</p>
             </div>
             <div className="flex gap-2">
+              <button
+                onClick={() => setShowPreview(!showPreview)}
+                className="btn-outline flex items-center gap-2"
+                title={showPreview ? 'Hide Preview' : 'Show Preview'}
+              >
+                {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPreview ? 'Hide Preview' : 'Show Preview'}
+              </button>
               {savedResumes.length > 0 && (
                 <select
                   value={selectedResume?._id || ''}
@@ -932,8 +944,8 @@ export default function Builder() {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+        <div className={`grid grid-cols-1 gap-8 ${showPreview ? 'lg:grid-cols-2' : ''}`}>
+          <div className="space-y-4">
             {sections.map((section) => (
               <div key={section.id} className="card">
                 <button onClick={() => toggleSection(section.id)} className="w-full flex items-center justify-between p-2">
@@ -950,7 +962,7 @@ export default function Builder() {
               </div>
             ))}
 
-            <div className="flex gap-3 sticky bottom-0 bg-gray-50 dark:bg-gray-900 py-2">
+            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
               <button onClick={handleSaveResume} disabled={saving} className="btn-primary flex-1 flex items-center justify-center gap-2">
                 <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save'}
               </button>
@@ -960,10 +972,14 @@ export default function Builder() {
             </div>
           </div>
 
-          <div className="lg:sticky lg:top-24 h-fit">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Live Preview</h3>
-            {renderResumePreview()}
-          </div>
+          {showPreview && (
+            <div className="lg:sticky lg:top-24 h-fit">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Live Preview</h3>
+              </div>
+              {renderResumePreview()}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -4,8 +4,26 @@
 
 :root {
   --color-primary: #22c55e;
-  --color-secondary: #f97316;
-  --color-accent: #3b82f6;
+  --color-secondary: #10b981;
+  --color-accent: #14b8a6;
+  
+  /* Dark Reader Fix - Prevent color inversion */
+  --darkreader-background--bg-color: #0f172a;
+  --darkreader-text--text-color: #f8fafc;
+}
+
+/* Dark Reader Compatibility - Lock colors */
+html {
+  --darkreader-neutral-background: #0f172a;
+  --darkreader-neutral-text: #f8fafc;
+  --darkreader-text: #f8fafc;
+  --darkreader-background: #0f172a;
+}
+
+/* Prevent Dark Reader from inverting specific elements */
+.darkreader-lock {
+  --darkreader-text: #f8fafc !important;
+  --darkreader-background: #0f172a !important;
 }
 
 * {
@@ -16,12 +34,77 @@
 
 html {
   scroll-behavior: smooth;
+  /* Dark Reader attribute to preserve colors */
+  color-scheme: dark;
 }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Dark Reader compatibility */
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+/* Dark Reader Exclusion - Preserve gradient backgrounds */
+.bg-gradient-to-br,
+.from-gray-900,
+.from-green-900,
+.to-gray-900,
+.bg-gradient-to-r,
+.from-green-600,
+.from-emerald-600,
+.to-green-700 {
+  --darkreader-bg--background: transparent !important;
+}
+
+/* Preserve text colors in dark mode */
+.text-white {
+  color: #ffffff !important;
+}
+
+.text-gray-300,
+.text-gray-400 {
+  color: #d1d5db !important;
+}
+
+.text-green-400 {
+  color: #4ade80 !important;
+}
+
+/* Preserve gradient text */
+.bg-clip-text {
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Dark Reader data attributes preservation */
+[data-darkreader-lock] {
+  --darkreader-text: #f8fafc !important;
+  --darkreader-background: #0f172a !important;
+}
+
+/* Preserve all gradient backgrounds from Dark Reader inversion */
+[class*="from-"],
+[class*="via-"],
+[class*="to-"],
+[class*="bg-gradient"] {
+  background-clip: padding-box !important;
+}
+
+/* Preserve button gradients */
+.btn-primary,
+[class*="from-green-500"],
+[class*="from-emerald-500"],
+[class*="to-green-600"] {
+  --darkreader-bg: transparent !important;
+}
+
+/* Force dark mode colors */
+.dark\:bg-gray-900,
+.dark\:via-gray-800,
+.dark\:to-gray-900 {
+  background-color: #0f172a !important;
 }
 
 @layer components {

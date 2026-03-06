@@ -132,6 +132,26 @@ export interface ExistingSections {
   skills: boolean;
 }
 
+export interface AtsScoreBreakdown {
+  keywordMatching: { score: number; weight: number; details: string };
+  skillsMatch: { score: number; weight: number; details: string };
+  resumeSections: { score: number; weight: number; details: string };
+  experienceRelevance: { score: number; weight: number; details: string };
+  resumeFormatting: { score: number; weight: number; details: string };
+  achievementsImpact: { score: number; weight: number; details: string };
+  grammarReadability: { score: number; weight: number; details: string };
+}
+
+export interface JobMatchingBreakdown {
+  requiredSkillsMatch: { score: number; details: string };
+  relevantWorkExperience: { score: number; details: string };
+  technologiesUsed: { score: number; details: string };
+  toolsFrameworks: { score: number; details: string };
+  industryRelevance: { score: number; details: string };
+  yearsExperienceAlignment: { score: number; details: string };
+  roleResponsibilitySimilarity: { score: number; details: string };
+}
+
 export interface Analysis {
   _id: string;
   userId: string;
@@ -141,6 +161,8 @@ export interface Analysis {
   company?: string;
   score: number;
   atsScore: number;
+  atsScoreBreakdown?: AtsScoreBreakdown;
+  jobMatchingBreakdown?: JobMatchingBreakdown;
   feedback: Feedback;
   sectionScores: SectionScores;
   keywords: Keywords;
