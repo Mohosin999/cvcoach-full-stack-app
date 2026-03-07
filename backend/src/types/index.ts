@@ -1,11 +1,20 @@
 export interface ResumeContent {
   personalInfo: {
-    name?: string;
+    fullName?: string;
+    jobTitle?: string;
     email?: string;
-    phone?: string;
-    location?: string;
-    linkedin?: string;
-    portfolio?: string;
+    whatsapp?: string;
+    address?: {
+      city?: string;
+      division?: string;
+      zipCode?: string;
+    };
+    linkedIn?: string;
+    socialLinks?: {
+      github?: string;
+      portfolio?: string;
+      website?: string;
+    };
   };
   summary?: string;
   experience: Array<{
@@ -17,35 +26,56 @@ export interface ResumeContent {
     current?: boolean;
     description: string;
   }>;
-  education: Array<{
-    institution: string;
-    degree: string;
-    field?: string;
-    graduationDate?: string;
-    gpa?: string;
-  }>;
-  skills: string[];
   projects?: Array<{
     name: string;
     description: string;
+    links?: {
+      live?: string;
+      github?: string;
+      caseStudy?: string;
+    };
     technologies?: string[];
-    url?: string;
+  }>;
+  achievements?: Array<{
+    title: string;
+    description?: string;
+    date?: string;
   }>;
   certifications?: Array<{
-    name: string;
-    issuer: string;
+    title: string;
+    link?: string;
     date?: string;
-    url?: string;
   }>;
-  languages?: Array<{
-    language: string;
-    proficiency: string;
+  education: Array<{
+    institution: string;
+    degree: string;
+    date?: string;
   }>;
+  skills: string[];
 }
 
 export interface AnalysisResult {
   score: number;
-  atsScore: number;
+  atsScore?: number;
+  atsScoreBreakdown?: {
+    keywordMatching: { score: number; weight: number; details: string };
+    skillsMatch: { score: number; weight: number; details: string };
+    resumeSections: { score: number; weight: number; details: string };
+    experienceRelevance: { score: number; weight: number; details: string };
+    resumeFormatting: { score: number; weight: number; details: string };
+    achievementsImpact: { score: number; weight: number; details: string };
+    grammarReadability: { score: number; weight: number; details: string };
+  };
+  jobMatchingScore?: number;
+  jobMatchingBreakdown?: {
+    requiredSkillsMatch: { score: number; details: string };
+    relevantWorkExperience: { score: number; details: string };
+    technologiesUsed: { score: number; details: string };
+    toolsFrameworks: { score: number; details: string };
+    industryRelevance: { score: number; details: string };
+    yearsExperienceAlignment: { score: number; details: string };
+    roleResponsibilitySimilarity: { score: number; details: string };
+  };
   feedback: {
     overall: string;
     strengths: string[];

@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IResume extends Document {
   userId: mongoose.Types.ObjectId;
-  originalFormat: {
+  originalFormat?: {
     filename: string;
     mimetype: string;
     size: number;
@@ -10,12 +10,21 @@ export interface IResume extends Document {
   };
   content: {
     personalInfo: {
-      name?: string;
+      fullName?: string;
+      jobTitle?: string;
       email?: string;
-      phone?: string;
-      location?: string;
-      linkedin?: string;
-      portfolio?: string;
+      whatsapp?: string;
+      address?: {
+        city?: string;
+        division?: string;
+        zipCode?: string;
+      };
+      linkedIn?: string;
+      socialLinks?: {
+        github?: string;
+        portfolio?: string;
+        website?: string;
+      };
     };
     summary?: string;
     experience: Array<{
@@ -27,30 +36,32 @@ export interface IResume extends Document {
       current?: boolean;
       description: string;
     }>;
-    education: Array<{
-      institution: string;
-      degree: string;
-      field?: string;
-      graduationDate?: string;
-      gpa?: string;
-    }>;
-    skills: string[];
     projects?: Array<{
       name: string;
       description: string;
+      links?: {
+        live?: string;
+        github?: string;
+        caseStudy?: string;
+      };
       technologies?: string[];
-      url?: string;
+    }>;
+    achievements?: Array<{
+      title: string;
+      description?: string;
+      date?: string;
     }>;
     certifications?: Array<{
-      name: string;
-      issuer: string;
+      title: string;
+      link?: string;
       date?: string;
-      url?: string;
     }>;
-    languages?: Array<{
-      language: string;
-      proficiency: string;
+    education: Array<{
+      institution: string;
+      degree: string;
+      date?: string;
     }>;
+    skills: string[];
   };
   metadata: {
     filename: string;
@@ -80,12 +91,21 @@ const resumeSchema = new Schema<IResume>(
     },
     content: {
       personalInfo: {
-        name: String,
+        fullName: String,
+        jobTitle: String,
         email: String,
-        phone: String,
-        location: String,
-        linkedin: String,
-        portfolio: String
+        whatsapp: String,
+        address: {
+          city: String,
+          division: String,
+          zipCode: String
+        },
+        linkedIn: String,
+        socialLinks: {
+          github: String,
+          portfolio: String,
+          website: String
+        }
       },
       summary: String,
       experience: [
@@ -99,38 +119,40 @@ const resumeSchema = new Schema<IResume>(
           description: String
         }
       ],
-      education: [
-        {
-          institution: String,
-          degree: String,
-          field: String,
-          graduationDate: String,
-          gpa: String
-        }
-      ],
-      skills: [String],
       projects: [
         {
           name: String,
           description: String,
-          technologies: [String],
-          url: String
+          links: {
+            live: String,
+            github: String,
+            caseStudy: String
+          },
+          technologies: [String]
+        }
+      ],
+      achievements: [
+        {
+          title: String,
+          description: String,
+          date: String
         }
       ],
       certifications: [
         {
-          name: String,
-          issuer: String,
-          date: String,
-          url: String
+          title: String,
+          link: String,
+          date: String
         }
       ],
-      languages: [
+      education: [
         {
-          language: String,
-          proficiency: String
+          institution: String,
+          degree: String,
+          date: String
         }
-      ]
+      ],
+      skills: [String]
     },
     metadata: {
       filename: { type: String, required: true },

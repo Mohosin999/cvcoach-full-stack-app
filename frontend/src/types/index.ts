@@ -21,7 +21,7 @@ export interface User {
 export interface Resume {
   _id: string;
   userId: string;
-  originalFormat: {
+  originalFormat?: {
     filename: string;
     mimetype: string;
     size: number;
@@ -42,22 +42,29 @@ export interface Resume {
 
 export interface ResumeContent {
   personalInfo: {
-    name?: string;
+    fullName?: string;
+    jobTitle?: string;
     email?: string;
-    phone?: string;
-    location?: string;
-    linkedin?: string;
-    portfolio?: string;
+    whatsapp?: string;
+    address?: {
+      city?: string;
+      division?: string;
+      zipCode?: string;
+    };
+    linkedIn?: string;
+    socialLinks?: {
+      github?: string;
+      portfolio?: string;
+      website?: string;
+    };
   };
   summary?: string;
   experience: Experience[];
+  projects?: Project[];
+  achievements?: Achievement[];
+  certifications?: Certification[];
   education: Education[];
   skills: string[];
-  projects?: Project[];
-  certifications?: Certification[];
-  languages?: Language[];
-  awards?: Award[];
-  contributions?: Contribution[];
 }
 
 export interface Experience {
@@ -70,45 +77,33 @@ export interface Experience {
   description: string;
 }
 
-export interface Education {
-  institution: string;
-  degree: string;
-  field?: string;
-  graduationDate?: string;
-  gpa?: string;
-}
-
 export interface Project {
   name: string;
   description: string;
+  links?: {
+    live?: string;
+    github?: string;
+    caseStudy?: string;
+  };
   technologies?: string[];
-  url?: string;
+}
+
+export interface Achievement {
+  title: string;
+  description?: string;
+  date?: string;
 }
 
 export interface Certification {
-  name: string;
-  issuer: string;
-  date?: string;
-  url?: string;
-}
-
-export interface Language {
-  language: string;
-  proficiency: string;
-}
-
-export interface Award {
   title: string;
-  issuer: string;
+  link?: string;
   date?: string;
 }
 
-export interface Contribution {
-  organization: string;
-  role: string;
-  description: string;
-  startDate?: string;
-  endDate?: string;
+export interface Education {
+  institution: string;
+  degree: string;
+  date?: string;
 }
 
 export interface MissingKeywords {

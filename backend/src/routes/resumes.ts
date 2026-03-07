@@ -3,6 +3,14 @@ import { Resume } from '../models/Resume';
 import { authenticate, AuthRequest } from '../middlewares/auth';
 import { upload, uploadErrorHandler } from '../config/multer';
 import { parseResumeFile } from '../services/resumeParser';
+import {
+  generateSummary,
+  generateExperienceBulletPoints,
+  generateProjectDescription,
+  generateSkills,
+  generateAchievement,
+  generateCertification
+} from '../services/resumeGenerator';
 import fs from 'fs';
 import path from 'path';
 
@@ -210,19 +218,181 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
 router.delete('/delete-all', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    await Resume.updateMany(
-      { userId: req.user._id },
+    const result = await Resume.updateMany(
+      { userId: req.user._id, isActive: true },
       { $set: { isActive: false } }
+    );
+
+    return res.json({
+      success: true,
+      message: `Deleted ${result.modifiedCount} resumes successfully`
+    });
+  } catch (error) {
+    console.error('Error deleting all resumes:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error deleting all resumes'
+    });
+  }
+});
+
+router.post('/ai/generate-summary', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { jobTitle, skills, experience } = req.body;
+
+    if (!jobTitle) {
+      return res.status(400).json({
+        success: false,
+        message: 'Job title is required'
+      });
+    }
+
+    const summary = await generateSummary(jobTitle, skills || [], experience);
+
+    res.json({
+      success: true,
+      data: { summary }
+    });
+  } catch (error: any) {
+    console.error('Error generating summary:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate summary'
+    });
+  }
+});
+
+router.post('/ai/generate-experience', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { jobTitle, company, yearsExperience, skills } = req.body;
+
+    if (!jobTitle || !company) {
+      return res.status(400).json({
+        success: false,
+        message: 'Job title and company are required'
+      });
+    }
+
+    const description = await generateExperienceBulletPoints(
+      jobTitle,
+      company,
+      yearsExperience || 1,
+      skills || []
     );
 
     res.json({
       success: true,
-      message: 'All resumes deleted successfully'
+      data: { description }
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error generating experience:', error);
     res.status(500).json({
       success: false,
-      message: 'Error deleting all resumes'
+      message: error.message || 'Failed to generate experience'
+    });
+  }
+});
+
+router.post('/ai/generate-project', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { projectName, technologies } = req.body;
+
+    if (!projectName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Project name is required'
+      });
+    }
+
+    const description = await generateProjectDescription(projectName, technologies || []);
+
+    res.json({
+      success: true,
+      data: { description }
+    });
+  } catch (error: any) {
+    console.error('Error generating project:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate project'
+    });
+  }
+});
+
+router.post('/ai/generate-skills', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { jobTitle } = req.body;
+
+    if (!jobTitle) {
+      return res.status(400).json({
+        success: false,
+        message: 'Job title is required'
+      });
+    }
+
+    const skills = await generateSkills(jobTitle);
+
+    res.json({
+      success: true,
+      data: { skills }
+    });
+  } catch (error: any) {
+    console.error('Error generating skills:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate skills'
+    });
+  }
+});
+
+router.post('/ai/generate-achievements', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { jobTitle, experience } = req.body;
+
+    if (!jobTitle) {
+      return res.status(400).json({
+        success: false,
+        message: 'Job title is required'
+      });
+    }
+
+    const achievements = await generateAchievement(jobTitle, experience);
+
+    res.json({
+      success: true,
+      data: { achievements }
+    });
+  } catch (error: any) {
+    console.error('Error generating achievements:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate achievements'
+    });
+  }
+});
+
+router.post('/ai/generate-certifications', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { jobTitle } = req.body;
+
+    if (!jobTitle) {
+      return res.status(400).json({
+        success: false,
+        message: 'Job title is required'
+      });
+    }
+
+    const certifications = await generateCertification(jobTitle);
+
+    res.json({
+      success: true,
+      data: { certifications }
+    });
+  } catch (error: any) {
+    console.error('Error generating certifications:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate certifications'
     });
   }
 });

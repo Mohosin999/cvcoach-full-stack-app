@@ -1,23 +1,23 @@
-import { Router, Response } from "express";
+import { Router } from "express";
 import { authenticate } from "../middlewares/auth";
 import {
+  deleteAllAnalyses,
   deleteAnalysis,
   generateAnalysis,
-  getAnalysis,
-  getAnalysisById,
-  deleteAllAnalyses,
-} from "../controllers/analysisController";
+  getAllAnalysis,
+  getSingleAnalysis,
+} from "../controllers/analysis";
 
 const router = Router();
 
-router.get("/", authenticate, getAnalysis);
+router.delete("/delete-all", authenticate, deleteAllAnalyses);
+
+router.get("/:id", authenticate, getSingleAnalysis);
+
+router.delete("/:id", authenticate, deleteAnalysis);
 
 router.post("/", authenticate, generateAnalysis);
 
-router.delete("/delete-all", authenticate, deleteAllAnalyses);
-
-router.get("/:id", authenticate, getAnalysisById);
-
-router.delete("/:id", authenticate, deleteAnalysis);
+router.get("/", authenticate, getAllAnalysis);
 
 export default router;

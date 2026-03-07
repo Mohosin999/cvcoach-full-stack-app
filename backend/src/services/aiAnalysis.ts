@@ -2,12 +2,21 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface ResumeContent {
   personalInfo: {
-    name?: string;
+    fullName?: string;
+    jobTitle?: string;
     email?: string;
-    phone?: string;
-    location?: string;
-    linkedin?: string;
-    portfolio?: string;
+    whatsapp?: string;
+    address?: {
+      city?: string;
+      division?: string;
+      zipCode?: string;
+    };
+    linkedIn?: string;
+    socialLinks?: {
+      github?: string;
+      portfolio?: string;
+      website?: string;
+    };
   };
   summary?: string;
   experience: Array<{
@@ -19,42 +28,32 @@ interface ResumeContent {
     current?: boolean;
     description: string;
   }>;
-  education: Array<{
-    institution: string;
-    degree: string;
-    field?: string;
-    graduationDate?: string;
-    gpa?: string;
-  }>;
-  skills: string[];
   projects?: Array<{
     name: string;
     description: string;
+    links?: {
+      live?: string;
+      github?: string;
+      caseStudy?: string;
+    };
     technologies?: string[];
-    url?: string;
+  }>;
+  achievements?: Array<{
+    title: string;
+    description?: string;
+    date?: string;
   }>;
   certifications?: Array<{
-    name: string;
-    issuer: string;
-    date?: string;
-    url?: string;
-  }>;
-  languages?: Array<{
-    language: string;
-    proficiency: string;
-  }>;
-  awards?: Array<{
     title: string;
-    issuer: string;
+    link?: string;
     date?: string;
   }>;
-  contributions?: Array<{
-    organization: string;
-    role: string;
-    description: string;
-    startDate?: string;
-    endDate?: string;
+  education: Array<{
+    institution: string;
+    degree: string;
+    date?: string;
   }>;
+  skills: string[];
 }
 
 interface AnalysisResult {
@@ -150,7 +149,7 @@ const COMPREHENSIVE_KEYWORDS = {
     'context api', 'react query', 'axios', 'fetch', 'graphql', 'apollo'
   ],
   databases: [
-    'mongodb', 'postgresql', 'postgresql', 'mysql', 'redis', 'sqlite',
+    'mongodb', 'postgresql', 'mysql', 'redis', 'sqlite',
     'elasticsearch', 'dynamodb', 'firebase', 'supabase', 'prisma', 'mongoose',
     'sequelize', 'typeorm', 'cassandra', 'mariadb', 'oracle', 'mssql',
     'mongodb atlas', 'cosmos db', 'realm', 'couchdb', 'neo4j', 'graphql'
@@ -198,12 +197,14 @@ const ATS_SECTIONS = [
   { name: 'certifications', keywords: ['certifications', 'certificates', 'licenses', 'achievements'] }
 ];
 
-const calculateKeywordMatchingScore = (resumeText: string, jdKeywords: string[]): { score: number, found: string[], missing: string[] } => {
+const calculateKeywordMatchingScore = (resumeText: string, jdKeywords: string[], resumeSkills: string[] = []): { score: number, found: string[], missing: string[] } => {
   const resumeLower = resumeText.toLowerCase();
   const found: string[] = [];
   const missing: string[] = [];
   
-  for (const keyword of jdKeywords) {
+  const allKeywordsToCheck = [...new Set([...jdKeywords, ...resumeSkills.map(s => s.toLowerCase())])];
+  
+  for (const keyword of allKeywordsToCheck) {
     const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
     if (regex.test(resumeLower)) {
       found.push(keyword);
@@ -212,7 +213,7 @@ const calculateKeywordMatchingScore = (resumeText: string, jdKeywords: string[])
     }
   }
   
-  const score = jdKeywords.length > 0 ? Math.round((found.length / jdKeywords.length) * 100) : 50;
+  const score = allKeywordsToCheck.length > 0 ? Math.round((found.length / allKeywordsToCheck.length) * 100) : 50;
   return { score, found, missing };
 };
 
@@ -387,7 +388,32 @@ const calculateJobMatchingScore = (
   const resumeText = JSON.stringify(resume).toLowerCase();
   const jdText = jobDescription.toLowerCase();
   
-  const requiredSkillsMatch = calculateSkillsMatchScore(resume.skills || [], jdSkills);
+  const resumeSkills = extractSkillsFromResume(resume);
+  const resumeSkillsLower = resumeSkills.map(s => s.toLowerCase());
+  
+  const matchedSkills: string[] = [];
+  const missingSkills: string[] = [];
+  
+  for (const skill of resumeSkillsLower) {
+    if (jdText.includes(skill)) {
+      matchedSkills.push(skill);
+    }
+  }
+  
+  for (const jdSkill of jdSkills) {
+    const jdSkillLower = jdSkill.toLowerCase();
+    const found = resumeSkillsLower.some(rs => 
+      rs.includes(jdSkillLower) || jdSkillLower.includes(rs) || rs === jdSkillLower
+    );
+    if (!found) {
+      missingSkills.push(jdSkill);
+    }
+  }
+  
+  const requiredSkillsMatch = {
+    score: jdSkills.length > 0 ? Math.round((matchedSkills.length / Math.max(matchedSkills.length + missingSkills.length, jdSkills.length)) * 100) : 70,
+    details: `${matchedSkills.length} skills matched`
+  };
   
   let relevantWorkExperience = { score: 0, details: '' };
   if (resume.experience && resume.experience.length > 0) {
@@ -527,14 +553,48 @@ export const analyzeResume = async (resume: ResumeContent, jobDescription: strin
 
   try {
     const resumeText = JSON.stringify(resume, null, 2);
+    const jdLower = jobDescription.toLowerCase();
     
     const jdKeywords = extractTechFromText(jobDescription);
     const jdSkills = extractSkillsFromText(jobDescription);
     
     const resumeSkills = extractSkillsFromResume(resume);
+    const resumeSkillsLower = resumeSkills.map(s => s.toLowerCase());
     
-    const keywordMatching = calculateKeywordMatchingScore(resumeText, jdKeywords);
-    const skillsMatch = calculateSkillsMatchScore(resumeSkills, jdSkills);
+    const keywordMatching = calculateKeywordMatchingScore(resumeText, jdKeywords, resumeSkills);
+    
+    const matchedSkills: string[] = [];
+    const missingSkills: string[] = [];
+    
+    for (const skill of resumeSkillsLower) {
+      if (jdLower.includes(skill)) {
+        matchedSkills.push(skill);
+      }
+    }
+    
+    for (const jdSkill of jdSkills) {
+      const jdSkillLower = jdSkill.toLowerCase();
+      const found = resumeSkillsLower.some(rs => 
+        rs.includes(jdSkillLower) || jdSkillLower.includes(rs) || rs === jdSkillLower
+      );
+      if (!found) {
+        missingSkills.push(jdSkill);
+      }
+    }
+    
+    const totalUniqueSkills = new Set([...matchedSkills, ...missingSkills]).size;
+    const skillsMatchScore = totalUniqueSkills > 0 
+      ? Math.round((matchedSkills.length / totalUniqueSkills) * 100) 
+      : jdSkills.length > 0 
+        ? Math.round((matchedSkills.length / jdSkills.length) * 100)
+        : 70;
+    
+    const skillsMatch = { 
+      score: skillsMatchScore, 
+      matched: matchedSkills, 
+      missing: missingSkills 
+    };
+    
     const resumeSections = calculateResumeSectionsScore(resume);
     const experienceRelevance = calculateExperienceRelevanceScore(resume, '', jdKeywords);
     const formatting = calculateFormattingScore(resumeText);
@@ -597,7 +657,7 @@ export const analyzeResume = async (resume: ResumeContent, jobDescription: strin
       jobMatchingScore = jobMatchResult.overallScore;
       jobMatchResult.breakdown.requiredSkillsMatch = {
         score: jobMatchResult.breakdown.requiredSkillsMatch.score,
-        details: `${jobMatchResult.breakdown.requiredSkillsMatch.matched?.length || 0} skills matched`
+        details: `${matchedSkills.length} skills matched`
       };
       jobMatchingBreakdown = jobMatchResult.breakdown as any;
     } else {
@@ -718,7 +778,7 @@ export const analyzeResume = async (resume: ResumeContent, jobDescription: strin
       resumeImprovements: suggestions,
       jobMatch: jobDescription ? {
         score: jobMatchingScore,
-        missingKeywords: keywordMatching.missing,
+        missingKeywords: missingSkills,
         suggestions
       } : undefined,
       existingSections
@@ -856,7 +916,10 @@ const validateAndNormalizeResult = (result: any, resume: ResumeContent, jobDescr
   const existingSections = {
     experience: resume.experience && resume.experience.length > 0 && resume.experience.some(e => e.company || e.title),
     education: resume.education && resume.education.length > 0 && resume.education.some(e => e.institution || e.degree),
-    skills: resume.skills && resume.skills.length > 0
+    skills: resume.skills && resume.skills.length > 0,
+    summary: !!(resume.summary && resume.summary.length > 10),
+    projects: !!(resume.projects && resume.projects.length > 0),
+    certifications: !!(resume.certifications && resume.certifications.length > 0)
   };
 
   let missingKeywords = result.missingKeywords;
@@ -883,18 +946,17 @@ const validateAndNormalizeResult = (result: any, resume: ResumeContent, jobDescr
   let jobMatch = result.jobMatch;
   if (jobDescription && jobDescription.trim()) {
     if (!jobMatch) {
-      const jdSkills = extractTechFromText(jobDescription);
-      const matchedSkills = jdSkills.filter(skill => 
-        resumeSkills.some(resumeSkill => resumeSkill.toLowerCase().includes(skill.toLowerCase()))
-      );
-      const matchScore = Math.round((matchedSkills.length / jdSkills.length) * 100) || 0;
-      const missingJDKeywords = jdSkills.filter(skill => 
-        !resumeSkills.some(resumeSkill => resumeSkill.toLowerCase().includes(skill.toLowerCase()))
-      );
+      const jdLower = jobDescription.toLowerCase();
+      const matchedSkills = resumeSkills.filter(skill => jdLower.includes(skill.toLowerCase()));
+      const missingJDKeywords = resumeSkills.filter(skill => !jdLower.includes(skill.toLowerCase()));
+      
+      const matchScore = resumeSkills.length > 0 
+        ? Math.round((matchedSkills.length / Math.max(matchedSkills.length + missingJDKeywords.length, resumeSkills.length)) * 100)
+        : 0;
       
       jobMatch = {
         score: matchScore,
-        missingKeywords: missingJDKeywords,
+        missingKeywords: missingJDKeywords.slice(0, 10),
         suggestions: [
           'Add missing keywords to your skills section',
           'Incorporate job requirements in your project descriptions',
@@ -946,7 +1008,10 @@ const validateAndNormalizeResult = (result: any, resume: ResumeContent, jobDescr
     howToUseKeywords,
     resumeImprovements,
     jobMatch,
-    existingSections
+    existingSections,
+    atsScoreBreakdown: defaultResult.atsScoreBreakdown,
+    jobMatchingScore: 0,
+    jobMatchingBreakdown: defaultResult.jobMatchingBreakdown
   };
 };
 
@@ -955,19 +1020,12 @@ const fallbackAnalysis = (resume: ResumeContent, jobDescription: string): Analys
   const jdLower = jobDescription.toLowerCase();
   const jobKeywords = extractTechFromText(jobDescription);
   
-  const matchedSkills = resumeSkills.filter(skill => 
-    jdLower.includes(skill.toLowerCase()) || 
-    jobKeywords.some(js => skill.toLowerCase().includes(js.toLowerCase()) || js.toLowerCase().includes(skill.toLowerCase()))
-  );
+  const matchedSkills = resumeSkills.filter(skill => jdLower.includes(skill.toLowerCase()));
   
-  const missingFromJD = jobKeywords
-    .filter(keyword => 
-      !resumeSkills.some(skill => skill.toLowerCase().includes(keyword.toLowerCase()) || keyword.toLowerCase().includes(skill.toLowerCase()))
-    )
-    .slice(0, 10);
+  const missingFromJD = resumeSkills.filter(skill => !jdLower.includes(skill.toLowerCase())).slice(0, 10);
 
-  const skillsScore = jobKeywords.length > 0 
-    ? Math.round((matchedSkills.length / jobKeywords.length) * 100) 
+  const skillsScore = resumeSkills.length > 0 
+    ? Math.round((matchedSkills.length / Math.max(matchedSkills.length + missingFromJD.length, resumeSkills.length)) * 100)
     : Math.min(100, Math.round(30 + resumeSkills.length * 5));
 
   const experienceScore = resume.experience?.length > 0 ? 70 : 40;
@@ -979,14 +1037,19 @@ const fallbackAnalysis = (resume: ResumeContent, jobDescription: string): Analys
   const existingSections = {
     experience: resume.experience && resume.experience.length > 0 && resume.experience.some(e => e.company || e.title),
     education: resume.education && resume.education.length > 0 && resume.education.some(e => e.institution || e.degree),
-    skills: resume.skills && resume.skills.length > 0
+    skills: resume.skills && resume.skills.length > 0,
+    summary: !!(resume.summary && resume.summary.length > 10),
+    projects: !!(resume.projects && resume.projects.length > 0),
+    certifications: !!(resume.certifications && resume.certifications.length > 0)
   };
 
   const missingKeywords = categorizeMissingKeywords(resumeSkills, resume);
 
   let jobMatch = undefined;
   if (jobDescription && jobDescription.trim()) {
-    const matchScore = Math.round((matchedSkills.length / jobKeywords.length) * 100) || 0;
+    const matchScore = resumeSkills.length > 0 
+      ? Math.round((matchedSkills.length / Math.max(matchedSkills.length + missingFromJD.length, resumeSkills.length)) * 100)
+      : 0;
     jobMatch = {
       score: matchScore,
       missingKeywords: missingFromJD,
@@ -1058,7 +1121,26 @@ const fallbackAnalysis = (resume: ResumeContent, jobDescription: string): Analys
       'Add quantifiable achievements in experience section'
     ],
     jobMatch,
-    existingSections
+    existingSections,
+    atsScoreBreakdown: {
+      keywordMatching: { score: skillsScore, weight: 30, details: `${matchedSkills.length} keywords matched` },
+      skillsMatch: { score: skillsScore, weight: 20, details: 'Skills match calculated' },
+      resumeSections: { score: 70, weight: 15, details: 'Standard sections present' },
+      experienceRelevance: { score: experienceScore, weight: 15, details: 'Experience reviewed' },
+      resumeFormatting: { score: formatScore, weight: 10, details: 'Format checked' },
+      achievementsImpact: { score: 50, weight: 5, details: 'Achievements impact assessed' },
+      grammarReadability: { score: 80, weight: 5, details: 'Grammar checked' }
+    },
+    jobMatchingScore: 0,
+    jobMatchingBreakdown: {
+      requiredSkillsMatch: { score: 0, details: 'No job description provided' },
+      relevantWorkExperience: { score: 0, details: 'No job description provided' },
+      technologiesUsed: { score: 0, details: 'No job description provided' },
+      toolsFrameworks: { score: 0, details: 'No job description provided' },
+      industryRelevance: { score: 0, details: 'No job description provided' },
+      yearsExperienceAlignment: { score: 0, details: 'No job description provided' },
+      roleResponsibilitySimilarity: { score: 0, details: 'No job description provided' }
+    }
   };
 };
 

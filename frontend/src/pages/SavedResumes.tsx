@@ -63,8 +63,10 @@ export default function SavedResumes() {
       setPage(1);
       toast.success('All resumes cleared');
       setShowClearModal(false);
-    } catch (error) {
-      toast.error('Failed to clear resumes');
+      fetchResumes();
+    } catch (error: any) {
+      console.error('Clear all error:', error);
+      toast.error(error.response?.data?.message || 'Failed to clear resumes');
     }
   };
 
@@ -74,7 +76,7 @@ export default function SavedResumes() {
 
   const filteredResumes = resumes.filter(
     (resume) =>
-      resume.content.personalInfo.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      resume.content.personalInfo.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resume.content.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resume.content.skills?.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -186,7 +188,7 @@ export default function SavedResumes() {
                   </div>
 
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                    {resume.content.personalInfo.name || 'Untitled Resume'}
+                    {resume.content.personalInfo.fullName || 'Untitled Resume'}
                   </h3>
 
                   <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">

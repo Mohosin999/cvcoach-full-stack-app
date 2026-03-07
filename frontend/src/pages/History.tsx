@@ -71,7 +71,7 @@ export default function HistoryPage() {
       analysis.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       analysis.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       analysis.jobDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      analysis.resumeId?.content?.personalInfo?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      analysis.resumeId?.content?.personalInfo?.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading && analyses.length === 0) {
@@ -171,7 +171,7 @@ export default function HistoryPage() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900 dark:text-white">
-                        {analysis.jobTitle || analysis.resumeId?.content?.personalInfo?.name || 'Resume Analysis'}
+                        {analysis.jobTitle || analysis.resumeId?.content?.personalInfo?.fullName || 'Resume Analysis'}
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {analysis.company || 'General'} • {new Date(analysis.createdAt).toLocaleDateString()}

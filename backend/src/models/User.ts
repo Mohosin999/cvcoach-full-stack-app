@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
   email: string;
@@ -7,12 +7,12 @@ export interface IUser extends Document {
   password?: string;
   picture?: string;
   preferences: {
-    theme: 'light' | 'dark' | 'system';
+    theme: "light" | "dark" | "system";
     defaultTemplate?: string;
     notifications: boolean;
   };
   subscription: {
-    plan: 'free' | 'pro';
+    plan: "free" | "pro";
     credits: number;
     expiresAt?: Date;
   };
@@ -29,65 +29,65 @@ const userSchema = new Schema<IUser>(
       required: true,
       unique: true,
       lowercase: true,
-      trim: true
+      trim: true,
     },
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     googleId: {
       type: String,
       unique: true,
-      sparse: true
+      sparse: true,
     },
     password: {
-      type: String
+      type: String,
     },
     picture: {
-      type: String
+      type: String,
     },
     preferences: {
       theme: {
         type: String,
-        enum: ['light', 'dark', 'system'],
-        default: 'system'
+        enum: ["light", "dark", "system"],
+        default: "system",
       },
       defaultTemplate: {
-        type: String
+        type: String,
       },
       notifications: {
         type: Boolean,
-        default: true
-      }
+        default: true,
+      },
     },
     subscription: {
       plan: {
         type: String,
-        enum: ['free', 'pro'],
-        default: 'free'
+        enum: ["free", "pro"],
+        default: "free",
       },
       credits: {
         type: Number,
-        default: 5
+        default: 100,
       },
       expiresAt: {
-        type: Date
-      }
+        type: Date,
+      },
     },
     lastFreeCreditDate: {
-      type: Date
+      type: Date,
     },
     freeCreditsUsedToday: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
   },
   {
-    timestamps: true
-  }
+    timestamps: true,
+  },
 );
 
 userSchema.index({ email: 1 });
 
-export const User = mongoose.model<IUser>('User', userSchema);
+export const User = mongoose.model<IUser>("User", userSchema);
