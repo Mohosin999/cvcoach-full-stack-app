@@ -1,18 +1,17 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Loader2, CheckCircle, Circle } from 'lucide-react';
+import React from "react";
+import { Loader2, CheckCircle, Circle } from "lucide-react";
 
-export type AnalysisStep = 
-  | 'uploading'
-  | 'parsing'
-  | 'keywords'
-  | 'skills'
-  | 'formatting'
-  | 'experience'
-  | 'achievements'
-  | 'grammar'
-  | 'matching'
-  | 'complete';
+export type AnalysisStep =
+  | "uploading"
+  | "parsing"
+  | "keywords"
+  | "skills"
+  | "formatting"
+  | "experience"
+  | "achievements"
+  | "grammar"
+  | "matching"
+  | "complete";
 
 interface AnalysisProgressProps {
   currentStep: AnalysisStep;
@@ -26,20 +25,52 @@ interface StepInfo {
 }
 
 const STEPS: StepInfo[] = [
-  { id: 'uploading', label: 'Uploading', description: 'Processing resume file' },
-  { id: 'parsing', label: 'Parsing', description: 'Extracting resume content' },
-  { id: 'keywords', label: 'Analyzing Keywords', description: 'Matching job description keywords' },
-  { id: 'skills', label: 'Evaluating Skills', description: 'Comparing required skills' },
-  { id: 'formatting', label: 'Checking Format', description: 'Verifying ATS compatibility' },
-  { id: 'experience', label: 'Reviewing Experience', description: 'Assessing relevance' },
-  { id: 'achievements', label: 'Quantifying Impact', description: 'Finding measurable achievements' },
-  { id: 'grammar', label: 'Checking Quality', description: 'Evaluating readability' },
-  { id: 'matching', label: 'Computing Match', description: 'Calculating final scores' },
-  { id: 'complete', label: 'Complete', description: 'Analysis finished!' }
+  {
+    id: "uploading",
+    label: "Uploading",
+    description: "Processing resume file",
+  },
+  { id: "parsing", label: "Parsing", description: "Extracting resume content" },
+  {
+    id: "keywords",
+    label: "Analyzing Keywords",
+    description: "Matching job description keywords",
+  },
+  {
+    id: "skills",
+    label: "Evaluating Skills",
+    description: "Comparing required skills",
+  },
+  {
+    id: "formatting",
+    label: "Checking Format",
+    description: "Verifying ATS compatibility",
+  },
+  {
+    id: "experience",
+    label: "Reviewing Experience",
+    description: "Assessing relevance",
+  },
+  {
+    id: "achievements",
+    label: "Quantifying Impact",
+    description: "Finding measurable achievements",
+  },
+  {
+    id: "grammar",
+    label: "Checking Quality",
+    description: "Evaluating readability",
+  },
+  {
+    id: "matching",
+    label: "Computing Match",
+    description: "Calculating final scores",
+  },
+  { id: "complete", label: "Complete", description: "Analysis finished!" },
 ];
 
 const getStepIndex = (step: AnalysisStep): number => {
-  return STEPS.findIndex(s => s.id === step);
+  return STEPS.findIndex((s) => s.id === step);
 };
 
 interface StepItemProps {
@@ -50,9 +81,11 @@ interface StepItemProps {
 
 const StepItem: React.FC<StepItemProps> = ({ step, isActive, isComplete }) => {
   return (
-    <div className={`flex items-center gap-3 py-2 transition-opacity duration-200 ${
-      isActive || isComplete ? 'opacity-100' : 'opacity-40'
-    }`}>
+    <div
+      className={`flex items-center gap-3 py-2 transition-opacity duration-200 ${
+        isActive || isComplete ? "opacity-100" : "opacity-40"
+      }`}
+    >
       <div className="flex-shrink-0">
         {isComplete ? (
           <CheckCircle className="w-5 h-5 text-green-500" />
@@ -66,10 +99,10 @@ const StepItem: React.FC<StepItemProps> = ({ step, isActive, isComplete }) => {
         <p
           className={`text-sm font-medium ${
             isActive
-              ? 'text-primary'
+              ? "text-primary"
               : isComplete
-              ? 'text-green-600 dark:text-green-400'
-              : 'text-gray-600 dark:text-gray-400'
+                ? "text-green-600 dark:text-green-400"
+                : "text-gray-600 dark:text-gray-400"
           }`}
         >
           {step.label}
@@ -86,7 +119,7 @@ const StepItem: React.FC<StepItemProps> = ({ step, isActive, isComplete }) => {
 
 export const AnalysisProgress: React.FC<AnalysisProgressProps> = ({
   currentStep,
-  showDetails = true
+  showDetails = true,
 }) => {
   const currentIndex = getStepIndex(currentStep);
   const progressPercent = Math.round(((currentIndex + 1) / STEPS.length) * 100);
@@ -116,11 +149,11 @@ export const AnalysisProgress: React.FC<AnalysisProgressProps> = ({
         </div>
 
         <p className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
-          {currentStepInfo?.label || 'Analyzing...'}
+          {currentStepInfo?.label || "Analyzing..."}
         </p>
 
         <p className="text-gray-500 dark:text-gray-400 text-sm">
-          {currentStepInfo?.description || 'Please wait'}
+          {currentStepInfo?.description || "Please wait"}
         </p>
       </div>
 

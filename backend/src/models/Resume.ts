@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IResume extends Document {
   userId: mongoose.Types.ObjectId;
+  sourceType: 'uploaded' | 'builder';
   originalFormat?: {
     filename: string;
     mimetype: string;
@@ -81,6 +82,12 @@ const resumeSchema = new Schema<IResume>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+      index: true
+    },
+    sourceType: {
+      type: String,
+      enum: ['uploaded', 'builder'],
+      default: 'uploaded',
       index: true
     },
     originalFormat: {

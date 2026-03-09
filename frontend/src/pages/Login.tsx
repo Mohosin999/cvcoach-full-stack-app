@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Chrome, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAppDispatch } from '../hooks/redux';
+import { login, fetchUser } from '../store/slices/authSlice';
 import api from '../services/api';
 
 export default function Login() {
-  const { login, refreshUser } = useAuth();
+  const dispatch = useAppDispatch();
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,9 +31,9 @@ export default function Login() {
     try {
       const endpoint = isRegister ? '/auth/register' : '/auth/login';
       const response = await api.post(endpoint, formData);
-      
+
       if (response.data.success) {
-        await refreshUser();
+        await dispatch(fetchUser());
         window.location.href = '/dashboard';
       }
     } catch (err: any) {
@@ -63,7 +64,7 @@ export default function Login() {
 
         <div className="card">
           <button
-            onClick={login}
+            onClick={() => dispatch(login())}
             className="w-full btn-primary py-3 flex items-center justify-center gap-3 text-lg"
           >
             <Chrome className="w-5 h-5" />

@@ -6,24 +6,6 @@
   --color-primary: #22c55e;
   --color-secondary: #10b981;
   --color-accent: #14b8a6;
-
-  /* Dark Reader Fix - Prevent color inversion */
-  --darkreader-background--bg-color: #0f172a;
-  --darkreader-text--text-color: #f8fafc;
-}
-
-/* Dark Reader Compatibility - Lock colors */
-html {
-  --darkreader-neutral-background: #0f172a;
-  --darkreader-neutral-text: #f8fafc;
-  --darkreader-text: #f8fafc;
-  --darkreader-background: #0f172a;
-}
-
-/* Prevent Dark Reader from inverting specific elements */
-.darkreader-lock {
-  --darkreader-text: #f8fafc !important;
-  --darkreader-background: #0f172a !important;
 }
 
 * {
@@ -34,8 +16,6 @@ html {
 
 html {
   scroll-behavior: smooth;
-  /* Dark Reader attribute to preserve colors */
-  color-scheme: dark;
 }
 
 body {
@@ -46,69 +26,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Dark Reader compatibility */
-  background-color: #0f172a !important;
-  color: #f8fafc !important;
-}
-
-/* Dark Reader Exclusion - Preserve gradient backgrounds */
-.bg-gradient-to-br,
-.from-gray-900,
-.from-green-900,
-.to-gray-900,
-.bg-gradient-to-r,
-.from-green-600,
-.from-emerald-600,
-.to-green-700 {
-  --darkreader-bg--background: transparent !important;
-}
-
-/* Preserve text colors in dark mode */
-.text-white {
-  color: #ffffff !important;
-}
-
-.text-gray-300,
-.text-gray-400 {
-  color: #d1d5db !important;
-}
-
-.text-green-400 {
-  color: #4ade80 !important;
-}
-
-/* Preserve gradient text */
-.bg-clip-text {
-  -webkit-text-fill-color: transparent !important;
-}
-
-/* Dark Reader data attributes preservation */
-[data-darkreader-lock] {
-  --darkreader-text: #f8fafc !important;
-  --darkreader-background: #0f172a !important;
-}
-
-/* Preserve all gradient backgrounds from Dark Reader inversion */
-[class*="from-"],
-[class*="via-"],
-[class*="to-"],
-[class*="bg-gradient"] {
-  background-clip: padding-box !important;
-}
-
-/* Preserve button gradients */
-.btn-primary,
-[class*="from-green-500"],
-[class*="from-emerald-500"],
-[class*="to-green-600"] {
-  --darkreader-bg: transparent !important;
-}
-
-/* Force dark mode colors */
-.dark\:bg-gray-900,
-.dark\:via-gray-800,
-.dark\:to-gray-900 {
-  background-color: #0f172a !important;
+  background-color: #0f172a;
+  color: #f8fafc;
 }
 
 @layer components {
@@ -117,31 +36,31 @@ body {
   }
 
   .btn-primary {
-    @apply btn bg-primary text-white hover:bg-primary-dark focus:ring-primary;
+    @apply btn bg-green-500 text-white hover:bg-green-600 focus:ring-green-500;
   }
 
   .btn-secondary {
-    @apply btn bg-secondary text-white hover:bg-secondary-700 focus:ring-secondary;
+    @apply btn bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500;
   }
 
   .btn-outline {
-    @apply btn border-2 border-primary text-primary hover:bg-primary hover:text-white focus:ring-primary;
+    @apply btn border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-white focus:ring-green-500;
   }
 
   .btn-ghost {
-    @apply btn text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800;
+    @apply btn text-gray-300 hover:bg-gray-800;
   }
 
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6;
+    @apply bg-gray-800 rounded-xl shadow-sm border border-gray-700 p-6;
   }
 
   .input {
-    @apply w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200;
+    @apply w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
   }
 
   .label {
-    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5;
+    @apply block text-sm font-medium text-gray-300 mb-1.5;
   }
 
   .section-container {
@@ -161,5 +80,24 @@ body {
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #1f2937;
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
   }
 }

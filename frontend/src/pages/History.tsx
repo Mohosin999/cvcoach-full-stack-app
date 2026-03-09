@@ -1,19 +1,27 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { History, Search, Trash2, FileText, ChevronLeft, ChevronRight, AlertTriangle, Target } from 'lucide-react';
-import { toast } from 'react-toastify';
-import { analysisApi } from '../services/api';
-import { Analysis } from '../types';
-import LoadingSpinner from '../components/LoadingSpinner';
-import BackButton from '../components/BackButton';
-import ConfirmModal from '../components/ConfirmModal';
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  History,
+  Search,
+  Trash2,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+  Target,
+} from "lucide-react";
+import { toast } from "react-toastify";
+import { analysisApi } from "../services/api";
+import { Analysis } from "../types";
+import LoadingSpinner from "../components/LoadingSpinner";
+import BackButton from "../components/BackButton";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function HistoryPage() {
   const navigate = useNavigate();
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -32,7 +40,7 @@ export default function HistoryPage() {
       setTotalPages(response.data.pagination?.pages || 1);
       setTotalItems(response.data.pagination?.total || 0);
     } catch (error) {
-      console.error('Error fetching analyses:', error);
+      console.error("Error fetching analyses:", error);
     } finally {
       setLoading(false);
     }
@@ -43,10 +51,10 @@ export default function HistoryPage() {
     try {
       await analysisApi.delete(deleteId);
       setAnalyses(analyses.filter((a) => a._id !== deleteId));
-      setTotalItems(prev => prev - 1);
-      toast.success('Analysis deleted');
+      setTotalItems((prev) => prev - 1);
+      toast.success("Analysis deleted");
     } catch (error) {
-      toast.error('Failed to delete analysis');
+      toast.error("Failed to delete analysis");
     } finally {
       setDeleteId(null);
     }
@@ -59,10 +67,10 @@ export default function HistoryPage() {
       setTotalItems(0);
       setTotalPages(1);
       setPage(1);
-      toast.success('All analysis history cleared');
+      toast.success("All analysis history cleared");
       setShowClearModal(false);
     } catch (error) {
-      toast.error('Failed to clear history');
+      toast.error("Failed to clear history");
     }
   };
 
@@ -70,8 +78,15 @@ export default function HistoryPage() {
     (analysis) =>
       analysis.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       analysis.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      analysis.jobDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      analysis.resumeId?.content?.personalInfo?.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
+      analysis.jobDescription
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      analysis.resumeId?.metadata?.originalName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      analysis.resumeId?.content?.personalInfo?.fullName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()),
   );
 
   if (loading && analyses.length === 0) {
@@ -81,7 +96,7 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
+        <div className="mt-6 mb-1">
           <BackButton />
         </div>
 
@@ -90,7 +105,7 @@ export default function HistoryPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-end md:items-center  justify-end md:justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Analysis History
@@ -102,7 +117,7 @@ export default function HistoryPage() {
             {totalItems > 0 && (
               <button
                 onClick={() => setShowClearModal(true)}
-                className="btn-outline text-red-500 hover:text-red-600 hover:border-red-500 flex items-center gap-2"
+                className="bg-red-500/20 text-red-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
                 Clear All
@@ -151,19 +166,19 @@ export default function HistoryPage() {
                     <div
                       className={`w-14 h-14 rounded-xl flex items-center justify-center ${
                         analysis.score >= 70
-                          ? 'bg-green-100 dark:bg-green-900/30'
+                          ? "bg-green-100 dark:bg-green-900/30"
                           : analysis.score >= 50
-                          ? 'bg-yellow-100 dark:bg-yellow-900/30'
-                          : 'bg-red-100 dark:bg-red-900/30'
+                            ? "bg-yellow-100 dark:bg-yellow-900/30"
+                            : "bg-red-100 dark:bg-red-900/30"
                       }`}
                     >
                       <span
                         className={`text-xl font-bold ${
                           analysis.score >= 70
-                            ? 'text-green-600'
+                            ? "text-green-600"
                             : analysis.score >= 50
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
+                              ? "text-yellow-600"
+                              : "text-red-600"
                         }`}
                       >
                         {analysis.score}%
@@ -171,10 +186,13 @@ export default function HistoryPage() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900 dark:text-white">
-                        {analysis.jobTitle || analysis.resumeId?.content?.personalInfo?.fullName || 'Resume Analysis'}
+                        {analysis.resumeId?.metadata?.originalName ||
+                          analysis.resumeId?.content?.personalInfo?.fullName ||
+                          "Resume Analysis"}
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {analysis.company || 'General'} • {new Date(analysis.createdAt).toLocaleDateString()}
+                        {analysis.company || "General"} •{" "}
+                        {new Date(analysis.createdAt).toLocaleDateString()}
                       </p>
                       {analysis.jobMatch && (
                         <div className="flex items-center gap-2 mt-1">
@@ -234,9 +252,14 @@ export default function HistoryPage() {
               No Analyses Found
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
-              {searchTerm ? 'Try a different search term' : 'Start by analyzing your first resume'}
+              {searchTerm
+                ? "Try a different search term"
+                : "Start by analyzing your first resume"}
             </p>
-            <Link to="/analyze" className="btn-primary inline-flex items-center gap-2">
+            <Link
+              to="/analyze"
+              className="btn-primary inline-flex items-center gap-2"
+            >
               <FileText className="w-4 h-4" />
               New Analysis
             </Link>

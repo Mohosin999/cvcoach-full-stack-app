@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   FileSearch,
   FileText,
@@ -8,20 +8,21 @@ import {
   Plus,
   Clock,
   Zap,
-  ChevronRight
-} from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { analysisApi, resumeApi } from '../services/api';
-import { Analysis, Resume } from '../types';
-import LoadingSpinner from '../components/LoadingSpinner';
-import BackButton from '../components/BackButton';
+  ChevronRight,
+} from "lucide-react";
+import { useAppSelector } from "../hooks/redux";
+import { analysisApi, resumeApi } from "../services/api";
+import { Analysis, Resume } from "../types";
+import LoadingSpinner from "../components/LoadingSpinner";
+import BackButton from "../components/BackButton";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user } = useAppSelector((state) => state.auth);
   const [recentAnalyses, setRecentAnalyses] = useState<Analysis[]>([]);
   const [recentResumes, setRecentResumes] = useState<Resume[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch dashboard data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -29,11 +30,11 @@ export default function Dashboard() {
           analysisApi.getAll(1, 5),
           resumeApi.getAll(1, 5),
         ]);
-        
+
         setRecentAnalyses(analysesRes.data.data || []);
         setRecentResumes(resumesRes.data.data || []);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setLoading(false);
       }
@@ -46,41 +47,44 @@ export default function Dashboard() {
     return <LoadingSpinner fullScreen />;
   }
 
+  // Calculate stats
   const stats = [
     {
-      label: 'Total Analyses',
+      label: "Total Analyses",
       value: recentAnalyses.length,
       icon: FileSearch,
-      color: 'bg-blue-500',
+      color: "bg-blue-500",
     },
     {
-      label: 'Saved Resumes',
+      label: "Saved Resumes",
       value: recentResumes.length,
       icon: FileText,
-      color: 'bg-purple-500',
+      color: "bg-purple-500",
     },
     {
-      label: 'Credits Left',
+      label: "Credits Left",
       value: user?.subscription.credits || 0,
       icon: Zap,
-      color: 'bg-amber-500',
+      color: "bg-amber-500",
     },
     {
-      label: 'Avg Match Score',
-      value: recentAnalyses.length > 0
-        ? Math.round(
-            recentAnalyses.reduce((acc, a) => acc + a.score, 0) / recentAnalyses.length
-          )
-        : 0,
+      label: "Avg Match Score",
+      value:
+        recentAnalyses.length > 0
+          ? Math.round(
+              recentAnalyses.reduce((acc, a) => acc + a.score, 0) /
+                recentAnalyses.length,
+            )
+          : 0,
       icon: TrendingUp,
-      color: 'bg-green-500',
+      color: "bg-green-500",
     },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
+        <div className="mt-6 mb-1">
           <BackButton />
         </div>
 
@@ -90,7 +94,7 @@ export default function Dashboard() {
           className="mb-8"
         >
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Welcome back, {user?.name?.split(' ')[0] || 'User'}!
+            Welcome back, {user?.name?.split(" ")[0] || "User"}!
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Here's an overview of your resume analysis activity
@@ -107,7 +111,9 @@ export default function Dashboard() {
               className="card"
             >
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center`}>
+                <div
+                  className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center`}
+                >
                   <stat.icon className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -155,19 +161,19 @@ export default function Dashboard() {
                         <div
                           className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                             analysis.score >= 70
-                              ? 'bg-green-100 dark:bg-green-900/30'
+                              ? "bg-green-100 dark:bg-green-900/30"
                               : analysis.score >= 50
-                              ? 'bg-yellow-100 dark:bg-yellow-900/30'
-                              : 'bg-red-100 dark:bg-red-900/30'
+                                ? "bg-yellow-100 dark:bg-yellow-900/30"
+                                : "bg-red-100 dark:bg-red-900/30"
                           }`}
                         >
                           <span
                             className={`font-bold ${
                               analysis.score >= 70
-                                ? 'text-green-600'
+                                ? "text-green-600"
                                 : analysis.score >= 50
-                                ? 'text-yellow-600'
-                                : 'text-red-600'
+                                  ? "text-yellow-600"
+                                  : "text-red-600"
                             }`}
                           >
                             {analysis.score}%
@@ -175,10 +181,10 @@ export default function Dashboard() {
                         </div>
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {analysis.jobTitle || 'Resume Analysis'}
+                            {analysis.jobTitle || "Resume Analysis"}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {analysis.company || 'General'}
+                            {analysis.company || "General"}
                           </p>
                         </div>
                       </div>
@@ -197,7 +203,10 @@ export default function Dashboard() {
                   <p className="text-gray-500 dark:text-gray-400">
                     No analyses yet
                   </p>
-                  <Link to="/analyze" className="btn-primary mt-4 inline-flex items-center gap-2">
+                  <Link
+                    to="/analyze"
+                    className="btn-primary mt-4 inline-flex items-center gap-2"
+                  >
                     <Plus className="w-4 h-4" />
                     Start Analysis
                   </Link>
@@ -231,13 +240,6 @@ export default function Dashboard() {
                   <FileText className="w-5 h-5" />
                   Build Resume
                 </Link>
-                <Link
-                  to="/saved-resumes"
-                  className="w-full btn-ghost flex items-center justify-center gap-2"
-                >
-                  <Clock className="w-5 h-5" />
-                  My Resumes
-                </Link>
               </div>
 
               <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg">
@@ -247,7 +249,10 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Get more credits and advanced features.
                 </p>
-                <Link to="/plans" className="w-full btn-secondary text-sm inline-block text-center">
+                <Link
+                  to="/plans"
+                  className="w-full btn-secondary text-sm inline-block text-center"
+                >
                   View Plans
                 </Link>
               </div>

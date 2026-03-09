@@ -21,6 +21,7 @@ export interface User {
 export interface Resume {
   _id: string;
   userId: string;
+  sourceType?: 'uploaded' | 'builder';
   originalFormat?: {
     filename: string;
     mimetype: string;
@@ -132,9 +133,7 @@ export interface AtsScoreBreakdown {
   skillsMatch: { score: number; weight: number; details: string };
   resumeSections: { score: number; weight: number; details: string };
   experienceRelevance: { score: number; weight: number; details: string };
-  resumeFormatting: { score: number; weight: number; details: string };
   achievementsImpact: { score: number; weight: number; details: string };
-  grammarReadability: { score: number; weight: number; details: string };
 }
 
 export interface JobMatchingBreakdown {

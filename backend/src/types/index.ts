@@ -62,9 +62,7 @@ export interface AnalysisResult {
     skillsMatch: { score: number; weight: number; details: string };
     resumeSections: { score: number; weight: number; details: string };
     experienceRelevance: { score: number; weight: number; details: string };
-    resumeFormatting: { score: number; weight: number; details: string };
     achievementsImpact: { score: number; weight: number; details: string };
-    grammarReadability: { score: number; weight: number; details: string };
   };
   jobMatchingScore?: number;
   jobMatchingBreakdown?: {

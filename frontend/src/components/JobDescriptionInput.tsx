@@ -1,5 +1,5 @@
-import React from 'react';
-import { FileText, X } from 'lucide-react';
+import React from "react";
+import { FileText, X } from "lucide-react";
 
 interface JobDescriptionInputProps {
   value: string;
@@ -14,7 +14,7 @@ export const JobDescriptionInput: React.FC<JobDescriptionInputProps> = ({
   value,
   onChange,
   onClear,
-  maxLength = MAX_JD_LENGTH
+  maxLength = MAX_JD_LENGTH,
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value.slice(0, maxLength));
@@ -45,7 +45,7 @@ export const JobDescriptionInput: React.FC<JobDescriptionInputProps> = ({
         value={value}
         onChange={handleChange}
         placeholder="Paste the job description here..."
-        className="input min-h-[200px] resize-none"
+        className="input min-h-[200px]"
       />
 
       <div className="flex justify-between mt-2">

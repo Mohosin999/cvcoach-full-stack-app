@@ -8,33 +8,6 @@ import {
   Wand2,
 } from "lucide-react";
 
-export const features = [
-  {
-    icon: FileSearch,
-    title: "AI-Powered Analysis",
-    description:
-      "Advanced AI analyzes your resume against job descriptions to identify gaps and opportunities.",
-  },
-  {
-    icon: TrendingUp,
-    title: "ATS Optimization",
-    description:
-      "Get detailed ATS compatibility scores and recommendations to pass automated screening.",
-  },
-  {
-    icon: Flame,
-    title: "Smart Suggestions",
-    description:
-      "Receive personalized improvements for skills, experience, and formatting.",
-  },
-  {
-    icon: Download,
-    title: "Multiple Export Formats",
-    description:
-      "Download your improved resume in PDF or DOCX while keeping the original layout.",
-  },
-];
-
 export const steps = [
   {
     number: "01",
@@ -88,7 +61,7 @@ export const allFeatures = [
   },
   {
     icon: Wand2,
-    title: "AI Resume Creation",
+    title: "Resume Creation",
     description:
       "Generate professional, ATS-optimized resumes from scratch using advanced AI technology.",
   },
@@ -143,19 +116,20 @@ export const analysisSteps = [
 export const creationSteps = [
   {
     number: "01",
-    title: "Choose Template",
-    description: "Select from our professional, ATS-friendly resume templates.",
+    title: "Fill in Your Details",
+    description:
+      "Enter your information such as personal details, experience, education, and skills using our simple input forms.",
   },
   {
     number: "02",
-    title: "Input Your Info",
+    title: "Preview Your Resume",
     description:
-      "Enter your work experience, education, and skills in our simple form.",
+      "Instantly see how your resume looks in a clean and professional format.",
   },
   {
     number: "03",
-    title: "AI Generates Resume",
+    title: "Download PDF",
     description:
-      "Our AI creates a polished, professional resume tailored to your industry.",
+      "Download your resume as a professional PDF ready to share with employers.",
   },
 ];

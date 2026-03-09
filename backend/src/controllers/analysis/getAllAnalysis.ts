@@ -5,14 +5,14 @@ import { Analysis } from "../../models/Analysis";
 export const getAllAnalysis = async (req: AuthRequest, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const limit = parseInt(req.query.limit as string) || 3;
     const skip = (page - 1) * limit;
 
     const analyses = await Analysis.find({ userId: req.user._id })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate("resumeId", "metadata.originalName content.personalInfo.name");
+      .populate("resumeId", "metadata content.personalInfo");
 
     const total = await Analysis.countDocuments({ userId: req.user._id });
 

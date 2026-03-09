@@ -1,13 +1,22 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FileText, Edit3, Trash2, Plus, Clock, ChevronRight, ChevronLeft, Search } from 'lucide-react';
-import { toast } from 'react-toastify';
-import { resumeApi } from '../services/api';
-import { Resume } from '../types';
-import LoadingSpinner from '../components/LoadingSpinner';
-import BackButton from '../components/BackButton';
-import ConfirmModal from '../components/ConfirmModal';
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  FileText,
+  Edit3,
+  Trash2,
+  Plus,
+  Clock,
+  ChevronRight,
+  ChevronLeft,
+  Search,
+} from "lucide-react";
+import { toast } from "react-toastify";
+import { resumeApi } from "../services/api";
+import { Resume } from "../types";
+import LoadingSpinner from "../components/LoadingSpinner";
+import BackButton from "../components/BackButton";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function SavedResumes() {
   const navigate = useNavigate();
@@ -17,7 +26,7 @@ export default function SavedResumes() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showClearModal, setShowClearModal] = useState(false);
 
@@ -33,7 +42,7 @@ export default function SavedResumes() {
       setTotalPages(response.data.pagination?.pages || 1);
       setTotalItems(response.data.pagination?.total || 0);
     } catch (error) {
-      console.error('Error fetching resumes:', error);
+      console.error("Error fetching resumes:", error);
     } finally {
       setLoading(false);
     }
@@ -41,14 +50,14 @@ export default function SavedResumes() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    
+
     try {
       await resumeApi.delete(deleteId);
-      toast.success('Resume deleted');
+      toast.success("Resume deleted");
       setResumes(resumes.filter((r) => r._id !== deleteId));
-      setTotalItems(prev => prev - 1);
+      setTotalItems((prev) => prev - 1);
     } catch (error) {
-      toast.error('Failed to delete resume');
+      toast.error("Failed to delete resume");
     } finally {
       setDeleteId(null);
     }
@@ -61,24 +70,33 @@ export default function SavedResumes() {
       setTotalItems(0);
       setTotalPages(1);
       setPage(1);
-      toast.success('All resumes cleared');
+      toast.success("All resumes cleared");
       setShowClearModal(false);
       fetchResumes();
     } catch (error: any) {
-      console.error('Clear all error:', error);
-      toast.error(error.response?.data?.message || 'Failed to clear resumes');
+      console.error("Clear all error:", error);
+      toast.error(error.response?.data?.message || "Failed to clear resumes");
     }
   };
 
   const handleEdit = (resume: Resume) => {
-    navigate('/builder', { state: { resume } });
+    navigate("/builder", { state: { resume } });
   };
 
   const filteredResumes = resumes.filter(
     (resume) =>
-      resume.content.personalInfo.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      resume.content.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      resume.content.skills?.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
+      resume.content.personalInfo.fullName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      resume.content.personalInfo.jobTitle
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      resume.content.summary
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      resume.content.skills?.some((s) =>
+        s.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
   );
 
   if (loading && resumes.length === 0) {
@@ -88,7 +106,7 @@ export default function SavedResumes() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
+        <div className="mt-6 mb-1">
           <BackButton />
         </div>
 
@@ -110,19 +128,12 @@ export default function SavedResumes() {
               {totalItems > 0 && (
                 <button
                   onClick={() => setShowClearModal(true)}
-                  className="btn-outline text-red-500 hover:text-red-600 hover:border-red-500 flex items-center gap-2"
+                  className="bg-red-500/20 text-red-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" />
                   Clear All
                 </button>
               )}
-              <button
-                onClick={() => navigate('/builder')}
-                className="btn-primary flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                New Resume
-              </button>
             </div>
           </div>
         </motion.div>
@@ -166,8 +177,8 @@ export default function SavedResumes() {
                   className="card hover:shadow-lg transition-shadow"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-primary" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -187,9 +198,15 @@ export default function SavedResumes() {
                     </div>
                   </div>
 
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                    {resume.content.personalInfo.fullName || 'Untitled Resume'}
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1 truncate">
+                    {resume.content.personalInfo.fullName || "Untitled Resume"}
                   </h3>
+
+                  {resume.content.personalInfo.jobTitle && (
+                    <p className="text-sm text-green-500 font-medium mb-2 truncate">
+                      {resume.content.personalInfo.jobTitle}
+                    </p>
+                  )}
 
                   <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
                     <Clock className="w-4 h-4" />
@@ -261,15 +278,15 @@ export default function SavedResumes() {
           >
             <FileText className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              {searchTerm ? 'No Resumes Found' : 'No Saved Resumes'}
+              {searchTerm ? "No Resumes Found" : "No Saved Resumes"}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-6">
-              {searchTerm 
-                ? 'Try a different search term' 
+              {searchTerm
+                ? "Try a different search term"
                 : "You haven't created any resumes yet. Start building your first resume!"}
             </p>
             <button
-              onClick={() => navigate('/builder')}
+              onClick={() => navigate("/builder")}
               className="btn-primary inline-flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />

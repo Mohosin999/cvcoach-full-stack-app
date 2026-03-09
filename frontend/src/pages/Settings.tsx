@@ -1,19 +1,36 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { User, Bell, Palette, Trash2, Save, Moon, Sun, Monitor } from 'lucide-react';
-import { toast } from 'react-toastify';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { userApi } from '../services/api';
-import BackButton from '../components/BackButton';
-import ConfirmModal from '../components/ConfirmModal';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  User,
+  Bell,
+  Palette,
+  Trash2,
+  Save,
+  Moon,
+  Sun,
+  Monitor,
+} from "lucide-react";
+import { toast } from "react-toastify";
+import { useAppSelector, useAppDispatch } from "../hooks/redux";
+import { logoutUser, fetchUser } from "../store/slices/authSlice";
+import { setTheme } from "../store/slices/themeSlice";
+import { userApi } from "../services/api";
+import BackButton from "../components/BackButton";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function Settings() {
-  const { user, refreshUser, logout } = useAuth();
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const [name, setName] = useState(user?.name || '');
+  const { user, loading } = useAppSelector((state) => ({
+    user: state.auth.user,
+    loading: state.auth.loading,
+  }));
+  const { theme } = useAppSelector((state) => state.theme);
+  const dispatch = useAppDispatch();
+  const [name, setName] = useState(user?.name || "");
   const [saving, setSaving] = useState(false);
-  const [notifications, setNotifications] = useState(user?.preferences?.notifications ?? true);
+  const [notifications, setNotifications] = useState(
+    user?.preferences?.notifications ?? true,
+  );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleSaveProfile = async () => {
@@ -26,10 +43,10 @@ export default function Settings() {
           notifications,
         },
       });
-      await refreshUser();
-      toast.success('Profile updated successfully');
+      await dispatch(fetchUser());
+      toast.success("Profile updated successfully");
     } catch (error) {
-      toast.error('Failed to update profile');
+      toast.error("Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -39,23 +56,23 @@ export default function Settings() {
     setShowDeleteConfirm(false);
     try {
       await userApi.deleteAccount();
-      toast.success('Account deleted');
-      await logout();
+      toast.success("Account deleted");
+      await dispatch(logoutUser());
     } catch (error) {
-      toast.error('Failed to delete account');
+      toast.error("Failed to delete account");
     }
   };
 
   const themeOptions = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
-    { value: 'system', label: 'System', icon: Monitor },
+    { value: "light", label: "Light", icon: Sun },
+    { value: "dark", label: "Dark", icon: Moon },
+    { value: "system", label: "System", icon: Monitor },
   ] as const;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
+        <div className="mt-6 mb-1">
           <BackButton />
         </div>
 
@@ -97,12 +114,16 @@ export default function Settings() {
                 />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">
-                  {user?.name?.charAt(0) || 'U'}
+                  {user?.name?.charAt(0) || "U"}
                 </div>
               )}
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">{user?.name}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {user?.name}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {user?.email}
+                </p>
               </div>
             </div>
 
@@ -141,8 +162,8 @@ export default function Settings() {
                   onClick={() => setTheme(option.value)}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     theme === option.value
-                      ? 'border-primary bg-primary/5'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      ? "border-primary bg-primary/5"
+                      : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
                   }`}
                 >
                   <option.icon className="w-6 h-6 mx-auto mb-2 text-gray-600 dark:text-gray-400" />
@@ -202,14 +223,22 @@ export default function Settings() {
                   Subscription
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Current plan: <span className="font-medium capitalize">{user?.subscription.plan}</span>
+                  Current plan:{" "}
+                  <span className="font-medium capitalize">
+                    {user?.subscription.plan}
+                  </span>
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Credits remaining: <span className="font-medium">{user?.subscription.credits}</span>
+                  Credits remaining:{" "}
+                  <span className="font-medium">
+                    {user?.subscription.credits}
+                  </span>
                 </p>
               </div>
-              {user?.subscription.plan === 'free' && (
-                <button className="btn-primary">Upgrade to Pro</button>
+              {user?.subscription.plan === "free" && (
+                <Link to="/plans" className="btn-primary">
+                  Upgrade to Pro
+                </Link>
               )}
             </div>
           </motion.div>
@@ -230,7 +259,8 @@ export default function Settings() {
             </div>
 
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Once you delete your account, there is no going back. Please be certain.
+              Once you delete your account, there is no going back. Please be
+              certain.
             </p>
             <button
               onClick={() => setShowDeleteConfirm(true)}
@@ -247,7 +277,7 @@ export default function Settings() {
               className="btn-primary flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>

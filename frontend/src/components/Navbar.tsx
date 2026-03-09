@@ -6,54 +6,71 @@ import {
   History,
   Settings,
   LogOut,
-  Sun,
-  Moon,
   Menu,
   X,
   Flame,
   FileText,
   Crown,
 } from "lucide-react";
-import { useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { useTheme } from "../contexts/ThemeContext";
+import { useState, useRef, useEffect } from "react";
+import { useAppSelector, useAppDispatch } from "../hooks/redux";
+import { logoutUser } from "../store/slices/authSlice";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { user, loading } = useAppSelector((state) => ({
+    user: state.auth.user,
+    loading: state.auth.loading,
+  }));
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close profile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    if (profileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [profileMenuOpen]);
 
   const navLinks = [
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/analyze", label: "Analyze", icon: FileSearch },
     { path: "/history", label: "History", icon: History },
+    { path: "/builder", label: "Builder", icon: FileText },
+    { path: "/my-resumes", label: "My Resumes", icon: FileText },
   ];
 
   const handleLogout = async () => {
-    await logout();
+    setShowLogoutConfirm(false);
+    await dispatch(logoutUser());
     navigate("/");
-  };
-
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 py-1 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-white/80 dark:border-gray-900/80">
+      <nav className="fixed top-0 left-0 right-0 z-50 py-1 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
         <div className="section-container">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-2">
-              {/* <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
-                <Flame className="w-5 h-5 text-white" />
-              </div> */}
               <div className="w-8 h-8 bg-gradient-to-br from-green-500 via-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
                 <Flame className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <span className="text-xl font-bold text-white">
                 CV<span className="text-green-500">Coach</span>
               </span>
             </Link>
@@ -68,29 +85,13 @@ export default function Navbar() {
                         to={link.path}
                         className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                           location.pathname === link.path
-                            ? "bg-primary/10 text-primary"
-                            : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                            ? "bg-green-500/20 text-green-400"
+                            : "text-gray-300 hover:bg-gray-800"
                         }`}
                       >
                         {link.label}
                       </Link>
                     ))}
-                  </div>
-
-                  <div className="hidden md:flex items-center gap-2">
-                    <Link
-                      to="/builder"
-                      className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-1"
-                    >
-                      <FileText className="w-4 h-4" />
-                      Builder
-                    </Link>
-                    <Link
-                      to="/my-resumes"
-                      className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                    >
-                      My Resumes
-                    </Link>
                   </div>
 
                   <Link
@@ -101,29 +102,18 @@ export default function Navbar() {
                     Upgrade
                   </Link>
 
-                  <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full">
-                    <span className="text-sm font-medium text-primary">
+                  <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-green-500/20 rounded-full">
+                    <span className="text-sm font-medium text-green-400">
                       {user.subscription.credits} credits
                     </span>
                   </div>
 
-                  <button
-                    onClick={toggleTheme}
-                    className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-                  >
-                    {resolvedTheme === "dark" ? (
-                      <Sun className="w-5 h-5" />
-                    ) : (
-                      <Moon className="w-5 h-5" />
-                    )}
-                  </button>
-
-                  <div className="relative">
+                  <div className="relative" ref={profileMenuRef}>
                     <button
                       onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                       className="flex items-center gap-2"
                     >
-                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-medium">
+                      <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-medium">
                         {user.name?.charAt(0).toUpperCase() || "U"}
                       </div>
                     </button>
@@ -134,33 +124,33 @@ export default function Navbar() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
-                          className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1"
+                          className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-lg border border-gray-700 py-1 z-50"
                         >
-                          <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="px-4 py-3 border-b border-gray-700">
+                            <p className="text-sm font-semibold text-white truncate">
                               {user.name}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-400 truncate mt-1" title={user.email}>
                               {user.email}
                             </p>
                           </div>
                           <Link
                             to="/settings"
-                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
                             onClick={() => setProfileMenuOpen(false)}
                           >
-                            <Settings className="w-4 h-4 inline mr-2" />
-                            Settings
+                            <Settings className="w-4 h-4" />
+                            <span>Settings</span>
                           </Link>
                           <button
                             onClick={() => {
                               setProfileMenuOpen(false);
-                              handleLogout();
+                              setShowLogoutConfirm(true);
                             }}
-                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
                           >
-                            <LogOut className="w-4 h-4 inline mr-2" />
-                            Logout
+                            <LogOut className="w-4 h-4" />
+                            <span>Logout</span>
                           </button>
                         </motion.div>
                       )}
@@ -172,9 +162,9 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   >
                     {mobileMenuOpen ? (
-                      <X className="w-6 h-6" />
+                      <X className="w-6 h-6 text-white" />
                     ) : (
-                      <Menu className="w-6 h-6" />
+                      <Menu className="w-6 h-6 text-white" />
                     )}
                   </button>
                 </>
@@ -182,7 +172,7 @@ export default function Navbar() {
                 <>
                   <Link
                     to="/login"
-                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium"
+                    className="text-gray-300 hover:text-white font-medium"
                   >
                     Login
                   </Link>
@@ -201,7 +191,7 @@ export default function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
+              className="md:hidden bg-gray-900 border-t border-gray-800"
             >
               <div className="px-4 py-3 space-y-2">
                 {navLinks.map((link) => (
@@ -210,8 +200,8 @@ export default function Navbar() {
                     to={link.path}
                     className={`block px-3 py-2 rounded-lg text-sm font-medium ${
                       location.pathname === link.path
-                        ? "bg-primary/10 text-primary"
-                        : "text-gray-600 dark:text-gray-300"
+                        ? "bg-green-500/20 text-green-400"
+                        : "text-gray-300"
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -219,27 +209,13 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <Link
-                  to="/builder"
-                  className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Builder
-                </Link>
-                <Link
-                  to="/my-resumes"
-                  className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  My Resumes
-                </Link>
-                <Link
                   to="/plans"
-                  className="block px-3 py-2 rounded-lg text-sm font-medium text-orange-600"
+                  className="block px-3 py-2 rounded-lg text-sm font-medium text-orange-400"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Upgrade Plan
                 </Link>
-                <div className="px-3 py-2 text-sm text-gray-500">
+                <div className="px-3 py-2 text-sm text-gray-400">
                   {user.subscription.credits} credits
                 </div>
               </div>
@@ -247,6 +223,16 @@ export default function Navbar() {
           )}
         </AnimatePresence>
       </nav>
+
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        title="Logout"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
+import { useAppSelector } from './hooks/redux';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -12,7 +12,10 @@ import Plans from './pages/Plans';
 import LoadingSpinner from './components/LoadingSpinner';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAppSelector((state) => ({
+    user: state.auth.user,
+    loading: state.auth.loading,
+  }));
 
   if (loading) {
     return <LoadingSpinner fullScreen />;
@@ -22,7 +25,10 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAppSelector((state) => ({
+    user: state.auth.user,
+    loading: state.auth.loading,
+  }));
 
   if (loading) {
     return <LoadingSpinner fullScreen />;

@@ -1,5 +1,6 @@
 import { Router, Response } from 'express';
 import { Resume } from '../models/Resume';
+import { User } from '../models/User';
 import { authenticate, AuthRequest } from '../middlewares/auth';
 import { upload, uploadErrorHandler } from '../config/multer';
 import { parseResumeFile } from '../services/resumeParser';
@@ -22,13 +23,13 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const resumes = await Resume.find({ userId: req.user._id, isActive: true })
+    const resumes = await Resume.find({ userId: req.user._id, isActive: true, sourceType: 'builder' })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .select('-originalFormat');
 
-    const total = await Resume.countDocuments({ userId: req.user._id, isActive: true });
+    const total = await Resume.countDocuments({ userId: req.user._id, isActive: true, sourceType: 'builder' });
 
     res.json({
       success: true,
@@ -65,6 +66,7 @@ router.post('/',
 
       const resume = await Resume.create({
         userId: req.user._id,
+        sourceType: 'uploaded',
         originalFormat: {
           filename: req.file.filename,
           mimetype: req.file.mimetype,
@@ -98,8 +100,8 @@ router.post('/',
   }
 );
 
-router.post('/content', 
-  authenticate, 
+router.post('/content',
+  authenticate,
   async (req: AuthRequest, res: Response) => {
     try {
       const { content } = req.body;
@@ -111,12 +113,33 @@ router.post('/content',
         });
       }
 
+      // Check if user has enough credits
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      if (user.subscription.credits <= 0) {
+        return res.status(403).json({
+          success: false,
+          message: 'Insufficient credits. Please upgrade your plan.'
+        });
+      }
+
+      // Deduct one credit
+      user.subscription.credits -= 1;
+      await user.save();
+
       const resume = await Resume.create({
         userId: req.user._id,
+        sourceType: 'builder',
         content,
         metadata: {
           filename: `resume_${Date.now()}.json`,
-          originalName: content.personalInfo?.name || 'Resume',
+          originalName: content.personalInfo?.fullName || 'Resume',
           size: JSON.stringify(content).length,
           type: 'application/json'
         },
@@ -125,7 +148,8 @@ router.post('/content',
 
       res.status(201).json({
         success: true,
-        data: resume
+        data: resume,
+        remainingCredits: user.subscription.credits
       });
     } catch (error: any) {
       res.status(500).json({
@@ -135,6 +159,25 @@ router.post('/content',
     }
   }
 );
+
+router.delete('/delete-all', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const result = await Resume.deleteMany(
+      { userId: req.user._id, isActive: true }
+    );
+
+    return res.json({
+      success: true,
+      message: `Deleted ${result.deletedCount} resumes successfully`
+    });
+  } catch (error) {
+    console.error('Error deleting all resumes:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error deleting all resumes'
+    });
+  }
+});
 
 router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   try {
@@ -191,11 +234,10 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
 router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const resume = await Resume.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user._id },
-      { $set: { isActive: false } },
-      { new: true }
-    );
+    const resume = await Resume.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id
+    });
 
     if (!resume) {
       return res.status(404).json({
@@ -212,26 +254,6 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting resume'
-    });
-  }
-});
-
-router.delete('/delete-all', authenticate, async (req: AuthRequest, res: Response) => {
-  try {
-    const result = await Resume.updateMany(
-      { userId: req.user._id, isActive: true },
-      { $set: { isActive: false } }
-    );
-
-    return res.json({
-      success: true,
-      message: `Deleted ${result.modifiedCount} resumes successfully`
-    });
-  } catch (error) {
-    console.error('Error deleting all resumes:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error deleting all resumes'
     });
   }
 });

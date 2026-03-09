@@ -16,8 +16,6 @@ export interface IUser extends Document {
     credits: number;
     expiresAt?: Date;
   };
-  lastFreeCreditDate?: Date;
-  freeCreditsUsedToday?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -74,13 +72,6 @@ const userSchema = new Schema<IUser>(
       expiresAt: {
         type: Date,
       },
-    },
-    lastFreeCreditDate: {
-      type: Date,
-    },
-    freeCreditsUsedToday: {
-      type: Number,
-      default: 0,
     },
   },
   {

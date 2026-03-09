@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useCallback, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FileSearch,
   Send,
@@ -9,35 +9,39 @@ import {
   Upload,
   Star,
   X,
-} from 'lucide-react';
-import { toast } from 'react-toastify';
-import { useAuth } from '../contexts/AuthContext';
-import { analysisApi, resumeApi } from '../services/api';
-import { Resume, ResumeContent, Analysis } from '../types';
-import LoadingSpinner from '../components/LoadingSpinner';
-import BackButton from '../components/BackButton';
-import JobDescriptionInput from '../components/JobDescriptionInput';
-import AnalysisProgress, { AnalysisStep } from '../components/AnalysisProgress';
-import ResultPanel from '../components/ResultPanel';
+} from "lucide-react";
+import { toast } from "react-toastify";
+import { useAppSelector, useAppDispatch } from "../hooks/redux";
+import { fetchUser } from "../store/slices/authSlice";
+import { analysisApi, resumeApi } from "../services/api";
+import { Resume, ResumeContent, Analysis } from "../types";
+import LoadingSpinner from "../components/LoadingSpinner";
+import BackButton from "../components/BackButton";
+import JobDescriptionInput from "../components/JobDescriptionInput";
+import AnalysisProgress, { AnalysisStep } from "../components/AnalysisProgress";
+import ResultPanel from "../components/ResultPanel";
 
 const MAX_JD_LENGTH = 10000;
 
 export default function Analyze() {
-  const { user, refreshUser } = useAuth();
+  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [resume, setResume] = useState<Resume | null>(null);
-  const [resumeContent, setResumeContent] = useState<ResumeContent | null>(null);
-  const [jobDescription, setJobDescription] = useState('');
+  const [resumeContent, setResumeContent] = useState<ResumeContent | null>(
+    null,
+  );
+  const [jobDescription, setJobDescription] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [currentStep, setCurrentStep] = useState<AnalysisStep>('uploading');
+  const [currentStep, setCurrentStep] = useState<AnalysisStep>("uploading");
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
 
   useEffect(() => {
-    const analysisId = searchParams.get('analysis');
+    const analysisId = searchParams.get("analysis");
     if (analysisId) {
       loadAnalysisById(analysisId);
     }
@@ -50,15 +54,19 @@ export default function Analyze() {
       if (response.data.success && response.data.data) {
         const analysisData = response.data.data;
         setAnalysis(analysisData);
-        if (analysisData.resumeId) {
+        // Only set resume and job description if they're not already set
+        // This prevents clearing the current form when viewing a completed analysis
+        if (analysisData.resumeId && !resume) {
           setResume(analysisData.resumeId as unknown as Resume);
           setResumeContent(analysisData.resumeId.content);
         }
-        setJobDescription(analysisData.jobDescription || '');
+        if (analysisData.jobDescription && !jobDescription) {
+          setJobDescription(analysisData.jobDescription || "");
+        }
       }
     } catch (error) {
-      console.error('Error loading analysis:', error);
-      toast.error('Failed to load analysis');
+      console.error("Error loading analysis:", error);
+      toast.error("Failed to load analysis");
     } finally {
       setLoadingAnalysis(false);
     }
@@ -67,18 +75,18 @@ export default function Analyze() {
   useEffect(() => {
     if (analyzing) {
       const steps: AnalysisStep[] = [
-        'uploading',
-        'parsing',
-        'keywords',
-        'skills',
-        'formatting',
-        'experience',
-        'achievements',
-        'grammar',
-        'matching',
-        'complete',
+        "uploading",
+        "parsing",
+        "keywords",
+        "skills",
+        "formatting",
+        "experience",
+        "achievements",
+        "grammar",
+        "matching",
+        "complete",
       ];
-      
+
       let stepIndex = 0;
       const interval = setInterval(() => {
         if (stepIndex < steps.length - 1) {
@@ -93,80 +101,112 @@ export default function Analyze() {
     }
   }, [analyzing]);
 
-  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    setUploading(true);
-    setUploadSuccess(false);
-    try {
-      const formData = new FormData();
-      formData.append('resume', file);
-      const response = await resumeApi.upload(formData);
-      setResume(response.data.data);
-      setResumeContent(response.data.data.content);
-      setUploadSuccess(true);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to upload resume');
-    } finally {
-      setUploading(false);
-    }
-  }, []);
+      if (!user || user.subscription.credits < 1) {
+        toast.error("Insufficient credits. Please upgrade your plan.");
+        navigate("/plans");
+        return;
+      }
+
+      setUploading(true);
+      setUploadSuccess(false);
+      try {
+        const formData = new FormData();
+        formData.append("resume", file);
+        const response = await resumeApi.upload(formData);
+        setResume(response.data.data);
+        setResumeContent(response.data.data.content);
+        setUploadSuccess(true);
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "Failed to upload resume");
+      } finally {
+        setUploading(false);
+      }
+    },
+    [],
+  );
 
   const simulateAnalysis = async () => {
     setAnalyzing(true);
     setAnalysis(null);
-    
+
     const steps: AnalysisStep[] = [
-      'uploading',
-      'parsing',
-      'keywords',
-      'skills',
-      'formatting',
-      'experience',
-      'achievements',
-      'grammar',
-      'matching',
-      'complete',
+      "uploading",
+      "parsing",
+      "keywords",
+      "skills",
+      "formatting",
+      "experience",
+      "achievements",
+      "grammar",
+      "matching",
+      "complete",
     ];
-    
+
     for (let i = 0; i < steps.length; i++) {
       setCurrentStep(steps[i]);
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 600));
     }
-    
+
     return steps[steps.length - 1];
   };
 
   const handleAnalyze = async () => {
     if (!resume) {
-      toast.error('Please upload a resume first');
+      toast.error("Please upload a resume first");
       return;
     }
     if (!jobDescription.trim()) {
-      toast.error('Please enter a job description');
+      toast.error("Please enter a job description");
       return;
     }
     if (!user || user.subscription.credits < 1) {
-      toast.error('Insufficient credits');
-      navigate('/plans');
+      toast.error("Insufficient credits");
+      navigate("/plans");
+      return;
+    }
+
+    // Validate resume ID
+    const resumeId = resume._id;
+    if (!resumeId) {
+      toast.error("Invalid resume: Missing ID. Please re-upload the resume.");
+      console.error("Resume object:", resume);
       return;
     }
 
     try {
       await simulateAnalysis();
-      
+
+      console.log("Sending analysis request with:", {
+        resumeId,
+        jobDescriptionLength: jobDescription.length,
+      });
+
       const response = await analysisApi.create({
-        resumeId: resume._id,
+        resumeId,
         jobDescription,
       });
 
-      setAnalysis(response.data.data);
-      await refreshUser();
-      setCurrentStep('complete');
-      toast.success('Analysis complete!');
+      console.log("Analysis response:", response.data);
+
+      const analysisData = response.data.data;
+      setAnalysis(analysisData);
+      
+      // Update URL with analysis ID so the result persists
+      navigate(`/analyze?analysis=${analysisData._id}`, { replace: true });
+      
+      await dispatch(fetchUser());
+      setCurrentStep("complete");
+      toast.success("Analysis complete!");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Analysis failed');
+      console.error("Analysis error:", error);
+      const errorMessage =
+        error.response?.data?.message || error.message || "Analysis failed";
+      toast.error(errorMessage);
       setAnalyzing(false);
     } finally {
       setAnalyzing(false);
@@ -176,9 +216,9 @@ export default function Analyze() {
   const clearAll = () => {
     setResume(null);
     setResumeContent(null);
-    setJobDescription('');
+    setJobDescription("");
     setAnalysis(null);
-    setCurrentStep('uploading');
+    setCurrentStep("uploading");
     setAnalyzing(false);
   };
 
@@ -189,7 +229,7 @@ export default function Analyze() {
   };
 
   const clearJobDescription = () => {
-    setJobDescription('');
+    setJobDescription("");
   };
 
   const handleClearAll = () => {
@@ -202,7 +242,7 @@ export default function Analyze() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
+        <div className="mt-6 mb-1">
           <BackButton />
         </div>
 
@@ -228,7 +268,7 @@ export default function Analyze() {
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  1. Upload Resume
+                  Upload Resume
                 </h2>
                 {resume && (
                   <button
@@ -240,7 +280,7 @@ export default function Analyze() {
                   </button>
                 )}
               </div>
-            
+
               {!resume ? (
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -249,7 +289,7 @@ export default function Analyze() {
                   </p>
                   <label className="btn-primary cursor-pointer inline-flex items-center gap-2">
                     <Upload className="w-4 h-4" />
-                    {uploading ? 'Uploading...' : 'Choose File'}
+                    {uploading ? "Uploading..." : "Choose File"}
                     <input
                       type="file"
                       accept=".pdf,.docx,.doc,.txt"
@@ -265,8 +305,18 @@ export default function Analyze() {
                     <div className="flex items-center gap-3">
                       {uploadSuccess ? (
                         <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          <svg
+                            className="w-5 h-5 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M5 13l4 4L19 7"
+                            />
                           </svg>
                         </div>
                       ) : uploading ? (
@@ -276,10 +326,12 @@ export default function Analyze() {
                       )}
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white">
-                          {resume.metadata?.originalName || 'Resume uploaded'}
+                          {resume.metadata?.originalName || "Resume uploaded"}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {uploadSuccess ? 'Ready to analyze' : 'Click to upload different file'}
+                          {uploadSuccess
+                            ? "Ready to analyze"
+                            : "Click to upload different file"}
                         </p>
                       </div>
                     </div>
@@ -351,7 +403,10 @@ export default function Analyze() {
                   </div>
                 </motion.div>
               ) : analyzing ? (
-                <AnalysisProgress currentStep={currentStep} showDetails={true} />
+                <AnalysisProgress
+                  currentStep={currentStep}
+                  showDetails={true}
+                />
               ) : analysis ? (
                 <ResultPanel analysis={analysis} />
               ) : (
