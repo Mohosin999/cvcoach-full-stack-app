@@ -11,9 +11,7 @@ import {
 
 const router = Router();
 
-router.get("/", authenticate, getAllJobs);
-
-router.post("/", authenticate, createJob);
+router.post("/fetch-from-url", authenticate, fetchFromUrl);
 
 router.get("/:id", authenticate, getSingleJob);
 
@@ -21,6 +19,8 @@ router.put("/:id", authenticate, updateJob);
 
 router.delete("/:id", authenticate, deleteJob);
 
-router.post("/fetch-from-url", authenticate, fetchFromUrl);
+router.get("/", authenticate, getAllJobs);
+
+router.post("/", authenticate, createJob);
 
 export default router;

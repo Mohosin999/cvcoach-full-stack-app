@@ -103,9 +103,8 @@ export class ResumeAnalysisService {
     });
 
     // Calculate overall scores
-    const atsScore = this.calculateWeightedATSScore(atsBreakdown);
     const jobMatchScore = this.calculateWeightedJobMatchScore(jobMatchBreakdown);
-    const overallScore = Math.round(atsScore * 0.5 + jobMatchScore * 0.5);
+    const overallScore = jobMatchScore;
 
     // Generate detailed analysis
     const sectionAnalysis = this.analyzeSections(resume, resumeKeywords);
@@ -142,7 +141,6 @@ export class ResumeAnalysisService {
 
     return {
       overallScore,
-      atsScore,
       jobMatchScore,
       scoreBreakdown: {
         ats: atsBreakdown,

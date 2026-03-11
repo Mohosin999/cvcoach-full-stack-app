@@ -1,9 +1,7 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IJobDescription extends Document {
   userId: mongoose.Types.ObjectId;
-  title: string;
-  company?: string;
   description: string;
   createdAt: Date;
   updatedAt: Date;
@@ -13,29 +11,23 @@ const jobDescriptionSchema = new Schema<IJobDescription>(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
-      index: true
-    },
-    title: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    company: {
-      type: String,
-      trim: true
+      index: true,
     },
     description: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   {
-    timestamps: true
-  }
+    timestamps: true,
+  },
 );
 
 jobDescriptionSchema.index({ userId: 1, createdAt: -1 });
 
-export const JobDescription = mongoose.model<IJobDescription>('JobDescription', jobDescriptionSchema);
+export const JobDescription = mongoose.model<IJobDescription>(
+  "JobDescription",
+  jobDescriptionSchema,
+);

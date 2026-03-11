@@ -1,7 +1,7 @@
 /* ===================================
 Score Cards Component
 =================================== */
-import { Trophy, Target, Briefcase } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { Analysis } from "../../types";
 
 interface ScoreCardProps {
@@ -44,11 +44,10 @@ const getScoreLabel = (score: number) => {
 };
 
 export default function ScoreCards({ analysis }: { analysis: Analysis }) {
+  const jobMatchScore = analysis.jobMatch?.score || 0;
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <ScoreCard title="Overall Score" value={analysis.score} label="Combined ATS + Job Match" icon={Trophy} color={getScoreColor(analysis.score)} badge={getScoreLabel(analysis.score)} />
-      <ScoreCard title="ATS Score" value={analysis.atsScore} label="30% Keywords + 30% Skills + 30% Sections + 10% Experience" icon={Target} color="text-blue-500" badge="ATS Optimized" />
-      <ScoreCard title="Job Match Score" value={analysis.jobMatch?.score || 0} label="Alignment with job requirements" icon={Briefcase} color="text-purple-500" badge="Job Match" />
+    <div className="grid grid-cols-1 gap-4">
+      <ScoreCard title="Job Match Score" value={jobMatchScore} label="Alignment with job requirements" icon={Briefcase} color={getScoreColor(jobMatchScore)} badge={getScoreLabel(jobMatchScore)} />
     </div>
   );
 }

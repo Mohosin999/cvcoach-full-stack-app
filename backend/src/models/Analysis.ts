@@ -7,14 +7,6 @@ export interface IAnalysis extends Document {
   jobTitle?: string;
   company?: string;
   score: number;
-  atsScore: number;
-  atsScoreBreakdown?: {
-    keywordMatching: { score: number; weight: number; details: string };
-    skillsMatch: { score: number; weight: number; details: string };
-    resumeSections: { score: number; weight: number; details: string };
-    experienceRelevance: { score: number; weight: number; details: string };
-    achievementsImpact: { score: number; weight: number; details: string };
-  };
   jobMatchingBreakdown?: {
     requiredSkillsMatch: { score: number; details: string };
     relevantWorkExperience: { score: number; details: string };
@@ -102,32 +94,6 @@ const analysisSchema = new Schema<IAnalysis>(
     score: {
       type: Number,
       default: 0,
-    },
-    atsScore: {
-      type: Number,
-      default: 0,
-    },
-    atsScoreBreakdown: {
-      keywordMatching: {
-        score: { type: Number, default: 0 },
-        weight: { type: Number, default: 30 },
-        details: String,
-      },
-      skillsMatch: {
-        score: { type: Number, default: 0 },
-        weight: { type: Number, default: 30 },
-        details: String,
-      },
-      resumeSections: {
-        score: { type: Number, default: 0 },
-        weight: { type: Number, default: 30 },
-        details: String,
-      },
-      experienceRelevance: {
-        score: { type: Number, default: 0 },
-        weight: { type: Number, default: 10 },
-        details: String,
-      },
     },
     jobMatchingBreakdown: {
       requiredSkillsMatch: {

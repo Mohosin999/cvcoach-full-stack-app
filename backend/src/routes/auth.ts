@@ -1,12 +1,7 @@
 import { Router, Response } from "express";
 import passport from "passport";
 import { authenticate, AuthRequest } from "../middlewares/auth";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyRefreshToken,
-} from "../config/jwt";
-import { User } from "../models/User";
+import { generateAccessToken, generateRefreshToken } from "../config/jwt";
 import {
   register,
   login,
@@ -26,7 +21,7 @@ router.get(
   passport.authenticate("google", {
     scope: ["profile", "email"],
     session: false,
-  })
+  }),
 );
 
 router.get(
@@ -63,12 +58,14 @@ router.get(
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.redirect(process.env.FRONTEND_URL || "http://localhost:3000/dashboard");
+      res.redirect(
+        process.env.FRONTEND_URL || "http://localhost:3000/dashboard",
+      );
     } catch (error) {
       console.error("OAuth callback error:", error);
       res.redirect("/login?error=callback_failed");
     }
-  }
+  },
 );
 
 router.get("/me", authenticate, getMe);

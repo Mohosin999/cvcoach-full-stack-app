@@ -7,14 +7,11 @@ import passport from "passport";
 import path from "path";
 import { configureGoogleStrategy } from "../config/passport";
 
-export { authenticate, optionalAuth, requireCredits, AuthRequest } from "./auth";
-export { errorHandler, createError, notFound, AppError } from "./errorHandler";
-
-export const setupMiddleware = (app: Application): void => {
+export const applyMiddleware = (app: Application): void => {
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: "cross-origin" },
-    })
+    }),
   );
 
   app.use(
@@ -23,7 +20,7 @@ export const setupMiddleware = (app: Application): void => {
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
       allowedHeaders: ["Content-Type", "Authorization"],
-    })
+    }),
   );
 
   app.use(express.json({ limit: "10mb" }));
@@ -37,7 +34,7 @@ export const setupMiddleware = (app: Application): void => {
 
   const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 1000,
+    max: 100,
     message: { message: "Too many requests, please try again later." },
     standardHeaders: true,
     legacyHeaders: false,
@@ -45,7 +42,7 @@ export const setupMiddleware = (app: Application): void => {
 
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 1000,
+    max: 10,
     message: { message: "Too many requests, please try again later." },
     standardHeaders: true,
     legacyHeaders: false,

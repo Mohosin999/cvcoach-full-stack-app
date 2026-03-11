@@ -128,14 +128,6 @@ export interface ExistingSections {
   skills: boolean;
 }
 
-export interface AtsScoreBreakdown {
-  keywordMatching: { score: number; weight: number; details: string };
-  skillsMatch: { score: number; weight: number; details: string };
-  resumeSections: { score: number; weight: number; details: string };
-  experienceRelevance: { score: number; weight: number; details: string };
-  achievementsImpact: { score: number; weight: number; details: string };
-}
-
 export interface JobMatchingBreakdown {
   requiredSkillsMatch: { score: number; details: string };
   relevantWorkExperience: { score: number; details: string };
@@ -154,8 +146,6 @@ export interface Analysis {
   jobTitle?: string;
   company?: string;
   score: number;
-  atsScore: number;
-  atsScoreBreakdown?: AtsScoreBreakdown;
   jobMatchingBreakdown?: JobMatchingBreakdown;
   feedback: Feedback;
   sectionScores: SectionScores;

@@ -4,7 +4,7 @@ Result Panel Component
 import { motion } from "framer-motion";
 import { Analysis } from "../types";
 import {
-  ScoreCards, OverallFeedback, AtsScoreInfo, SkillsAnalysis,
+  ScoreCards, OverallFeedback, SkillsAnalysis,
   JobMatchBreakdown, Recommendations, Strengths, MissingKeywords,
 } from "./shared";
 
@@ -27,7 +27,6 @@ export default function ResultPanel({ analysis }: ResultPanelProps) {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <ScoreCards analysis={analysis} />
       <OverallFeedback analysis={analysis} />
-      <AtsScoreInfo />
       <SkillsAnalysis analysis={analysis} />
       {jobMatchingItems.length > 0 && <JobMatchBreakdown items={jobMatchingItems} />}
       {analysis.feedback?.suggestions?.length > 0 && <Recommendations suggestions={analysis.feedback.suggestions} />}

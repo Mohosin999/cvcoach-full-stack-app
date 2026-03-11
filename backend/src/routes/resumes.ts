@@ -12,10 +12,6 @@ import {
 
 const router = Router();
 
-router.get("/", authenticate, getAllResumes);
-
-router.post("/", authenticate, uploadResume);
-
 router.post("/content", authenticate, createResumeFromContent);
 
 router.delete("/delete-all", authenticate, deleteAllResumes);
@@ -25,5 +21,9 @@ router.get("/:id", authenticate, getSingleResume);
 router.put("/:id", authenticate, updateResume);
 
 router.delete("/:id", authenticate, deleteResume);
+
+router.get("/", authenticate, getAllResumes);
+
+router.post("/", authenticate, uploadResume);
 
 export default router;

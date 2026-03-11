@@ -57,13 +57,6 @@ interface ResumeContent {
 }
 
 interface AnalysisResult {
-  atsScore: number;
-  atsScoreBreakdown: {
-    keywordMatching: { score: number; weight: number; details: string };
-    skillsMatch: { score: number; weight: number; details: string };
-    resumeSections: { score: number; weight: number; details: string };
-    experienceRelevance: { score: number; weight: number; details: string };
-  };
   jobMatchingScore: number;
   jobMatchingBreakdown: {
     requiredSkillsMatch: { score: number; details: string };
@@ -1106,38 +1099,6 @@ export const analyzeResume = async (
       jdKeywords,
     );
 
-    // NEW ATS Score Breakdown with weights: 30% Keywords, 30% Skills, 30% Sections, 10% Experience
-    const atsScoreBreakdown = {
-      keywordMatching: {
-        score: keywordMatching.score,
-        weight: 30,
-        details: `${keywordMatching.found.length} of ${jdKeywords.length || 0} keywords found in resume`,
-      },
-      skillsMatch: {
-        score: skillsMatch.score,
-        weight: 30,
-        details: `${skillsMatch.matched.length} of ${jdSkills.length || 0} required skills matched`,
-      },
-      resumeSections: {
-        score: resumeSections.score,
-        weight: 30,
-        details: `${resumeSections.found.length}/4 critical sections present (Summary, Skills, Experience, Projects)`,
-      },
-      experienceRelevance: {
-        score: experienceRelevance.score,
-        weight: 10,
-        details: experienceRelevance.details,
-      },
-    };
-
-    // Calculate ATS Score using new weights: 30% + 30% + 30% + 10% = 100%
-    const atsScore = Math.round(
-      keywordMatching.score * 0.30 +
-      skillsMatch.score * 0.30 +
-      resumeSections.score * 0.30 +
-      experienceRelevance.score * 0.10
-    );
-
     let jobMatchingScore = 0;
     let jobMatchingBreakdown: AnalysisResult["jobMatchingBreakdown"];
 
@@ -1270,7 +1231,6 @@ export const analyzeResume = async (
     if (skillsMatch.score < 50) 
       weaknesses.push("Skills gap identified");
 
-    const atsScoreFinal = Math.max(atsScore, 30);
     const jobMatchingScoreFinal = Math.max(jobMatchingScore, 30);
 
     const hasGoodMatch =
@@ -1281,19 +1241,17 @@ export const analyzeResume = async (
     const overallScore = jobDescription
       ? Math.min(
           100,
-          Math.round(atsScoreFinal * 0.5 + jobMatchingScoreFinal * 0.5) +
+          Math.round(jobMatchingScoreFinal) +
             bonusForGoodMatch,
         )
-      : atsScoreFinal;
+      : jobMatchingScoreFinal;
 
     return {
-      atsScore,
-      atsScoreBreakdown,
       jobMatchingScore,
       jobMatchingBreakdown: jobMatchingBreakdown || ({} as any),
       score: overallScore,
       feedback: {
-        overall: `ATS Score: ${atsScore}% | Job Match: ${jobDescription ? jobMatchingScore + "%" : "N/A"}. ${suggestions[0] || "Good overall profile"}`,
+        overall: `Overall Score: ${overallScore}% | Job Match: ${jobDescription ? jobMatchingScore + "%" : "N/A"}. ${suggestions[0] || "Good overall profile"}`,
         strengths,
         weaknesses,
         suggestions: suggestions.slice(0, 7),
@@ -1686,11 +1644,6 @@ const validateAndNormalizeResult = (
       typeof result.score === "number"
         ? Math.min(100, Math.max(0, result.score))
         : defaultResult.score,
-    atsScore: Math.round(
-      (typeof result.score === "number"
-        ? Math.min(100, Math.max(0, result.score))
-        : defaultResult.score) * 0.85,
-    ),
     feedback: {
       overall: result.feedback?.overall || defaultResult.feedback.overall,
       strengths: Array.isArray(result.feedback?.strengths)
@@ -1760,7 +1713,6 @@ const validateAndNormalizeResult = (
     resumeImprovements,
     jobMatch,
     existingSections,
-    atsScoreBreakdown: defaultResult.atsScoreBreakdown,
     jobMatchingScore: 0,
     jobMatchingBreakdown: defaultResult.jobMatchingBreakdown,
   };
@@ -1802,15 +1754,10 @@ const fallbackAnalysis = (
 
   const experienceScore = resume.experience?.length > 0 ? 70 : 40;
 
-  // NEW ATS Score: 30% Keywords + 30% Skills + 30% Sections + 10% Experience
-  const atsScore = Math.round(
-    keywordMatchingScore * 0.30 +
-    skillsScore * 0.30 +
-    sectionsScore * 0.30 +
-    experienceScore * 0.10
+  // Overall score based on keywords and skills
+  const overallScore = Math.round(
+    (keywordMatchingScore + skillsScore + sectionsScore + experienceScore) / 4
   );
-
-  const overallScore = atsScore;
 
   const existingSections = {
     experience:
@@ -1864,9 +1811,8 @@ const fallbackAnalysis = (
 
   return {
     score: overallScore,
-    atsScore,
     feedback: {
-      overall: `ATS Score: ${atsScore}%. ${suggestions[0] || "Good overall profile"}`,
+      overall: `Overall Score: ${overallScore}%. ${suggestions[0] || "Good overall profile"}`,
       strengths: matchedSkills.slice(0, 5),
       weaknesses: missingFromJD.slice(0, 5),
       suggestions: [
@@ -1925,28 +1871,6 @@ const fallbackAnalysis = (
     ],
     jobMatch,
     existingSections,
-    atsScoreBreakdown: {
-      keywordMatching: {
-        score: keywordMatchingScore,
-        weight: 30,
-        details: `${matchedSkills.length} keywords matched from job description`,
-      },
-      skillsMatch: {
-        score: skillsScore,
-        weight: 30,
-        details: `${matchedSkills.length} skills matched`,
-      },
-      resumeSections: {
-        score: sectionsScore,
-        weight: 30,
-        details: `${[hasSummary, hasSkills, hasExperience, hasProjects].filter(Boolean).length}/4 critical sections present`,
-      },
-      experienceRelevance: {
-        score: experienceScore,
-        weight: 10,
-        details: resume.experience?.length > 0 ? "Experience section present" : "No experience listed",
-      },
-    },
     jobMatchingScore: 0,
     jobMatchingBreakdown: {
       requiredSkillsMatch: { score: 0, details: "No job description provided" },

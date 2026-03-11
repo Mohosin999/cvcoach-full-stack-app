@@ -56,14 +56,6 @@ export interface ResumeContent {
 
 export interface AnalysisResult {
   score: number;
-  atsScore?: number;
-  atsScoreBreakdown?: {
-    keywordMatching: { score: number; weight: number; details: string };
-    skillsMatch: { score: number; weight: number; details: string };
-    resumeSections: { score: number; weight: number; details: string };
-    experienceRelevance: { score: number; weight: number; details: string };
-    achievementsImpact: { score: number; weight: number; details: string };
-  };
   jobMatchingScore?: number;
   jobMatchingBreakdown?: {
     requiredSkillsMatch: { score: number; details: string };

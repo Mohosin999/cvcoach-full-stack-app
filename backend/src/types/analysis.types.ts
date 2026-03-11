@@ -183,7 +183,6 @@ export interface ExperienceRequirement {
 export interface AnalysisResult {
   // Overall Scores
   overallScore: number; // 0-100
-  atsScore: number; // 0-100
   jobMatchScore: number; // 0-100
 
   // Detailed Score Breakdown

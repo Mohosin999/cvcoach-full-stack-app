@@ -1,24 +1,34 @@
-import passport from 'passport';
-import { Strategy as GoogleStrategy, Profile, VerifyCallback } from 'passport-google-oauth20';
-import { User } from '../models/User';
+import passport from "passport";
+import {
+  Strategy as GoogleStrategy,
+  Profile,
+  VerifyCallback,
+} from "passport-google-oauth20";
+import { User } from "../models/User";
 
 export const configureGoogleStrategy = () => {
   return new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      callbackURL: process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback'
+      clientID: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      callbackURL:
+        process.env.GOOGLE_CALLBACK_URL || "/api/auth/google/callback",
     },
-    async (accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) => {
+    async (
+      _accessToken: string,
+      _refreshToken: string,
+      profile: Profile,
+      done: VerifyCallback,
+    ) => {
       try {
         let user = await User.findOne({ googleId: profile.id });
 
         if (!user) {
           const email = profile.emails?.[0]?.value;
-          
+
           if (email) {
             user = await User.findOne({ email });
-            
+
             if (user) {
               user.googleId = profile.id;
               user.picture = profile.photos?.[0]?.value;
@@ -33,9 +43,9 @@ export const configureGoogleStrategy = () => {
               googleId: profile.id,
               picture: profile.photos?.[0]?.value,
               subscription: {
-                plan: 'free',
-                credits: 100
-              }
+                plan: "free",
+                credits: 100,
+              },
             });
           }
         }
@@ -44,7 +54,7 @@ export const configureGoogleStrategy = () => {
       } catch (error) {
         return done(error as Error, undefined);
       }
-    }
+    },
   );
 };
 
