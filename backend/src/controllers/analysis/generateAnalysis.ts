@@ -1,6 +1,6 @@
-import { Response } from "express";
-import { AuthRequest } from "../../middlewares/auth";
-import { Analysis } from "../../models/Analysis";
+import { Response } from 'express';
+import { AuthRequest } from '../../types';
+import { Analysis } from '../../models/Analysis';
 import { Resume } from "../../models/Resume";
 import { User } from "../../models/User";
 import { resumeAnalysisService } from "../../services/analysis";

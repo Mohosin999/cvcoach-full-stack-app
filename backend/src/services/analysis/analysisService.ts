@@ -1,14 +1,14 @@
 /**
  * Resume Analysis Service - Enterprise Grade
  * Main orchestrator for professional resume analysis
- * 
+ *
  * Scoring Model:
  * - ATS Score (50% of overall):
  *   - Keyword Matching: 30%
  *   - Skills Match: 30%
  *   - Section Completeness: 30%
  *   - Experience Relevance: 10%
- * 
+ *
  * - Job Match Score (50% of overall):
  *   - Required Skills: 25%
  *   - Preferred Skills: 15%
@@ -19,7 +19,7 @@
 
 import {
   ResumeContent,
-  AnalysisResult,
+  DetailedAnalysisResult,
   ScoreBreakdown,
   SectionAnalysis,
   SkillsAnalysis,
@@ -34,7 +34,7 @@ import {
   KeywordMatch,
   KeywordGap,
   DEFAULT_ANALYSIS_CONFIG,
-} from '../../types/analysis.types';
+} from '../../types';
 
 import {
   KeywordMatchingCalculator,
@@ -76,7 +76,7 @@ export class ResumeAnalysisService {
   /**
    * Main analysis entry point
    */
-  async analyze(input: AnalysisInput): Promise<AnalysisResult> {
+  async analyze(input: AnalysisInput): Promise<DetailedAnalysisResult> {
     const startTime = Date.now();
 
     const { resume, resumeText, jobDescription } = input;

@@ -1,7 +1,8 @@
-import { Response } from "express";
-import { AuthRequest } from "../../middlewares";
-import { findUserByEmail, validatePassword } from "../../services/auth";
-import { createTokens } from "../../services/auth";
+import { Response } from 'express';
+import { AuthRequest } from '../../types';
+import { findUserByEmail, validatePassword } from '../../services/auth';
+import { createTokens } from '../../services/auth';
+import { env } from '../../config/env';
 
 export const login = async (req: AuthRequest, res: Response) => {
   try {
@@ -10,7 +11,7 @@ export const login = async (req: AuthRequest, res: Response) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required",
+        message: 'Email and password are required',
       });
     }
 
@@ -18,14 +19,14 @@ export const login = async (req: AuthRequest, res: Response) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password",
+        message: 'Invalid email or password',
       });
     }
 
     if (!user.password) {
       return res.status(401).json({
         success: false,
-        message: "Please login with Google",
+        message: 'Please login with Google',
       });
     }
 
@@ -33,32 +34,32 @@ export const login = async (req: AuthRequest, res: Response) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password",
+        message: 'Invalid email or password',
       });
     }
 
     const { accessToken, refreshToken } = createTokens(
       user._id.toString(),
-      user.email
+      user.email,
     );
 
-    res.cookie("accessToken", accessToken, {
+    res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: env.nodeEnv === 'production',
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000,
     });
 
-    res.cookie("refreshToken", refreshToken, {
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: env.nodeEnv === 'production',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({
       success: true,
-      message: "Login successful",
+      message: 'Login successful',
       data: {
         user: {
           _id: user._id,
@@ -71,10 +72,10 @@ export const login = async (req: AuthRequest, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error('Login error:', error);
     res.status(500).json({
       success: false,
-      message: "Error logging in",
+      message: 'Error logging in',
     });
   }
 };

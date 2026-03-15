@@ -1,20 +1,19 @@
-import http from "http";
-import app from "./app";
-import { connectDB } from "./db";
+import http from 'http';
+import app from './app';
+import { connectDB } from './db';
+import { env } from './config/env';
 
 const server = http.createServer(app);
-
-const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
     await connectDB();
 
-    server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    server.listen(env.port, () => {
+      console.log(`Server running on port ${env.port}`);
     });
   } catch (error) {
-    console.error("Failed to connect to MongoDB:", error);
+    console.error('Failed to connect to MongoDB:', error);
     process.exit(1);
   }
 };

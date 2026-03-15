@@ -1,7 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { env } from '../../config/env';
 
 const getGenAI = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = env.geminiApiKey;
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY not configured');
   }
@@ -178,8 +179,8 @@ Return ONLY bullet points in HTML format, one per line with <li> tags, wrapped i
 
 export const generateSkills = async (jobTitle: string): Promise<string[]> => {
   const defaultSkills = getDefaultSkills(jobTitle);
-  
-  const apiKey = process.env.GEMINI_API_KEY;
+
+  const apiKey = env.geminiApiKey;
   if (!apiKey) {
     return defaultSkills;
   }

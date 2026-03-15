@@ -17,9 +17,11 @@ function InitializeApp() {
   useEffect(() => {
     dispatch(fetchUser());
 
+    // Refresh access token every 10 minutes (before 15 min expiry)
+    // This ensures user stays logged in without interruption
     const interval = setInterval(() => {
       dispatch(tokenRefresh());
-    }, 5 * 60 * 1000);
+    }, 10 * 60 * 1000); // 10 minutes
 
     return () => clearInterval(interval);
   }, [dispatch]);

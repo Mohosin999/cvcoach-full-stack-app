@@ -1,6 +1,6 @@
-import { Response } from "express";
-import { Analysis } from "../../models/Analysis";
-import { AuthRequest } from "../../middlewares/auth";
+import { Response } from 'express';
+import { Analysis } from '../../models/Analysis';
+import { AuthRequest } from '../../types';
 
 export const getAllAnalysis = async (req: AuthRequest, res: Response) => {
   try {

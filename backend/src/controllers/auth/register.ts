@@ -1,7 +1,8 @@
-import { Response } from "express";
-import { AuthRequest } from "../../middlewares";
-import { createUser, findUserByEmail } from "../../services/auth";
-import { createTokens } from "../../services/auth";
+import { Response } from 'express';
+import { AuthRequest } from '../../types';
+import { createUser, findUserByEmail } from '../../services/auth';
+import { createTokens } from '../../services/auth';
+import { env } from '../../config/env';
 
 export const register = async (req: AuthRequest, res: Response) => {
   try {
@@ -10,7 +11,7 @@ export const register = async (req: AuthRequest, res: Response) => {
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Name, email and password are required",
+        message: 'Name, email and password are required',
       });
     }
 
@@ -18,7 +19,7 @@ export const register = async (req: AuthRequest, res: Response) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists with this email",
+        message: 'User already exists with this email',
       });
     }
 
@@ -26,26 +27,26 @@ export const register = async (req: AuthRequest, res: Response) => {
 
     const { accessToken, refreshToken } = createTokens(
       user._id.toString(),
-      user.email
+      user.email,
     );
 
-    res.cookie("accessToken", accessToken, {
+    res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: env.nodeEnv === 'production',
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000,
     });
 
-    res.cookie("refreshToken", refreshToken, {
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: env.nodeEnv === 'production',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: 'User registered successfully',
       data: {
         user: {
           _id: user._id,
@@ -58,10 +59,10 @@ export const register = async (req: AuthRequest, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error('Registration error:', error);
     res.status(500).json({
       success: false,
-      message: "Error registering user",
+      message: 'Error registering user',
     });
   }
 };

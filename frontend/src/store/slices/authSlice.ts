@@ -30,6 +30,18 @@ const initialState: AuthState = {
   isAuthenticated: !!loadUserFromStorage(),
 };
 
+// Token refresh thunk - refreshes access token using refresh token
+export const tokenRefresh = createAsyncThunk<void, void, { rejectValue: string }>(
+  'auth/refreshToken',
+  async (_, { rejectWithValue }) => {
+    try {
+      await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true });
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to refresh token');
+    }
+  }
+);
+
 export const fetchUser = createAsyncThunk<User | null, void, { rejectValue: string }>(
   'auth/fetchUser',
   async (_, { rejectWithValue }) => {
@@ -105,21 +117,16 @@ const authSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
+      })
+      // tokenRefresh
+      .addCase(tokenRefresh.rejected, (state) => {
+        // Clear user data if refresh fails
+        state.user = null;
+        state.isAuthenticated = false;
+        localStorage.removeItem('user');
       });
   },
 });
-
-// Separate thunk for token refresh interval
-export const tokenRefresh = createAsyncThunk<void, void, { rejectValue: string }>(
-  'auth/refreshToken',
-  async (_, { rejectWithValue }) => {
-    try {
-      await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true });
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to refresh token');
-    }
-  }
-);
 
 export const { login, clearUser, setUser, setUserCredits } = authSlice.actions;
 export default authSlice.reducer;

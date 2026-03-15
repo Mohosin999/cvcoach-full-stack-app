@@ -1,18 +1,20 @@
-import { Response } from "express";
+import { Response } from 'express';
+import { AuthRequest } from '../../types';
 import {
   verifyRefreshTokenAndGetUserId,
   generateNewAccessToken,
-} from "../../services/auth";
-import { findUserById } from "../../services/auth";
+} from '../../services/auth';
+import { findUserById } from '../../services/auth';
+import { env } from '../../config/env';
 
-export const refreshToken = async (req: any, res: Response) => {
+export const refreshToken = async (req: AuthRequest, res: Response) => {
   try {
     const refreshTokenValue = req.cookies.refreshToken || req.body.refreshToken;
 
     if (!refreshTokenValue) {
       return res.status(401).json({
         success: false,
-        message: "Refresh token not provided",
+        message: 'Refresh token not provided',
       });
     }
 
@@ -23,30 +25,30 @@ export const refreshToken = async (req: any, res: Response) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "User not found",
+        message: 'User not found',
       });
     }
 
     const newAccessToken = generateNewAccessToken(
       user._id.toString(),
-      user.email
+      user.email,
     );
 
-    res.cookie("accessToken", newAccessToken, {
+    res.cookie('accessToken', newAccessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: env.nodeEnv === 'production',
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000,
     });
 
     res.json({
       success: true,
-      message: "Token refreshed",
+      message: 'Token refreshed',
     });
   } catch (error) {
     res.status(401).json({
       success: false,
-      message: "Invalid refresh token",
+      message: 'Invalid refresh token',
     });
   }
 };

@@ -1,18 +1,18 @@
-import passport from "passport";
+import passport from 'passport';
 import {
   Strategy as GoogleStrategy,
   Profile,
   VerifyCallback,
-} from "passport-google-oauth20";
-import { User } from "../models/User";
+} from 'passport-google-oauth20';
+import { User } from '../models/User';
+import { env } from '../config/env';
 
 export const configureGoogleStrategy = () => {
   return new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      callbackURL:
-        process.env.GOOGLE_CALLBACK_URL || "/api/auth/google/callback",
+      clientID: env.googleClientId,
+      clientSecret: env.googleClientSecret,
+      callbackURL: env.googleCallbackUrl,
     },
     async (
       _accessToken: string,
@@ -43,7 +43,7 @@ export const configureGoogleStrategy = () => {
               googleId: profile.id,
               picture: profile.photos?.[0]?.value,
               subscription: {
-                plan: "free",
+                plan: 'free',
                 credits: 100,
               },
             });

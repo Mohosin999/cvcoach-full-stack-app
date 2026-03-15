@@ -37,6 +37,9 @@ api.interceptors.response.use(
         await api.post('/auth/refresh');
         return api(originalRequest);
       } catch (refreshError) {
+        // Clear local storage on refresh failure
+        localStorage.removeItem('user');
+        // Redirect to login page (not /auth/login which doesn't exist)
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }

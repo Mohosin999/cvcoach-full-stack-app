@@ -1,54 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-
-interface ResumeContent {
-  personalInfo: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    location?: string;
-    linkedin?: string;
-    portfolio?: string;
-  };
-  summary?: string;
-  experience: Array<{
-    company: string;
-    title: string;
-    location?: string;
-    startDate: string;
-    endDate?: string;
-    current?: boolean;
-    description: string;
-  }>;
-  education: Array<{
-    institution: string;
-    degree: string;
-    field?: string;
-    graduationDate?: string;
-    gpa?: string;
-  }>;
-  skills: string[];
-  projects?: Array<{
-    name: string;
-    description: string;
-    technologies?: string[];
-    url?: string;
-  }>;
-  certifications?: Array<{
-    name: string;
-    issuer: string;
-    date?: string;
-    url?: string;
-  }>;
-  languages?: Array<{
-    language: string;
-    proficiency: string;
-  }>;
-}
+import { ResumeContent } from '../../types';
 
 export const parseResumeFile = async (filePath: string, mimeType: string): Promise<ResumeContent> => {
   const ext = path.extname(filePath).toLowerCase();
-  
+
   if (ext === '.pdf') {
     return parsePDF(filePath);
   } else if (ext === '.docx') {
@@ -63,7 +19,7 @@ const parsePDF = async (filePath: string): Promise<ResumeContent> => {
     const pdf = require('pdf-parse');
     const dataBuffer = fs.readFileSync(filePath);
     const data = await pdf(dataBuffer);
-    
+
     return parseTextToResume(data.text);
   } catch (error) {
     console.error('PDF parsing error:', error);
@@ -75,7 +31,7 @@ const parseDOCX = async (filePath: string): Promise<ResumeContent> => {
   try {
     const mammoth = require('mammoth');
     const result = await mammoth.extractRawText({ path: filePath });
-    
+
     return parseTextToResume(result.value);
   } catch (error) {
     console.error('DOCX parsing error:', error);
@@ -84,15 +40,15 @@ const parseDOCX = async (filePath: string): Promise<ResumeContent> => {
 };
 
 const parseTextToResume = (text: string): ResumeContent => {
-  const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-  
+  const lines = text.split('\n').map((line) => line.trim()).filter((line) => line.length > 0);
+
   const content: ResumeContent = {
     personalInfo: {},
     experience: [],
     education: [],
     skills: [],
     projects: [],
-    certifications: []
+    certifications: [],
   };
 
   const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
@@ -106,13 +62,13 @@ const parseTextToResume = (text: string): ResumeContent => {
   const urlMatch = text.match(urlRegex);
 
   if (emailMatch) content.personalInfo.email = emailMatch[0];
-  if (phoneMatch) content.personalInfo.phone = phoneMatch[0];
-  if (linkedinMatch) content.personalInfo.linkedin = linkedinMatch[0];
-  if (urlMatch) content.personalInfo.portfolio = urlMatch[0];
+  if (phoneMatch) content.personalInfo.whatsapp = phoneMatch[0];
+  if (linkedinMatch) content.personalInfo.linkedIn = linkedinMatch[0];
+  if (urlMatch) content.personalInfo.socialLinks = { portfolio: urlMatch[0] };
 
   const nameCandidate = lines[0];
   if (nameCandidate && !nameCandidate.includes('@') && nameCandidate.length < 50) {
-    content.personalInfo.name = nameCandidate;
+    content.personalInfo.fullName = nameCandidate;
   }
 
   const sections: { [key: string]: { regex: RegExp; order: number } } = {
@@ -121,11 +77,11 @@ const parseTextToResume = (text: string): ResumeContent => {
     education: { regex: /^(education|academic|qualification|academic\s+background)/i, order: 2 },
     skills: { regex: /^(skills|technical\s+skills|core\s+competencies|technologies|tech\s+stack)/i, order: 3 },
     projects: { regex: /^(projects|portfolio|key\s+projects|personal\s+projects|side\s+projects)/i, order: 4 },
-    certifications: { regex: /^(certifications|certificates|licenses|professional\s+certifications|awards)/i, order: 5 }
+    certifications: { regex: /^(certifications|certificates|licenses|professional\s+certifications|awards)/i, order: 5 },
   };
 
   const sectionPositions: { [key: string]: number } = {};
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     for (const [section, { regex }] of Object.entries(sections)) {
@@ -145,9 +101,9 @@ const parseTextToResume = (text: string): ResumeContent => {
     const nextSection = sortedSections[i + 1];
     const startIdx = sectionPositions[currentSection] + 1;
     const endIdx = nextSection ? sectionPositions[nextSection] : lines.length;
-    
+
     const sectionContent = lines.slice(startIdx, endIdx).join(' ');
-    
+
     switch (currentSection) {
       case 'summary':
         if (sectionContent.length > 10) {
@@ -155,7 +111,7 @@ const parseTextToResume = (text: string): ResumeContent => {
         }
         break;
       case 'skills':
-        const skillMatches = sectionContent.split(/[,;|•\n]/).map(s => s.trim()).filter(s => s.length > 1 && s.length < 40);
+        const skillMatches = sectionContent.split(/[,;|•\n]/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 40);
         if (skillMatches.length > 0) {
           content.skills = [...new Set(skillMatches)];
         }
@@ -177,13 +133,54 @@ const parseTextToResume = (text: string): ResumeContent => {
 
   if (content.skills.length === 0) {
     const commonSkills = [
-      'JavaScript', 'TypeScript', 'Python', 'Java', 'C++', 'C#', 'Ruby', 'Go', 'Rust', 'PHP',
-      'React', 'Angular', 'Vue', 'Node.js', 'Express', 'Django', 'Flask', 'NestJS', 'Next.js', 'Nuxt',
-      'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'SQL', 'NoSQL', 'Firebase', 'Elasticsearch',
-      'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'Jenkins', 'Git', 'GitHub', 'GitLab',
-      'HTML', 'CSS', 'SASS', 'Tailwind', 'REST', 'GraphQL', 'API', 'Microservices', 'Linux'
+      'JavaScript',
+      'TypeScript',
+      'Python',
+      'Java',
+      'C++',
+      'C#',
+      'Ruby',
+      'Go',
+      'Rust',
+      'PHP',
+      'React',
+      'Angular',
+      'Vue',
+      'Node.js',
+      'Express',
+      'Django',
+      'Flask',
+      'NestJS',
+      'Next.js',
+      'Nuxt',
+      'MongoDB',
+      'PostgreSQL',
+      'MySQL',
+      'Redis',
+      'SQL',
+      'NoSQL',
+      'Firebase',
+      'Elasticsearch',
+      'AWS',
+      'Azure',
+      'GCP',
+      'Docker',
+      'Kubernetes',
+      'Jenkins',
+      'Git',
+      'GitHub',
+      'GitLab',
+      'HTML',
+      'CSS',
+      'SASS',
+      'Tailwind',
+      'REST',
+      'GraphQL',
+      'API',
+      'Microservices',
+      'Linux',
     ];
-    
+
     for (const skill of commonSkills) {
       if (text.toLowerCase().includes(skill.toLowerCase())) {
         if (!content.skills.includes(skill)) {
@@ -200,30 +197,30 @@ const parseExperienceSection = (lines: string[]): ResumeContent['experience'] =>
   const experiences: ResumeContent['experience'] = [];
   const expBlockRegex = /^(.+?)(?:@|at|,|-)\s*(.+?)(?:\(|（)([^)]+)\)?(?:\s*[-–]\s*(.+))?$/i;
   const dateRegex = /(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*\d{4}|\d{1,2}\/\d{4}|\d{4}\s*[-–]\s*(?:present|current|\d{1,2}\/\d{4}|\d{4})/gi;
-  
+
   let currentExp: Partial<ResumeContent['experience'][0]> = {};
   let descriptionLines: string[] = [];
-  
+
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
-    
+
     const dateMatch = trimmed.match(dateRegex);
     const expMatch = trimmed.match(expBlockRegex);
-    
+
     if (expMatch) {
       if (currentExp.title && (currentExp.company || currentExp.description)) {
         currentExp.description = descriptionLines.join(' ');
         if (currentExp.title) experiences.push(currentExp as ResumeContent['experience'][0]);
       }
-      
+
       currentExp = {
         title: expMatch[1]?.trim(),
         company: expMatch[2]?.trim(),
-        description: ''
+        description: '',
       };
       descriptionLines = [];
-      
+
       if (dateMatch) {
         const dateStr = dateMatch[0];
         if (dateStr.toLowerCase().includes('present') || dateStr.toLowerCase().includes('current')) {
@@ -253,12 +250,12 @@ const parseExperienceSection = (lines: string[]): ResumeContent['experience'] =>
       descriptionLines.push(trimmed);
     }
   }
-  
+
   if (currentExp.title && (currentExp.company || currentExp.description)) {
     currentExp.description = descriptionLines.join(' ');
     experiences.push(currentExp as ResumeContent['experience'][0]);
   }
-  
+
   return experiences;
 };
 
@@ -267,38 +264,38 @@ const parseEducationSection = (lines: string[]): ResumeContent['education'] => {
   const eduRegex = /^(.+?)(?:,|\s+at\s+)(.+?)(?:\(|（)([^)]+)\)?/i;
   const degreeKeywords = /bachelor|master|phd|doctorate|bs|ba|ms|ma|b\.sc|m\.sc|b\.e|m\.e|b\.tech|m\.tech/i;
   const dateRegex = /\d{4}\s*[-–]\s*\d{4}|\d{4}\s*[-–]\s*(?:present|current)|\d{4}/gi;
-  
+
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.length < 5) continue;
-    
+
     const eduMatch = trimmed.match(eduRegex);
     const hasDegree = degreeKeywords.test(trimmed);
     const dateMatch = trimmed.match(dateRegex);
-    
+
     if (eduMatch || hasDegree) {
       const eduEntry: ResumeContent['education'][0] = {
         institution: '',
-        degree: ''
+        degree: '',
       };
-      
+
       if (eduMatch) {
         eduEntry.degree = eduMatch[1]?.trim() || trimmed;
         eduEntry.institution = eduMatch[2]?.trim() || '';
       } else {
         eduEntry.degree = trimmed;
       }
-      
+
       if (dateMatch) {
-        eduEntry.graduationDate = dateMatch[0];
+        eduEntry.date = dateMatch[0];
       }
-      
+
       if (eduEntry.degree || eduEntry.institution) {
         education.push(eduEntry);
       }
     }
   }
-  
+
   return education;
 };
 
@@ -306,13 +303,13 @@ const parseProjectsSection = (lines: string[]): ResumeContent['projects'] => {
   const projects: ResumeContent['projects'] = [];
   const techRegex = /(?:tech|technology|technologies|built\s+with|used|stack)[:\s]+(.+)/i;
   const linkRegex = /(https?:\/\/[^\s]+|github\.com\/[^\s]+)/gi;
-  
+
   let currentProject: Partial<ResumeContent['projects'][0]> = {};
-  
+
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
-    
+
     if (trimmed.length < 50 && !trimmed.includes(':') && (trimmed.includes('-') || trimmed.includes('•'))) {
       if (currentProject.name && currentProject.description) {
         projects.push(currentProject as ResumeContent['projects'][0]);
@@ -320,52 +317,52 @@ const parseProjectsSection = (lines: string[]): ResumeContent['projects'] => {
       currentProject = {
         name: trimmed.replace(/^[-•]\s*/, ''),
         description: '',
-        technologies: []
+        technologies: [],
       };
     } else if (trimmed.length > 10) {
       const techMatch = trimmed.match(techRegex);
       if (techMatch) {
-        currentProject.technologies = techMatch[1].split(/[,;|]/).map(t => t.trim()).filter(t => t);
+        currentProject.technologies = techMatch[1].split(/[,;|]/).map((t) => t.trim()).filter((t) => t);
       } else if (currentProject.description) {
         currentProject.description += ' ' + trimmed;
       } else {
         currentProject.description = trimmed;
       }
-      
+
       const linkMatch = trimmed.match(linkRegex);
       if (linkMatch) {
-        currentProject.url = linkMatch[0];
+        currentProject.links = { live: linkMatch[0] };
       }
     }
   }
-  
+
   if (currentProject.name) {
     projects.push(currentProject as ResumeContent['projects'][0]);
   }
-  
+
   return projects;
 };
 
 const parseCertificationsSection = (lines: string[]): ResumeContent['certifications'] => {
   const certifications: ResumeContent['certifications'] = [];
   const dateRegex = /\d{4}|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/gi;
-  
+
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.length < 5) continue;
-    
+
     const cert: ResumeContent['certifications'][0] = {
-      name: trimmed,
-      issuer: ''
+      title: trimmed,
+      link: '',
     };
-    
+
     const dateMatch = trimmed.match(dateRegex);
     if (dateMatch) {
       cert.date = dateMatch[0];
     }
-    
+
     certifications.push(cert);
   }
-  
+
   return certifications;
 };

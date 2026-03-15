@@ -8,7 +8,7 @@ import {
   ScoringFactor,
   AnalysisConfig,
   DEFAULT_ANALYSIS_CONFIG,
-} from '../../types/analysis.types';
+} from '../../types';
 
 /**
  * Abstract base class for all score calculators

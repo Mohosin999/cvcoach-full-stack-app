@@ -2,7 +2,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
-} from "../config/jwt";
+} from '../../config/jwt';
 
 export const createTokens = (userId: string, email: string) => {
   const accessToken = generateAccessToken({

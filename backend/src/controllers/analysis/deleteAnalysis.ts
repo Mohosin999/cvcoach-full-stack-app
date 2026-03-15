@@ -1,6 +1,6 @@
-import { Response } from "express";
-import { AuthRequest } from "../../middlewares";
-import { Analysis } from "../../models/Analysis";
+import { Response } from 'express';
+import { AuthRequest } from '../../types';
+import { Analysis } from '../../models/Analysis';
 
 export const deleteAnalysis = async (req: AuthRequest, res: Response) => {
   try {

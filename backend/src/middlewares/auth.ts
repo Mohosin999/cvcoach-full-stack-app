@@ -1,10 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import { verifyAccessToken } from "../config/jwt";
-import { User } from "../models/User";
-
-export interface AuthRequest extends Request {
-  user?: any;
-}
+import { Response, NextFunction } from 'express';
+import { verifyAccessToken } from '../config/jwt';
+import { User } from '../models/User';
+import { AuthRequest } from '../types';
 
 export const authenticate = (
   req: AuthRequest,
@@ -15,7 +12,7 @@ export const authenticate = (
 
   if (!token && req.headers.authorization) {
     const authHeader = req.headers.authorization;
-    if (authHeader.startsWith("Bearer ")) {
+    if (authHeader.startsWith('Bearer ')) {
       token = authHeader.substring(7);
     }
   }
@@ -23,7 +20,7 @@ export const authenticate = (
   if (!token) {
     return res.status(401).json({
       success: false,
-      message: "Unauthorized - No token provided",
+      message: 'Unauthorized - No token provided',
     });
   }
 
@@ -34,7 +31,7 @@ export const authenticate = (
         if (!user) {
           return res.status(401).json({
             success: false,
-            message: "Unauthorized - User not found",
+            message: 'Unauthorized - User not found',
           });
         }
         req.user = user;
@@ -44,7 +41,7 @@ export const authenticate = (
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: "Unauthorized - Invalid token",
+      message: 'Unauthorized - Invalid token',
     });
   }
 };
@@ -55,7 +52,7 @@ export const optionalAuth = async (
   next: NextFunction,
 ) => {
   const token =
-    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+    req.cookies.accessToken || req.headers.authorization?.split(' ')[1];
 
   if (token) {
     try {
@@ -80,15 +77,15 @@ export const requireCredits = (
   if (!req.user) {
     return res.status(401).json({
       success: false,
-      message: "Unauthorized",
+      message: 'Unauthorized',
     });
   }
 
   if (req.user.subscription.credits <= 0) {
     return res.status(403).json({
       success: false,
-      message: "Insufficient credits. Please upgrade your plan.",
-      code: "INSUFFICIENT_CREDITS",
+      message: 'Insufficient credits. Please upgrade your plan.',
+      code: 'INSUFFICIENT_CREDITS',
     });
   }
 

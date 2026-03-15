@@ -1,9 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-
-export interface AppError extends Error {
-  statusCode?: number;
-  isOperational?: boolean;
-}
+import { Request, Response, NextFunction } from 'express';
+import { AppError } from '../types';
+import { env } from '../config/env';
 
 export const errorHandler = (
   err: AppError,
@@ -12,7 +9,7 @@ export const errorHandler = (
   _next: NextFunction,
 ) => {
   const statusCode = err.statusCode || 500;
-  const message = err.isOperational ? err.message : "Internal Server Error";
+  const message = err.isOperational ? err.message : 'Internal Server Error';
 
   console.error(`[Error] ${err.message}`, {
     statusCode,
@@ -24,7 +21,7 @@ export const errorHandler = (
   res.status(statusCode).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    ...(env.nodeEnv === 'development' && { stack: err.stack }),
   });
 };
 
