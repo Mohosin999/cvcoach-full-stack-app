@@ -129,13 +129,26 @@ export interface ExistingSections {
 }
 
 export interface JobMatchingBreakdown {
-  requiredSkillsMatch: { score: number; details: string };
-  relevantWorkExperience: { score: number; details: string };
-  technologiesUsed: { score: number; details: string };
-  toolsFrameworks: { score: number; details: string };
-  industryRelevance: { score: number; details: string };
-  yearsExperienceAlignment: { score: number; details: string };
-  roleResponsibilitySimilarity: { score: number; details: string };
+  // New format
+  skillsMatch?: { score: number; details: string };
+  keywordsMatch?: { score: number; details: string };
+  // Legacy format
+  requiredSkillsMatch?: { score: number; details: string };
+  relevantWorkExperience?: { score: number; details: string };
+  technologiesUsed?: { score: number; details: string };
+  toolsFrameworks?: { score: number; details: string };
+  industryRelevance?: { score: number; details: string };
+  yearsExperienceAlignment?: { score: number; details: string };
+  roleResponsibilitySimilarity?: { score: number; details: string };
+}
+
+export interface ATSBreakdown {
+  keywordMatch: { score: number; details: string };
+  formattingCompatibility: { score: number; details: string };
+  skillsSection: { score: number; details: string };
+  experienceRelevance: { score: number; details: string };
+  readabilityLength: { score: number; details: string };
+  contactInfo: { score: number; details: string };
 }
 
 export interface Analysis {
@@ -146,6 +159,10 @@ export interface Analysis {
   jobTitle?: string;
   company?: string;
   score: number;
+  atsScore?: number;
+  atsBreakdown?: ATSBreakdown;
+  atsSuggestions?: string[];
+  jobMatchSuggestions?: string[];
   jobMatchingBreakdown?: JobMatchingBreakdown;
   feedback: Feedback;
   sectionScores: SectionScores;

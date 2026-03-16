@@ -1,7 +1,7 @@
 /* ===================================
 Score Cards Component
 =================================== */
-import { Briefcase } from "lucide-react";
+import { Briefcase, FileText } from "lucide-react";
 import { Analysis } from "../../types";
 
 interface ScoreCardProps {
@@ -44,10 +44,27 @@ const getScoreLabel = (score: number) => {
 };
 
 export default function ScoreCards({ analysis }: { analysis: Analysis }) {
-  const jobMatchScore = analysis.jobMatch?.score || 0;
+  const atsScore = analysis.atsScore || 0;
+  const jobMatchScore = analysis.jobMatch?.score || analysis.score || 0;
+  
   return (
-    <div className="grid grid-cols-1 gap-4">
-      <ScoreCard title="Job Match Score" value={jobMatchScore} label="Alignment with job requirements" icon={Briefcase} color={getScoreColor(jobMatchScore)} badge={getScoreLabel(jobMatchScore)} />
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <ScoreCard 
+        title="ATS Score" 
+        value={atsScore} 
+        label="ATS compatibility" 
+        icon={FileText} 
+        color={getScoreColor(atsScore)} 
+        badge={getScoreLabel(atsScore)} 
+      />
+      <ScoreCard 
+        title="Job Match Score" 
+        value={jobMatchScore} 
+        label="Alignment with job requirements" 
+        icon={Briefcase} 
+        color={getScoreColor(jobMatchScore)} 
+        badge={getScoreLabel(jobMatchScore)} 
+      />
     </div>
   );
 }

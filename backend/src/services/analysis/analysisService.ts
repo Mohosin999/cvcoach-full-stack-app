@@ -1,22 +1,3 @@
-/**
- * Resume Analysis Service - Enterprise Grade
- * Main orchestrator for professional resume analysis
- *
- * Scoring Model:
- * - ATS Score (50% of overall):
- *   - Keyword Matching: 30%
- *   - Skills Match: 30%
- *   - Section Completeness: 30%
- *   - Experience Relevance: 10%
- *
- * - Job Match Score (50% of overall):
- *   - Required Skills: 25%
- *   - Preferred Skills: 15%
- *   - Experience Alignment: 20%
- *   - Education Alignment: 15%
- *   - Responsibility Match: 25%
- */
-
 import {
   ResumeContent,
   DetailedAnalysisResult,
@@ -34,21 +15,23 @@ import {
   KeywordMatch,
   KeywordGap,
   DEFAULT_ANALYSIS_CONFIG,
-} from '../../types';
+  ScoreComponent,
+  ScoringFactor,
+} from "../../types";
 
 import {
   KeywordMatchingCalculator,
   SkillsMatchCalculator,
   SectionCompletenessCalculator,
   ExperienceRelevanceCalculator,
-} from './scoringEngine';
+} from "./scoringEngine";
 
 import {
   extractKeywords,
   extractSkillsFromResume,
   parseJobDescription,
   SKILL_TAXONOMY,
-} from './keywordExtractor';
+} from "./keywordExtractor";
 
 interface AnalysisInput {
   resume: ResumeContent;
@@ -86,6 +69,12 @@ export class ResumeAnalysisService {
     const jdKeywords = extractKeywords(jobDescription);
     const parsedJD = parseJobDescription(jobDescription);
 
+    // Generate detailed analysis FIRST (so we can use it for job match scoring)
+    const sectionAnalysis = this.analyzeSections(resume, resumeKeywords);
+    const skillsAnalysis = this.analyzeSkills(resume, parsedJD);
+    const experienceAnalysis = this.analyzeExperience(resume, jobDescription);
+    const keywordAnalysis = this.analyzeKeywords(resumeText, jdKeywords);
+
     // Calculate ATS Score Components
     const atsBreakdown = this.calculateATSScore({
       resume,
@@ -95,22 +84,19 @@ export class ResumeAnalysisService {
       parsedJD,
     });
 
-    // Calculate Job Match Score Components
+    // Calculate Job Match Score Components (using skillsAnalysis for accurate scores)
     const jobMatchBreakdown = this.calculateJobMatchScore({
       resume,
       resumeText,
       parsedJD,
+      jobDescription,
+      skillsAnalysis,
     });
 
     // Calculate overall scores
-    const jobMatchScore = this.calculateWeightedJobMatchScore(jobMatchBreakdown);
+    const jobMatchScore =
+      this.calculateWeightedJobMatchScore(jobMatchBreakdown);
     const overallScore = jobMatchScore;
-
-    // Generate detailed analysis
-    const sectionAnalysis = this.analyzeSections(resume, resumeKeywords);
-    const skillsAnalysis = this.analyzeSkills(resume, parsedJD);
-    const experienceAnalysis = this.analyzeExperience(resume, jobDescription);
-    const keywordAnalysis = this.analyzeKeywords(resumeText, jdKeywords);
 
     // Generate recommendations
     const recommendations = this.generateRecommendations({
@@ -124,7 +110,7 @@ export class ResumeAnalysisService {
 
     // Build metadata
     const metadata: AnalysisMetadata = {
-      analysisVersion: '2.0.0',
+      analysisVersion: "2.0.0",
       analyzedAt: new Date(),
       processingTimeMs: Date.now() - startTime,
       resumeWordCount: resumeText.split(/\s+/).length,
@@ -164,7 +150,7 @@ export class ResumeAnalysisService {
     resumeKeywords: any;
     jdKeywords: any;
     parsedJD: any;
-  }): ScoreBreakdown['ats'] {
+  }): ScoreBreakdown["ats"] {
     const { resume, resumeText, resumeKeywords, jdKeywords, parsedJD } = input;
 
     // Keyword Matching (30%)
@@ -192,7 +178,7 @@ export class ResumeAnalysisService {
     // Experience Relevance (10%)
     const experienceRelevance = this.experienceCalculator.calculate({
       resume,
-      jdText: input.parsedJD.rawText || '',
+      jdText: input.parsedJD.rawText || "",
       jdKeywords: jdKeywords.all,
       jdResponsibilities: [],
     });
@@ -207,214 +193,291 @@ export class ResumeAnalysisService {
 
   /**
    * Calculate Job Match Score Breakdown
+   * Focus: Skills Match (50%) + Keywords Match (50%)
    */
   private calculateJobMatchScore(input: {
     resume: ResumeContent;
     resumeText: string;
     parsedJD: any;
-  }): ScoreBreakdown['jobMatch'] {
-    const { resume, resumeText, parsedJD } = input;
+    jobDescription: string;
+    skillsAnalysis?: any;
+  }): ScoreBreakdown["jobMatch"] {
+    const { resume, resumeText, parsedJD, skillsAnalysis } = input;
     const resumeSkills = extractSkillsFromResume(resume);
+
+    const requiredSkills = parsedJD?.requiredSkills || [];
+    const jdKeywords = parsedJD?.keywords || [];
+
+    // Skills Match (50%) - use skillsAnalysis if available for accurate count
+    const matchedCount = skillsAnalysis?.matchedSkills?.length ?? 0;
+    const missingCount = skillsAnalysis?.missingSkills?.length ?? 0;
+    const totalRequired = matchedCount + missingCount;
+    
+    const skillsMatch = {
+      score: totalRequired > 0
+        ? Math.round((matchedCount / totalRequired) * 100)
+        : requiredSkills.length > 0
+          ? Math.round((matchedCount / Math.max(1, requiredSkills.length)) * 100)
+          : resumeSkills.length > 0 ? 70 : 50,
+      weight: 50,
+      maxScore: 100,
+      details: totalRequired > 0
+        ? `${matchedCount}/${totalRequired} skills matched`
+        : requiredSkills.length > 0
+          ? `${matchedCount}/${requiredSkills.length} skills matched`
+          : `Found ${resumeSkills.length} resume skills`,
+      factors: [],
+    };
+
+    // Keywords Match (50%) - use keywordAnalysis if available
+    const foundKeywords = skillsAnalysis?.additionalSkills?.length 
+      ? resumeSkills.filter((s: string) => 
+          !requiredSkills.some((rs: string) => rs.toLowerCase().includes(s.toLowerCase()))
+        ).length
+      : 0;
+    
     const resumeLower = resumeText.toLowerCase();
-
-    // Required Skills Match (25%)
-    const requiredMatches = parsedJD.requiredSkills.filter((skill: string) =>
-      resumeSkills.some((s) => s.toLowerCase().includes(skill.toLowerCase()))
-    );
-    const requiredSkillsMatch = {
-      score: parsedJD.requiredSkills.length > 0
-        ? Math.round((requiredMatches.length / parsedJD.requiredSkills.length) * 100)
-        : 100,
-      weight: 25,
+    const matchedKeywords = jdKeywords.filter((keyword: string) => {
+      const escaped = this.escapeRegex(keyword);
+      const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+      return regex.test(resumeLower);
+    });
+    
+    const keywordsMatch = {
+      score: jdKeywords.length > 0
+        ? Math.round((matchedKeywords.length / jdKeywords.length) * 100)
+        : 50,
+      weight: 50,
       maxScore: 100,
-      details: `${requiredMatches.length}/${parsedJD.requiredSkills.length} required skills matched`,
-      factors: [],
-    };
-
-    // Preferred Skills Match (15%)
-    const preferredMatches = parsedJD.preferredSkills.filter((skill: string) =>
-      resumeSkills.some((s) => s.toLowerCase().includes(skill.toLowerCase()))
-    );
-    const preferredSkillsMatch = {
-      score: parsedJD.preferredSkills.length > 0
-        ? Math.round((preferredMatches.length / parsedJD.preferredSkills.length) * 100)
-        : 100,
-      weight: 15,
-      maxScore: 100,
-      details: `${preferredMatches.length}/${parsedJD.preferredSkills.length} preferred skills matched`,
-      factors: [],
-    };
-
-    // Experience Alignment (20%)
-    const yearsExp = this.calculateYearsOfExperience(resume.experience);
-    const experienceAlignment = {
-      score: yearsExp >= parsedJD.experienceYears ? 100 : Math.round((yearsExp / parsedJD.experienceYears) * 100),
-      weight: 20,
-      maxScore: 100,
-      details: `${yearsExp} years experience (required: ${parsedJD.experienceYears}+)`,
-      factors: [],
-    };
-
-    // Education Alignment (15%)
-    const hasEducation = resume.education && resume.education.length > 0;
-    const educationAlignment = {
-      score: hasEducation ? 80 : 40,
-      weight: 15,
-      maxScore: 100,
-      details: hasEducation ? 'Education section present' : 'No education listed',
-      factors: [],
-    };
-
-    // Responsibility Match (25%)
-    const actionVerbs = [
-      'managed', 'led', 'developed', 'designed', 'implemented',
-      'created', 'built', 'optimized', 'improved', 'increased',
-    ];
-    const jdVerbs = actionVerbs.filter((v) => resumeLower.includes(v));
-    const resumeVerbs = actionVerbs.filter((v) =>
-      resume.experience?.some((exp) => exp.description?.toLowerCase().includes(v))
-    );
-    const responsibilityMatch = {
-      score: jdVerbs.length > 0
-        ? Math.round((resumeVerbs.filter((v) => jdVerbs.includes(v)).length / jdVerbs.length) * 100)
-        : 70,
-      weight: 25,
-      maxScore: 100,
-      details: `${resumeVerbs.filter(v => jdVerbs.includes(v)).length}/${jdVerbs.length} responsibility keywords matched`,
+      details: jdKeywords.length > 0
+        ? `${matchedKeywords.length}/${jdKeywords.length} keywords matched`
+        : `No keywords extracted from JD`,
       factors: [],
     };
 
     return {
-      requiredSkillsMatch,
-      preferredSkillsMatch,
-      experienceAlignment,
-      educationAlignment,
-      responsibilityMatch,
+      skillsMatch,
+      keywordsMatch,
     };
   }
 
   /**
    * Calculate weighted ATS Score
    */
-  private calculateWeightedATSScore(breakdown: ScoreBreakdown['ats']): number {
+  private calculateWeightedATSScore(breakdown: ScoreBreakdown["ats"]): number {
     const weights = DEFAULT_ANALYSIS_CONFIG.weights;
-    
+
     return Math.round(
       breakdown.keywordMatching.score * (weights.keywordMatching / 100) +
-      breakdown.skillsMatch.score * (weights.skillsMatch / 100) +
-      breakdown.sectionCompleteness.score * (weights.sectionCompleteness / 100) +
-      breakdown.experienceRelevance.score * (weights.experienceRelevance / 100)
+        breakdown.skillsMatch.score * (weights.skillsMatch / 100) +
+        breakdown.sectionCompleteness.score *
+          (weights.sectionCompleteness / 100) +
+        breakdown.experienceRelevance.score *
+          (weights.experienceRelevance / 100),
     );
   }
 
   /**
    * Calculate weighted Job Match Score
    */
-  private calculateWeightedJobMatchScore(breakdown: ScoreBreakdown['jobMatch']): number {
+  private calculateWeightedJobMatchScore(
+    breakdown: ScoreBreakdown["jobMatch"],
+  ): number {
+    const skillsWeight = breakdown.skillsMatch.weight || 50;
+    const keywordsWeight = breakdown.keywordsMatch.weight || 50;
+    const totalWeight = skillsWeight + keywordsWeight;
+
     return Math.round(
-      breakdown.requiredSkillsMatch.score * (breakdown.requiredSkillsMatch.weight / 100) +
-      breakdown.preferredSkillsMatch.score * (breakdown.preferredSkillsMatch.weight / 100) +
-      breakdown.experienceAlignment.score * (breakdown.experienceAlignment.weight / 100) +
-      breakdown.educationAlignment.score * (breakdown.educationAlignment.weight / 100) +
-      breakdown.responsibilityMatch.score * (breakdown.responsibilityMatch.weight / 100)
+      breakdown.skillsMatch.score * (skillsWeight / totalWeight) +
+        breakdown.keywordsMatch.score * (keywordsWeight / totalWeight),
     );
   }
 
   /**
    * Analyze resume sections in detail
    */
-  private analyzeSections(resume: ResumeContent, keywords: any): SectionAnalysis {
+  private analyzeSections(
+    resume: ResumeContent,
+    keywords: any,
+  ): SectionAnalysis {
     return {
       summary: {
         present: !!(resume.summary && resume.summary.length > 30),
         score: resume.summary && resume.summary.length > 30 ? 85 : 30,
-        quality: resume.summary && resume.summary.length > 50 ? 'Excellent' : 
-                 resume.summary && resume.summary.length > 30 ? 'Good' : 'Poor',
+        quality:
+          resume.summary && resume.summary.length > 50
+            ? "Excellent"
+            : resume.summary && resume.summary.length > 30
+              ? "Good"
+              : "Poor",
         wordCount: resume.summary?.split(/\s+/).length || 0,
-        issues: resume.summary && resume.summary.length < 30 
-          ? [{ type: 'Too Short', severity: 'High', description: 'Summary is too brief', suggestion: 'Expand to at least 30 words' }]
-          : [],
-        recommendations: resume.summary 
-          ? [] 
-          : ['Add a professional summary highlighting your key qualifications'],
-        strengths: resume.summary && resume.summary.length > 50 
-          ? ['Comprehensive professional summary'] 
-          : [],
+        issues:
+          resume.summary && resume.summary.length < 30
+            ? [
+                {
+                  type: "Too Short",
+                  severity: "High",
+                  description: "Summary is too brief",
+                  suggestion: "Expand to at least 30 words",
+                },
+              ]
+            : [],
+        recommendations: resume.summary
+          ? []
+          : ["Add a professional summary highlighting your key qualifications"],
+        strengths:
+          resume.summary && resume.summary.length > 50
+            ? ["Comprehensive professional summary"]
+            : [],
       },
       skills: {
         present: !!(resume.skills && resume.skills.length > 0),
-        score: resume.skills && resume.skills.length > 5 ? 90 : 
-               resume.skills && resume.skills.length > 0 ? 60 : 20,
-        quality: resume.skills && resume.skills.length > 10 ? 'Excellent' : 
-                 resume.skills && resume.skills.length > 5 ? 'Good' : 'Fair',
-        issues: resume.skills && resume.skills.length < 5
-          ? [{ type: 'Too Short', severity: 'High', description: 'Skills section is sparse', suggestion: 'Add at least 5 technical skills' }]
-          : [],
-        recommendations: resume.skills && resume.skills.length < 5
-          ? ['Expand your technical skills section']
-          : [],
-        strengths: resume.skills && resume.skills.length > 10
-          ? [`Comprehensive skills section with ${resume.skills.length} skills`]
-          : [],
+        score:
+          resume.skills && resume.skills.length > 5
+            ? 90
+            : resume.skills && resume.skills.length > 0
+              ? 60
+              : 20,
+        quality:
+          resume.skills && resume.skills.length > 10
+            ? "Excellent"
+            : resume.skills && resume.skills.length > 5
+              ? "Good"
+              : "Fair",
+        issues:
+          resume.skills && resume.skills.length < 5
+            ? [
+                {
+                  type: "Too Short",
+                  severity: "High",
+                  description: "Skills section is sparse",
+                  suggestion: "Add at least 5 technical skills",
+                },
+              ]
+            : [],
+        recommendations:
+          resume.skills && resume.skills.length < 5
+            ? ["Expand your technical skills section"]
+            : [],
+        strengths:
+          resume.skills && resume.skills.length > 10
+            ? [
+                `Comprehensive skills section with ${resume.skills.length} skills`,
+              ]
+            : [],
       },
       experience: {
         present: !!(resume.experience && resume.experience.length > 0),
-        score: resume.experience && resume.experience.length > 2 ? 90 :
-               resume.experience && resume.experience.length > 0 ? 70 : 20,
-        quality: resume.experience && resume.experience.length > 3 ? 'Excellent' :
-                 resume.experience && resume.experience.length > 1 ? 'Good' : 'Fair',
-        issues: !resume.experience || resume.experience.length === 0
-          ? [{ type: 'Missing', severity: 'Critical', description: 'No work experience listed', suggestion: 'Add relevant work experience' }]
-          : [],
-        recommendations: !resume.experience || resume.experience.length === 0
-          ? ['Add your work experience with detailed descriptions']
-          : [],
-        strengths: resume.experience && resume.experience.length > 2
-          ? [`Strong work history with ${resume.experience.length} positions`]
-          : [],
+        score:
+          resume.experience && resume.experience.length > 2
+            ? 90
+            : resume.experience && resume.experience.length > 0
+              ? 70
+              : 20,
+        quality:
+          resume.experience && resume.experience.length > 3
+            ? "Excellent"
+            : resume.experience && resume.experience.length > 1
+              ? "Good"
+              : "Fair",
+        issues:
+          !resume.experience || resume.experience.length === 0
+            ? [
+                {
+                  type: "Missing",
+                  severity: "Critical",
+                  description: "No work experience listed",
+                  suggestion: "Add relevant work experience",
+                },
+              ]
+            : [],
+        recommendations:
+          !resume.experience || resume.experience.length === 0
+            ? ["Add your work experience with detailed descriptions"]
+            : [],
+        strengths:
+          resume.experience && resume.experience.length > 2
+            ? [`Strong work history with ${resume.experience.length} positions`]
+            : [],
       },
       projects: {
         present: !!(resume.projects && resume.projects.length > 0),
-        score: resume.projects && resume.projects.length > 2 ? 90 :
-               resume.projects && resume.projects.length > 0 ? 70 : 40,
-        quality: resume.projects && resume.projects.length > 3 ? 'Excellent' :
-                 resume.projects && resume.projects.length > 1 ? 'Good' : 'Fair',
-        issues: !resume.projects || resume.projects.length === 0
-          ? [{ type: 'Missing', severity: 'Medium', description: 'No projects section', suggestion: 'Add personal or professional projects' }]
-          : [],
-        recommendations: !resume.projects || resume.projects.length === 0
-          ? ['Add a projects section to showcase practical work']
-          : [],
-        strengths: resume.projects && resume.projects.length > 2
-          ? [`Impressive portfolio with ${resume.projects.length} projects`]
-          : [],
+        score:
+          resume.projects && resume.projects.length > 2
+            ? 90
+            : resume.projects && resume.projects.length > 0
+              ? 70
+              : 40,
+        quality:
+          resume.projects && resume.projects.length > 3
+            ? "Excellent"
+            : resume.projects && resume.projects.length > 1
+              ? "Good"
+              : "Fair",
+        issues:
+          !resume.projects || resume.projects.length === 0
+            ? [
+                {
+                  type: "Missing",
+                  severity: "Medium",
+                  description: "No projects section",
+                  suggestion: "Add personal or professional projects",
+                },
+              ]
+            : [],
+        recommendations:
+          !resume.projects || resume.projects.length === 0
+            ? ["Add a projects section to showcase practical work"]
+            : [],
+        strengths:
+          resume.projects && resume.projects.length > 2
+            ? [`Impressive portfolio with ${resume.projects.length} projects`]
+            : [],
       },
       education: {
         present: !!(resume.education && resume.education.length > 0),
         score: resume.education && resume.education.length > 0 ? 80 : 50,
-        quality: resume.education && resume.education.length > 0 ? 'Good' : 'Fair',
-        issues: !resume.education || resume.education.length === 0
-          ? [{ type: 'Missing', severity: 'Low', description: 'No education section', suggestion: 'Consider adding education details' }]
-          : [],
-        recommendations: !resume.education || resume.education.length === 0
-          ? ['Add your educational background']
-          : [],
-        strengths: resume.education && resume.education.length > 0
-          ? ['Education section present']
-          : [],
+        quality:
+          resume.education && resume.education.length > 0 ? "Good" : "Fair",
+        issues:
+          !resume.education || resume.education.length === 0
+            ? [
+                {
+                  type: "Missing",
+                  severity: "Low",
+                  description: "No education section",
+                  suggestion: "Consider adding education details",
+                },
+              ]
+            : [],
+        recommendations:
+          !resume.education || resume.education.length === 0
+            ? ["Add your educational background"]
+            : [],
+        strengths:
+          resume.education && resume.education.length > 0
+            ? ["Education section present"]
+            : [],
       },
       certifications: {
         present: !!(resume.certifications && resume.certifications.length > 0),
-        score: resume.certifications && resume.certifications.length > 0 ? 85 : 50,
-        quality: resume.certifications && resume.certifications.length > 2 ? 'Excellent' :
-                 resume.certifications && resume.certifications.length > 0 ? 'Good' : 'Fair',
+        score:
+          resume.certifications && resume.certifications.length > 0 ? 85 : 50,
+        quality:
+          resume.certifications && resume.certifications.length > 2
+            ? "Excellent"
+            : resume.certifications && resume.certifications.length > 0
+              ? "Good"
+              : "Fair",
         issues: [],
-        recommendations: !resume.certifications || resume.certifications.length === 0
-          ? ['Consider adding relevant certifications']
-          : [],
-        strengths: resume.certifications && resume.certifications.length > 0
-          ? [`${resume.certifications.length} certifications listed`]
-          : [],
+        recommendations:
+          !resume.certifications || resume.certifications.length === 0
+            ? ["Consider adding relevant certifications"]
+            : [],
+        strengths:
+          resume.certifications && resume.certifications.length > 0
+            ? [`${resume.certifications.length} certifications listed`]
+            : [],
       },
       additionalSections: [],
     };
@@ -425,50 +488,73 @@ export class ResumeAnalysisService {
    */
   private analyzeSkills(resume: ResumeContent, parsedJD: any): SkillsAnalysis {
     const resumeSkills = extractSkillsFromResume(resume);
-    
+
     const matchedSkills: SkillMatch[] = parsedJD.requiredSkills
       .filter((skill: string) =>
-        resumeSkills.some((s) => s.toLowerCase().includes(skill.toLowerCase()))
+        resumeSkills.some((s) => s.toLowerCase().includes(skill.toLowerCase())),
       )
       .map((skill: string) => ({
         name: skill,
         category: this.categorizeSkill(skill),
-        matchType: 'Exact' as const,
+        matchType: "Exact" as const,
         matchScore: 100,
-        foundIn: ['skills'],
+        foundIn: ["skills"],
         context: [],
       }));
 
     const missingSkills: SkillGap[] = parsedJD.requiredSkills
-      .filter((skill: string) =>
-        !resumeSkills.some((s) => s.toLowerCase().includes(skill.toLowerCase()))
+      .filter(
+        (skill: string) =>
+          !resumeSkills.some((s) =>
+            s.toLowerCase().includes(skill.toLowerCase()),
+          ),
       )
       .map((skill: string) => ({
         name: skill,
         category: this.categorizeSkill(skill),
-        priority: 'High' as const,
+        priority: "High" as const,
         isRequired: true,
-        suggestions: [`Add ${skill} to your skills section`, `Highlight ${skill} experience in projects`],
+        suggestions: [
+          `Add ${skill} to your skills section`,
+          `Highlight ${skill} experience in projects`,
+        ],
       }));
 
     const additionalSkills = resumeSkills.filter(
-      (skill) => !parsedJD.requiredSkills.some((s: string) => s.toLowerCase().includes(skill.toLowerCase()))
+      (skill) =>
+        !parsedJD.requiredSkills.some((s: string) =>
+          s.toLowerCase().includes(skill.toLowerCase()),
+        ),
     );
 
     const categoryBreakdown: SkillCategoryBreakdown[] = [];
-    const categories = ['programmingLanguages', 'frontendFrameworks', 'backendFrameworks', 'databases', 'devopsTools'];
-    
+    const categories = [
+      "programmingLanguages",
+      "frontendFrameworks",
+      "backendFrameworks",
+      "databases",
+      "devopsTools",
+    ];
+
     categories.forEach((category) => {
-      const taxonomySkills = SKILL_TAXONOMY[category as keyof typeof SKILL_TAXONOMY] || [];
-      const required = taxonomySkills.filter((s) => parsedJD.requiredSkills.includes(s));
-      const matched = required.filter((s) => resumeSkills.some((rs) => rs.includes(s.toLowerCase())));
-      
+      const taxonomySkills =
+        SKILL_TAXONOMY[category as keyof typeof SKILL_TAXONOMY] || [];
+      const required = taxonomySkills.filter((s) =>
+        parsedJD.requiredSkills.includes(s),
+      );
+      const matched = required.filter((s) =>
+        resumeSkills.some((rs) => rs.includes(s.toLowerCase())),
+      );
+
       categoryBreakdown.push({
         category: this.getCategoryName(category),
         required: required.length,
         matched: matched.length,
         missing: required.length - matched.length,
-        matchPercentage: required.length > 0 ? Math.round((matched.length / required.length) * 100) : 100,
+        matchPercentage:
+          required.length > 0
+            ? Math.round((matched.length / required.length) * 100)
+            : 100,
         skills: matched,
       });
     });
@@ -479,7 +565,9 @@ export class ResumeAnalysisService {
       missingSkills,
       additionalSkills,
       skillCategories: categoryBreakdown,
-      skillDensity: resumeSkills.length / Math.max(1, this.calculateYearsOfExperience(resume.experience)),
+      skillDensity:
+        resumeSkills.length /
+        Math.max(1, this.calculateYearsOfExperience(resume.experience)),
       skillProficiency: {
         expert: 0,
         advanced: 0,
@@ -492,22 +580,34 @@ export class ResumeAnalysisService {
   /**
    * Analyze experience in detail
    */
-  private analyzeExperience(resume: ResumeContent, jdText: string): ExperienceAnalysis {
+  private analyzeExperience(
+    resume: ResumeContent,
+    jdText: string,
+  ): ExperienceAnalysis {
     const experience = resume.experience || [];
     const jdLower = jdText.toLowerCase();
 
     const positions: PositionAnalysis[] = experience.map((exp) => {
-      const expText = `${exp.title} ${exp.company} ${exp.description}`.toLowerCase();
+      const expText =
+        `${exp.title} ${exp.company} ${exp.description}`.toLowerCase();
       const keywords = jdLower.split(/\s+/).filter((word) => word.length > 4);
       const matchedKeywords = keywords.filter((k) => expText.includes(k));
 
-      const achievements = (exp.description?.match(/\d+%|\$\d+|\d+x/g) || []).length;
-      
+      const achievements = (exp.description?.match(/\d+%|\$\d+|\d+x/g) || [])
+        .length;
+
       return {
         title: exp.title,
         company: exp.company,
-        duration: this.calculateDuration(exp.startDate, exp.endDate, exp.current),
-        relevanceScore: matchedKeywords.length > 0 ? Math.min(100, matchedKeywords.length * 10) : 30,
+        duration: this.calculateDuration(
+          exp.startDate,
+          exp.endDate,
+          exp.current,
+        ),
+        relevanceScore:
+          matchedKeywords.length > 0
+            ? Math.min(100, matchedKeywords.length * 10)
+            : 30,
         matchedKeywords: matchedKeywords.slice(0, 10),
         matchedResponsibilities: [],
         achievements,
@@ -517,7 +617,10 @@ export class ResumeAnalysisService {
     });
 
     const totalYears = this.calculateYearsOfExperience(experience);
-    const totalAchievements = positions.reduce((sum, p) => sum + p.achievements, 0);
+    const totalAchievements = positions.reduce(
+      (sum, p) => sum + p.achievements,
+      0,
+    );
 
     return {
       totalYears,
@@ -526,7 +629,7 @@ export class ResumeAnalysisService {
       careerProgression: {
         hasProgression: experience.length > 1,
         progressionScore: experience.length > 2 ? 80 : 50,
-        titleProgression: 'Increasing' as const,
+        titleProgression: "Increasing" as const,
         responsibilityGrowth: true,
         skillGrowth: true,
       },
@@ -556,21 +659,25 @@ export class ResumeAnalysisService {
   /**
    * Analyze keywords in detail
    */
-  private analyzeKeywords(resumeText: string, jdKeywords: any): KeywordAnalysis {
+  private analyzeKeywords(
+    resumeText: string,
+    jdKeywords: any,
+  ): KeywordAnalysis {
     const resumeLower = resumeText.toLowerCase();
     const wordCount = resumeText.split(/\s+/).length;
 
     const foundKeywords: KeywordMatch[] = jdKeywords.all
       .filter((keyword: string) => {
         const escaped = this.escapeRegex(keyword);
-        return new RegExp(`\\b${escaped}\\b`, 'i').test(resumeLower);
+        return new RegExp(`\\b${escaped}\\b`, "i").test(resumeLower);
       })
       .map((keyword: string) => {
         const escaped = this.escapeRegex(keyword);
-        const frequency = (resumeLower.match(new RegExp(escaped, 'gi')) || []).length;
+        const frequency = (resumeLower.match(new RegExp(escaped, "gi")) || [])
+          .length;
         return {
           keyword,
-          category: 'Technical Skill' as const,
+          category: "Technical Skill" as const,
           frequency,
           locations: [],
           context: [],
@@ -581,12 +688,12 @@ export class ResumeAnalysisService {
     const missingKeywords: KeywordGap[] = jdKeywords.all
       .filter((keyword: string) => {
         const escaped = this.escapeRegex(keyword);
-        return !new RegExp(`\\b${escaped}\\b`, 'i').test(resumeLower);
+        return !new RegExp(`\\b${escaped}\\b`, "i").test(resumeLower);
       })
       .map((keyword: string) => ({
         keyword,
-        category: 'Technical Skill' as const,
-        importance: 'High' as const,
+        category: "Technical Skill" as const,
+        importance: "High" as const,
         frequency: 1,
         suggestions: [`Add ${keyword} to relevant sections`],
       }));
@@ -617,8 +724,8 @@ export class ResumeAnalysisService {
    * Generate actionable recommendations
    */
   private generateRecommendations(input: {
-    atsBreakdown: ScoreBreakdown['ats'];
-    jobMatchBreakdown: ScoreBreakdown['jobMatch'];
+    atsBreakdown: ScoreBreakdown["ats"];
+    jobMatchBreakdown: ScoreBreakdown["jobMatch"];
     sectionAnalysis: SectionAnalysis;
     skillsAnalysis: SkillsAnalysis;
     experienceAnalysis: ExperienceAnalysis;
@@ -630,19 +737,21 @@ export class ResumeAnalysisService {
     // Critical: Missing sections
     if (!sectionAnalysis.summary.present) {
       recommendations.push({
-        id: 'rec-001',
-        category: 'Content',
-        priority: 'Critical',
-        title: 'Add Professional Summary',
-        description: 'Your resume is missing a professional summary section.',
-        impact: 'High',
-        effort: 'Low',
+        id: "rec-001",
+        category: "Content",
+        priority: "Critical",
+        title: "Add Professional Summary",
+        description: "Your resume is missing a professional summary section.",
+        impact: "High",
+        effort: "Low",
         actionItems: [
           {
-            id: 'action-001',
-            action: 'Write a 3-5 sentence summary highlighting your key qualifications',
-            section: 'Summary',
-            example: 'Example: "Senior Software Engineer with 5+ years of experience..."',
+            id: "action-001",
+            action:
+              "Write a 3-5 sentence summary highlighting your key qualifications",
+            section: "Summary",
+            example:
+              'Example: "Senior Software Engineer with 5+ years of experience..."',
             completed: false,
           },
         ],
@@ -652,18 +761,19 @@ export class ResumeAnalysisService {
 
     if (!sectionAnalysis.experience.present) {
       recommendations.push({
-        id: 'rec-002',
-        category: 'Experience',
-        priority: 'Critical',
-        title: 'Add Work Experience',
-        description: 'Your resume is missing work experience.',
-        impact: 'High',
-        effort: 'High',
+        id: "rec-002",
+        category: "Experience",
+        priority: "Critical",
+        title: "Add Work Experience",
+        description: "Your resume is missing work experience.",
+        impact: "High",
+        effort: "High",
         actionItems: [
           {
-            id: 'action-002',
-            action: 'Add your relevant work experience with detailed descriptions',
-            section: 'Experience',
+            id: "action-002",
+            action:
+              "Add your relevant work experience with detailed descriptions",
+            section: "Experience",
             completed: false,
           },
         ],
@@ -674,19 +784,21 @@ export class ResumeAnalysisService {
     // High: Skills gaps
     if (skillsAnalysis.missingSkills.length > 0) {
       recommendations.push({
-        id: 'rec-003',
-        category: 'Skills',
-        priority: 'High',
-        title: 'Address Skills Gaps',
+        id: "rec-003",
+        category: "Skills",
+        priority: "High",
+        title: "Address Skills Gaps",
         description: `You're missing ${skillsAnalysis.missingSkills.length} required skills.`,
-        impact: 'High',
-        effort: 'Medium',
-        actionItems: skillsAnalysis.missingSkills.slice(0, 5).map((skill, i) => ({
-          id: `action-003-${i}`,
-          action: `Add ${skill.name} to your skills or experience section`,
-          section: 'Skills',
-          completed: false,
-        })),
+        impact: "High",
+        effort: "Medium",
+        actionItems: skillsAnalysis.missingSkills
+          .slice(0, 5)
+          .map((skill, i) => ({
+            id: `action-003-${i}`,
+            action: `Add ${skill.name} to your skills or experience section`,
+            section: "Skills",
+            completed: false,
+          })),
         estimatedScoreImprovement: 20,
       });
     }
@@ -694,19 +806,21 @@ export class ResumeAnalysisService {
     // Medium: Keyword optimization
     if (keywordAnalysis.missingKeywords.length > 5) {
       recommendations.push({
-        id: 'rec-004',
-        category: 'Keywords',
-        priority: 'Medium',
-        title: 'Optimize Keywords',
+        id: "rec-004",
+        category: "Keywords",
+        priority: "Medium",
+        title: "Optimize Keywords",
         description: `Add ${keywordAnalysis.missingKeywords.length} missing keywords from the job description.`,
-        impact: 'Medium',
-        effort: 'Low',
-        actionItems: keywordAnalysis.missingKeywords.slice(0, 5).map((kw, i) => ({
-          id: `action-004-${i}`,
-          action: `Incorporate "${kw.keyword}" naturally in your resume`,
-          section: 'Experience',
-          completed: false,
-        })),
+        impact: "Medium",
+        effort: "Low",
+        actionItems: keywordAnalysis.missingKeywords
+          .slice(0, 5)
+          .map((kw, i) => ({
+            id: `action-004-${i}`,
+            action: `Incorporate "${kw.keyword}" naturally in your resume`,
+            section: "Experience",
+            completed: false,
+          })),
         estimatedScoreImprovement: 10,
       });
     }
@@ -714,18 +828,20 @@ export class ResumeAnalysisService {
     // Medium: Projects section
     if (!sectionAnalysis.projects.present) {
       recommendations.push({
-        id: 'rec-005',
-        category: 'Structure',
-        priority: 'Medium',
-        title: 'Add Projects Section',
-        description: 'Adding projects showcases practical application of your skills.',
-        impact: 'Medium',
-        effort: 'Medium',
+        id: "rec-005",
+        category: "Structure",
+        priority: "Medium",
+        title: "Add Projects Section",
+        description:
+          "Adding projects showcases practical application of your skills.",
+        impact: "Medium",
+        effort: "Medium",
         actionItems: [
           {
-            id: 'action-005',
-            action: 'Add 2-3 relevant projects with descriptions and technologies used',
-            section: 'Projects',
+            id: "action-005",
+            action:
+              "Add 2-3 relevant projects with descriptions and technologies used",
+            section: "Projects",
             completed: false,
           },
         ],
@@ -739,50 +855,124 @@ export class ResumeAnalysisService {
   // Utility methods
   private calculateYearsOfExperience(experience: any[]): number {
     if (!experience || experience.length === 0) return 0;
-    
+
     let totalMonths = 0;
     experience.forEach((exp) => {
       if (exp.startDate) {
-        const start = new Date(exp.startDate);
-        const end = exp.current || !exp.endDate ? new Date() : new Date(exp.endDate);
-        totalMonths += (end.getFullYear() - start.getFullYear()) * 12 + 
-                       (end.getMonth() - start.getMonth());
+        // Parse start date - handle various string formats
+        const start = this.parseDate(exp.startDate);
+        const end = exp.current || !exp.endDate 
+          ? new Date() 
+          : this.parseDate(exp.endDate);
+        
+        if (start && !isNaN(start.getTime())) {
+          totalMonths +=
+            (end.getFullYear() - start.getFullYear()) * 12 +
+            (end.getMonth() - start.getMonth());
+        }
       }
     });
-    
+
     return Math.round(totalMonths / 12);
   }
 
-  private calculateDuration(start: string, end?: string, current?: boolean): number {
+  private parseDate(dateStr: string | Date): Date {
+    if (dateStr instanceof Date) return dateStr;
+    
+    const str = dateStr as string;
+    if (!str) return new Date();
+    
+    // Try parsing common date formats
+    const formats = [
+      // "Jan 2023", "January 2023"
+      /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*(\d{4})/i,
+      // "01/2023", "1/2023"
+      /^(\d{1,2})\/(\d{4})/,
+      // "2023-01", "2023-01-15"
+      /^(\d{4})-(\d{1,2})/,
+      // "2023"
+      /^(\d{4})$/,
+    ];
+    
+    // Format 1: Month Year
+    let match = str.match(formats[0]);
+    if (match) {
+      const months: Record<string, number> = {
+        jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+        jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+      };
+      const month = months[match[1].toLowerCase().slice(0, 3)] || 0;
+      const year = parseInt(match[2]);
+      return new Date(year, month, 1);
+    }
+    
+    // Format 2: MM/YYYY
+    match = str.match(formats[1]);
+    if (match) {
+      const month = parseInt(match[1]) - 1;
+      const year = parseInt(match[2]);
+      return new Date(year, month, 1);
+    }
+    
+    // Format 3: YYYY-MM
+    match = str.match(formats[2]);
+    if (match) {
+      const year = parseInt(match[1]);
+      const month = parseInt(match[2]) - 1;
+      return new Date(year, month, 1);
+    }
+    
+    // Format 4: YYYY
+    match = str.match(formats[3]);
+    if (match) {
+      const year = parseInt(match[1]);
+      return new Date(year, 0, 1);
+    }
+    
+    // Fallback: try native Date parsing
+    const parsed = new Date(str);
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
+  }
+
+  private calculateDuration(
+    start: string,
+    end?: string,
+    current?: boolean,
+  ): number {
     if (!start) return 0;
     const startDate = new Date(start);
     const endDate = current || !end ? new Date() : new Date(end);
-    return Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)));
+    return Math.max(
+      0,
+      Math.round(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30),
+      ),
+    );
   }
 
   private categorizeSkill(skill: string): any {
     const lower = skill.toLowerCase();
     for (const [category, skills] of Object.entries(SKILL_TAXONOMY)) {
       if (skills.some((s) => lower.includes(s) || s.includes(lower))) {
-        return category.replace(/([A-Z])/g, ' $1').trim();
+        return category.replace(/([A-Z])/g, " $1").trim();
       }
     }
-    return 'Domain Knowledge';
+    return "Domain Knowledge";
   }
 
   private getCategoryName(key: string): any {
     const names: Record<string, string> = {
-      programmingLanguages: 'Programming Language',
-      frontendFrameworks: 'Framework',
-      backendFrameworks: 'Framework',
-      databases: 'Database',
-      devopsTools: 'DevOps Tool',
+      programmingLanguages: "Programming Language",
+      frontendFrameworks: "Framework",
+      backendFrameworks: "Framework",
+      databases: "Database",
+      devopsTools: "DevOps Tool",
     };
-    return names[key] || 'Technical Skill';
+    return names[key] || "Technical Skill";
   }
 
   private escapeRegex(string: string): string {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   private calculateConfidenceScore(resume: ResumeContent, jd: string): number {
@@ -794,12 +984,14 @@ export class ResumeAnalysisService {
     return Math.max(0, score);
   }
 
-  private assessDataQuality(text: string): 'Excellent' | 'Good' | 'Fair' | 'Poor' {
+  private assessDataQuality(
+    text: string,
+  ): "Excellent" | "Good" | "Fair" | "Poor" {
     const wordCount = text.split(/\s+/).length;
-    if (wordCount > 500) return 'Excellent';
-    if (wordCount > 200) return 'Good';
-    if (wordCount > 50) return 'Fair';
-    return 'Poor';
+    if (wordCount > 500) return "Excellent";
+    if (wordCount > 200) return "Good";
+    if (wordCount > 50) return "Fair";
+    return "Poor";
   }
 
   private calculateCompletenessScore(resume: ResumeContent): number {

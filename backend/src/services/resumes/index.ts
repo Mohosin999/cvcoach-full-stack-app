@@ -20,12 +20,24 @@ export const getAllResumesByUser = async (
   const skip = (page - 1) * limit;
 
   const [resumes, total] = await Promise.all([
-    Resume.find({ userId, isActive: true })
+    Resume.find({ 
+      userId, 
+      $or: [
+        { isActive: true },
+        { isActive: { $exists: false } }
+      ]
+    })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .select("-originalFormat"),
-    Resume.countDocuments({ userId, isActive: true }),
+    Resume.countDocuments({ 
+      userId, 
+      $or: [
+        { isActive: true },
+        { isActive: { $exists: false } }
+      ]
+    }),
   ]);
 
   return {
@@ -129,6 +141,12 @@ export const deleteResumeById = async (resumeId: string, userId: string) => {
 };
 
 export const deleteAllResumesByUser = async (userId: string): Promise<{ deletedCount: number }> => {
-  const result = await Resume.deleteMany({ userId, isActive: true });
+  const result = await Resume.deleteMany({ 
+    userId, 
+    $or: [
+      { isActive: true },
+      { isActive: { $exists: false } }
+    ]
+  });
   return { deletedCount: result.deletedCount };
 };

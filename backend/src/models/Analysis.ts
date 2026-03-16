@@ -7,6 +7,15 @@ export interface IAnalysis extends Document {
   jobTitle?: string;
   company?: string;
   score: number;
+  atsScore: number;
+  atsBreakdown?: {
+    keywordMatch: { score: number; details: string };
+    formattingCompatibility: { score: number; details: string };
+    skillsSection: { score: number; details: string };
+    experienceRelevance: { score: number; details: string };
+    readabilityLength: { score: number; details: string };
+    contactInfo: { score: number; details: string };
+  };
   jobMatchingBreakdown?: {
     requiredSkillsMatch: { score: number; details: string };
     relevantWorkExperience: { score: number; details: string };
@@ -16,6 +25,8 @@ export interface IAnalysis extends Document {
     yearsExperienceAlignment: { score: number; details: string };
     roleResponsibilitySimilarity: { score: number; details: string };
   };
+  atsSuggestions?: string[];
+  jobMatchSuggestions?: string[];
   feedback: {
     overall: string;
     strengths: string[];
@@ -95,6 +106,36 @@ const analysisSchema = new Schema<IAnalysis>(
       type: Number,
       default: 0,
     },
+    atsScore: {
+      type: Number,
+      default: 0,
+    },
+    atsBreakdown: {
+      keywordMatch: {
+        score: { type: Number, default: 0 },
+        details: String,
+      },
+      formattingCompatibility: {
+        score: { type: Number, default: 0 },
+        details: String,
+      },
+      skillsSection: {
+        score: { type: Number, default: 0 },
+        details: String,
+      },
+      experienceRelevance: {
+        score: { type: Number, default: 0 },
+        details: String,
+      },
+      readabilityLength: {
+        score: { type: Number, default: 0 },
+        details: String,
+      },
+      contactInfo: {
+        score: { type: Number, default: 0 },
+        details: String,
+      },
+    },
     jobMatchingBreakdown: {
       requiredSkillsMatch: {
         score: { type: Number, default: 0 },
@@ -166,6 +207,8 @@ const analysisSchema = new Schema<IAnalysis>(
     recommendedKeywords: [String],
     howToUseKeywords: [String],
     resumeImprovements: [String],
+    atsSuggestions: [String],
+    jobMatchSuggestions: [String],
     jobMatch: {
       score: Number,
       missingKeywords: [String],

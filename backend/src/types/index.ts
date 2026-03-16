@@ -194,11 +194,8 @@ export interface ScoreBreakdown {
     experienceRelevance: ScoreComponent;
   };
   jobMatch: {
-    requiredSkillsMatch: ScoreComponent;
-    preferredSkillsMatch: ScoreComponent;
-    experienceAlignment: ScoreComponent;
-    educationAlignment: ScoreComponent;
-    responsibilityMatch: ScoreComponent;
+    skillsMatch: ScoreComponent;
+    keywordsMatch: ScoreComponent;
   };
 }
 

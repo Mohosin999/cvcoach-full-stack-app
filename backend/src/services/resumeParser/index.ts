@@ -195,32 +195,95 @@ const parseTextToResume = (text: string): ResumeContent => {
 
 const parseExperienceSection = (lines: string[]): ResumeContent['experience'] => {
   const experiences: ResumeContent['experience'] = [];
-  const expBlockRegex = /^(.+?)(?:@|at|,|-)\s*(.+?)(?:\(|（)([^)]+)\)?(?:\s*[-–]\s*(.+))?$/i;
+  // More flexible regex patterns for different resume formats
+  const expPatterns = [
+    // Pattern: "Job Title @ Company (Date)" or "Job Title at Company (Date)"
+    /^(.+?)\s*(?:@|at)\s*(.+?)\s*[\(\(]([^)]+)[\)\)]/i,
+    // Pattern: "Job Title, Company (Date)"
+    /^(.+?),\s*(.+?)\s*[\(\(]([^)]+)[\)\)]/i,
+    // Pattern: "Job Title - Company (Date)"
+    /^(.+?)\s*[-–]\s*(.+?)\s*[\(\(]([^)]+)[\)\)]/i,
+    // Pattern: "Job Title | Company | Date"
+    /^(.+?)\s*\|\s*(.+?)\s*\|\s*(.+)/i,
+  ];
   const dateRegex = /(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*\d{4}|\d{1,2}\/\d{4}|\d{4}\s*[-–]\s*(?:present|current|\d{1,2}\/\d{4}|\d{4})/gi;
+  const companyKeywords = /\b(Inc|LLC|Ltd|Corp|Co|Company|Technologies|Solutions|Systems|Labs|Studio|Group|Organization)\b/i;
+  const titleKeywords = /\b(Engineer|Developer|Manager|Director|Lead|Senior|Junior|Intern|Analyst|Consultant|Architect|Designer|Specialist|Coordinator|Administrator|Programmer|Scientist|Researcher|Officer|Executive|Head|Chief|VP|President|Founder|Owner|Administrator|Assistant|Associate|Trainee|Apprentice)\b/i;
 
   let currentExp: Partial<ResumeContent['experience'][0]> = {};
   let descriptionLines: string[] = [];
+  let inExperienceSection = false;
 
-  for (const line of lines) {
-    const trimmed = line.trim();
+  console.log('[parseExperienceSection] Input lines:', lines);
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
     if (!trimmed) continue;
 
     const dateMatch = trimmed.match(dateRegex);
-    const expMatch = trimmed.match(expBlockRegex);
+    
+    // Try multiple patterns to match experience entry
+    let expMatch = null;
+    for (const pattern of expPatterns) {
+      expMatch = trimmed.match(pattern);
+      if (expMatch) break;
+    }
+
+    // If no pattern matched, try heuristic approach
+    if (!expMatch) {
+      // Check if this line looks like a job title + company
+      const hasTitleKeyword = titleKeywords.test(trimmed);
+      const hasCompanyKeyword = companyKeywords.test(trimmed);
+      const hasDate = dateMatch !== null;
+      
+      // If line has title keyword and (company keyword or date), treat as new experience
+      if (hasTitleKeyword && (hasCompanyKeyword || hasDate)) {
+        // Try to split by common delimiters
+        const parts = trimmed.split(/[,|–-]/).map(p => p.trim()).filter(p => p);
+        if (parts.length >= 2) {
+          // First part is likely title, second is likely company
+          currentExp = {
+            title: parts[0],
+            company: parts[1],
+            description: '',
+          };
+          descriptionLines = [];
+          inExperienceSection = true;
+          
+          // Look for date in remaining parts or next line
+          if (parts.length >= 3 && dateRegex.test(parts[2])) {
+            const dateStr = parts[2];
+            if (dateStr.toLowerCase().includes('present') || dateStr.toLowerCase().includes('current')) {
+              currentExp.startDate = dateStr.replace(/[-–].*$/i, '').trim();
+              currentExp.current = true;
+            } else if (dateStr.includes('-') || dateStr.includes('–')) {
+              const [start, end] = dateStr.split(/-|–/);
+              currentExp.startDate = start?.trim();
+              currentExp.endDate = end?.trim();
+            }
+          }
+          continue;
+        }
+      }
+    }
 
     if (expMatch) {
+      // Save previous experience if exists
       if (currentExp.title && (currentExp.company || currentExp.description)) {
         currentExp.description = descriptionLines.join(' ');
         if (currentExp.title) experiences.push(currentExp as ResumeContent['experience'][0]);
       }
 
+      // Create new experience entry
       currentExp = {
         title: expMatch[1]?.trim(),
         company: expMatch[2]?.trim(),
         description: '',
       };
       descriptionLines = [];
+      inExperienceSection = true;
 
+      // Extract date if present
       if (dateMatch) {
         const dateStr = dateMatch[0];
         if (dateStr.toLowerCase().includes('present') || dateStr.toLowerCase().includes('current')) {
@@ -234,7 +297,8 @@ const parseExperienceSection = (lines: string[]): ResumeContent['experience'] =>
           currentExp.startDate = dateStr;
         }
       }
-    } else if (dateMatch) {
+    } else if (dateMatch && !currentExp.startDate) {
+      // Date on separate line
       const dateStr = dateMatch[0];
       if (dateStr.toLowerCase().includes('present') || dateStr.toLowerCase().includes('current')) {
         currentExp.startDate = dateStr.replace(/[-–].*$/i, '').trim();
@@ -246,16 +310,19 @@ const parseExperienceSection = (lines: string[]): ResumeContent['experience'] =>
       } else {
         currentExp.startDate = dateStr;
       }
-    } else if (trimmed.length > 10) {
+    } else if (trimmed.length > 20 && inExperienceSection) {
+      // Description line (must be substantial enough to be description)
       descriptionLines.push(trimmed);
     }
   }
 
+  // Don't forget the last experience
   if (currentExp.title && (currentExp.company || currentExp.description)) {
     currentExp.description = descriptionLines.join(' ');
     experiences.push(currentExp as ResumeContent['experience'][0]);
   }
 
+  console.log('[parseExperienceSection] Parsed experiences:', experiences);
   return experiences;
 };
 

@@ -614,6 +614,10 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
     const jdLower = jdText.toLowerCase();
     const experience = resume.experience || [];
 
+    console.log('[ExperienceRelevance] Experience array:', experience);
+    console.log('[ExperienceRelevance] Experience length:', experience.length);
+    console.log('[ExperienceRelevance] JD Keywords:', jdKeywords.length);
+
     // Factor 1: Keyword Match in Experience (40% weight)
     let keywordMatchScore = 0;
     let totalKeywordMatches = 0;
@@ -645,8 +649,8 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
     // Factor 2: Years of Experience (30% weight)
     const yearsExp = this.calculateYearsOfExperience(experience);
     const jdYears = this.extractJDYears(jdText);
-    
-    let yearsScore = 50;
+
+    let yearsScore = 0;
     if (jdYears > 0 && yearsExp > 0) {
       if (yearsExp >= jdYears) yearsScore = 100;
       else if (yearsExp >= jdYears * 0.8) yearsScore = 80;
@@ -682,7 +686,9 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
       experience.some((exp: any) => exp.description?.toLowerCase().includes(v))
     );
 
-    const responsibilityScore = jdVerbs.length > 0
+    const responsibilityScore = experience.length === 0
+      ? 0
+      : jdVerbs.length > 0
       ? (resumeVerbs.filter((v) => jdVerbs.includes(v)).length / jdVerbs.length) * 100
       : resumeVerbs.length > 0
       ? 80
@@ -710,7 +716,9 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
     return this.createScoreComponent(
       totalScore,
       this.config.weights.experienceRelevance,
-      `${yearsExp} years | ${totalKeywordMatches} keyword matches | ${resumeVerbs.filter(v => jdVerbs.includes(v)).length}/${jdVerbs.length} responsibilities`,
+      experience.length === 0
+        ? 'No work experience provided'
+        : `${yearsExp} years | ${totalKeywordMatches} keyword matches | ${resumeVerbs.filter(v => jdVerbs.includes(v)).length}/${jdVerbs.length} responsibilities`,
       factors
     );
   }
