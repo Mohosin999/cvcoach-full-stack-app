@@ -23,7 +23,7 @@ export default function SavedResumes() {
   const fetchResumes = async () => {
     setLoading(true);
     try {
-      const response = await resumeApi.getAll(page, 12);
+      const response = await resumeApi.getAll(page, 12, 'builder');
       setResumes(response.data.data || []);
       setTotalPages(response.data.pagination?.pages || 1);
       setTotalItems(response.data.pagination?.total || 0);
@@ -105,9 +105,9 @@ const SearchBar = ({ searchTerm, setSearchTerm }: { searchTerm: string; setSearc
 
 const ResumeGrid = ({ resumes, onEdit, onDelete, totalPages, page, setPage }: { resumes: Resume[]; onEdit: (r: Resume) => void; onDelete: (id: string) => void; totalPages: number; page: number; setPage: (p: number) => void }) => (
   <>
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {resumes.map((resume) => (
-        <motion.div key={resume._id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card hover:shadow-lg transition-shadow">
+        <div key={resume._id} className="card hover:shadow-lg transition-shadow">
           <div className="flex items-start justify-between mb-4">
             <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center"><FileText className="w-6 h-6 text-white" /></div>
             <div className="flex gap-2">
@@ -124,9 +124,9 @@ const ResumeGrid = ({ resumes, onEdit, onDelete, totalPages, page, setPage }: { 
             {resume.content.skills.length > 3 && <span className="px-2 py-0.5 text-gray-500 text-xs">+{resume.content.skills.length - 3} more</span>}
           </div>}
           <button onClick={() => onEdit(resume)} className="w-full btn-outline flex items-center justify-center gap-2">Edit Resume<ChevronRight className="w-4 h-4" /></button>
-        </motion.div>
+        </div>
       ))}
-    </motion.div>
+    </div>
     {totalPages > 1 && <div className="flex items-center justify-center gap-2 mt-8">
       <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="btn-ghost p-2 disabled:opacity-50"><ChevronRight className="w-5 h-5" /></button>
       <span className="text-sm text-gray-600 dark:text-gray-400">Page {page} of {totalPages}</span>

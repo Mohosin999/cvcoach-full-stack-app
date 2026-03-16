@@ -9,9 +9,10 @@ export function useSavedResumes() {
   const [savedResumes, setSavedResumes] = useState<Resume[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchResumes = async (silent: boolean = false) => {
+  const fetchResumes = async (silent: boolean = false, filterBuilder: boolean = true) => {
     try {
-      const response = await resumeApi.getAll(1, 50);
+      const sourceType = filterBuilder ? 'builder' : undefined;
+      const response = await resumeApi.getAll(1, 50, sourceType);
       setSavedResumes(response.data.data || []);
     } catch (error) {
       if (!silent) {

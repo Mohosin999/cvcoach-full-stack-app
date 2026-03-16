@@ -10,44 +10,61 @@ const getGenAI = () => {
 };
 
 const MODELS = [
-  'gemini-2.0-flash',
   'gemini-1.5-flash',
-  'gemini-1.5-flash-8k'
+  'gemini-2.0-flash'
 ];
 
-const getModel = async () => {
-  const genAI = getGenAI();
-  
-  for (const modelName of MODELS) {
-    try {
-      return genAI.getGenerativeModel({ model: modelName });
-    } catch (error: any) {
-      console.log(`Model ${modelName} failed, trying next...`);
-      continue;
-    }
-  }
-  
-  throw new Error('No available models found. Please check your API quota.');
+const generationConfig = {
+  temperature: 0.7,
+  topP: 0.95,
+  topK: 64,
+  maxOutputTokens: 2048,
 };
 
 const generateWithFallback = async (prompt: string): Promise<string> => {
   const genAI = getGenAI();
+  let lastError: Error | null = null;
   
   for (const modelName of MODELS) {
     try {
-      const model = genAI.getGenerativeModel({ model: modelName });
+      const model = genAI.getGenerativeModel({ 
+        model: modelName,
+        generationConfig,
+      });
+      
       const result = await model.generateContent(prompt);
-      return result.response.text();
+      
+      if (result.response && result.response.candidates && result.response.candidates.length > 0) {
+        const text = result.response.candidates[0].content?.parts?.[0]?.text;
+        if (text) return text;
+      }
+      
+      throw new Error('Empty response from model');
     } catch (error: any) {
       console.log(`Model ${modelName} error:`, error.message);
-      if (error.message?.includes('quota') || error.message?.includes('429')) {
+      lastError = error;
+      
+      const errorMsg = error.message?.toLowerCase() || '';
+      if (errorMsg.includes('quota') || errorMsg.includes('429') || errorMsg.includes('rate limit')) {
         continue;
+      }
+      if (errorMsg.includes('not found') || errorMsg.includes('not supported')) {
+        continue;
+      }
+      if (errorMsg.includes('api key') || errorMsg.includes('permission')) {
+        throw new Error('Invalid API key or insufficient permissions');
       }
       throw error;
     }
   }
   
-  throw new Error('API quota exceeded. Please check your Google AI Studio billing settings or try again later.');
+  if (lastError) {
+    if (lastError.message?.includes('quota') || lastError.message?.includes('429')) {
+      throw new Error('API quota exceeded. Please check your Google AI Studio free tier limits (15 requests/minute, 1500 requests/day)');
+    }
+    throw lastError;
+  }
+  throw new Error('All models failed. Please try again later.');
 };
 
 const SKILL_SUGGESTIONS: Record<string, string[]> = {
@@ -248,4 +265,57 @@ Return ONLY the certification names, one per line, with no numbering or extra te
     link: '',
     date: ''
   }));
+};
+
+export interface SummaryLevel {
+  level: 'beginner' | 'intermediate' | 'advanced';
+  summary: string;
+}
+
+export const generateSummaryLevels = async (
+  jobTitle: string, 
+  skills: string[], 
+  experience?: string
+): Promise<SummaryLevel[]> => {
+  const skillsText = skills.length > 0 ? skills.join(', ') : 'various relevant skills';
+  const expText = experience ? `\nExperience: ${experience}` : '';
+  
+  const prompt = `Generate 3 different professional resume summaries for a ${jobTitle} position.
+The person has skills in: ${skillsText}.${expText}
+
+For EACH level, write 2-3 sentence summary that:
+- Highlights their expertise and years of experience
+- Mentions key skills relevant to the role
+- Is impactful and ATS-friendly
+- Do not use bullet points or list format
+- Is concise and impactful
+
+Return the response in this EXACT JSON format (no other text, no markdown):
+{"summaries":[{"level":"beginner","summary":"..."},{"level":"intermediate","summary":"..."},{"level":"advanced","summary":"..."}]}
+
+Make sure each summary is appropriate for its experience level:
+- beginner: Entry-level, 0-2 years, focuses on education, internships, eagerness to learn
+- intermediate: 2-5 years, shows proven skills, some achievements, growth trajectory  
+- advanced: 5+ years, emphasizes leadership, significant achievements, strategic impact`;
+
+  const response = await generateWithFallback(prompt);
+  let text = response.trim();
+  
+  text = text.replace(/<[^>]*>/g, '').replace(/\*\*/g, '');
+  
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error('Failed to generate summaries. Please try again.');
+  }
+  
+  try {
+    const parsed = JSON.parse(jsonMatch[0]);
+    if (parsed.summaries && Array.isArray(parsed.summaries)) {
+      return parsed.summaries;
+    }
+    throw new Error('Invalid response format');
+  } catch (error) {
+    console.error('Error parsing summary response:', error);
+    throw new Error('Failed to parse AI response. Please try again.');
+  }
 };

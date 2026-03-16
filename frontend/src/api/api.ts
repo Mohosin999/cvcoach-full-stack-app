@@ -66,7 +66,8 @@ export const userApi = {
 };
 
 export const resumeApi = {
-  getAll: (page = 1, limit = 10) => api.get(`/resumes?page=${page}&limit=${limit}`),
+  getAll: (page = 1, limit = 10, sourceType?: 'uploaded' | 'builder') => 
+    api.get(`/resumes?page=${page}&limit=${limit}${sourceType ? `&sourceType=${sourceType}` : ''}`),
   getById: (id: string) => api.get(`/resumes/${id}`),
   upload: (formData: FormData) => api.post('/resumes', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },

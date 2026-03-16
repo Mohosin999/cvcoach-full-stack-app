@@ -6,6 +6,9 @@ interface SummaryEditorProps {
 export default function SummaryEditor({ value, onChange }: SummaryEditorProps) {
   return (
     <div className="space-y-2">
+      <label className="text-sm font-medium text-gray-300">
+        Professional Summary
+      </label>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

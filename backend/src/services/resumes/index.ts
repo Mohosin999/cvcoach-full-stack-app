@@ -10,34 +10,35 @@ interface ResumeContent {
 interface PaginationOptions {
   page: number;
   limit: number;
+  sourceType?: 'uploaded' | 'builder';
 }
 
 export const getAllResumesByUser = async (
   userId: string,
   options: PaginationOptions
 ) => {
-  const { page, limit } = options;
+  const { page, limit, sourceType } = options;
   const skip = (page - 1) * limit;
 
+  const query: any = { 
+    userId, 
+    $or: [
+      { isActive: true },
+      { isActive: { $exists: false } }
+    ]
+  };
+
+  if (sourceType) {
+    query.sourceType = sourceType;
+  }
+
   const [resumes, total] = await Promise.all([
-    Resume.find({ 
-      userId, 
-      $or: [
-        { isActive: true },
-        { isActive: { $exists: false } }
-      ]
-    })
+    Resume.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .select("-originalFormat"),
-    Resume.countDocuments({ 
-      userId, 
-      $or: [
-        { isActive: true },
-        { isActive: { $exists: false } }
-      ]
-    }),
+    Resume.countDocuments(query),
   ]);
 
   return {
