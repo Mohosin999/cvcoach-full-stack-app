@@ -15,8 +15,6 @@ import {
   KeywordMatch,
   KeywordGap,
   DEFAULT_ANALYSIS_CONFIG,
-  ScoreComponent,
-  ScoringFactor,
 } from "../../types";
 
 import {

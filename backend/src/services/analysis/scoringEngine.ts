@@ -1,14 +1,9 @@
-/**
- * Scoring Engine - Enterprise Resume Analysis System
- * Modular scoring calculators following SOLID principles
- */
-
 import {
   ScoreComponent,
   ScoringFactor,
   AnalysisConfig,
   DEFAULT_ANALYSIS_CONFIG,
-} from '../../types';
+} from "../../types";
 
 /**
  * Abstract base class for all score calculators
@@ -42,10 +37,7 @@ export abstract class ScoreCalculator {
     const totalWeight = factors.reduce((sum, f) => sum + f.weight, 0);
     if (totalWeight === 0) return 0;
 
-    const weightedSum = factors.reduce(
-      (sum, f) => sum + f.score * f.weight,
-      0
-    );
+    const weightedSum = factors.reduce((sum, f) => sum + f.score * f.weight, 0);
 
     return this.normalizeScore(weightedSum / totalWeight);
   }
@@ -53,11 +45,13 @@ export abstract class ScoreCalculator {
   /**
    * Determine quality rating based on score
    */
-  protected getQualityRating(score: number): 'Excellent' | 'Good' | 'Fair' | 'Poor' {
-    if (score >= this.config.thresholds.excellent) return 'Excellent';
-    if (score >= this.config.thresholds.good) return 'Good';
-    if (score >= this.config.thresholds.fair) return 'Fair';
-    return 'Poor';
+  protected getQualityRating(
+    score: number,
+  ): "Excellent" | "Good" | "Fair" | "Poor" {
+    if (score >= this.config.thresholds.excellent) return "Excellent";
+    if (score >= this.config.thresholds.good) return "Good";
+    if (score >= this.config.thresholds.fair) return "Fair";
+    return "Poor";
   }
 
   /**
@@ -67,7 +61,7 @@ export abstract class ScoreCalculator {
     score: number,
     weight: number,
     details: string,
-    factors: ScoringFactor[]
+    factors: ScoringFactor[],
   ): ScoreComponent {
     return {
       score: this.normalizeScore(score),
@@ -89,7 +83,7 @@ export class KeywordMatchingCalculator extends ScoreCalculator {
     jdKeywords: string[];
     resumeKeywords: string[];
   }): ScoreComponent {
-    const { resumeText, jdKeywords, resumeKeywords } = data;
+    const { resumeText, jdKeywords } = data;
     const resumeLower = resumeText.toLowerCase();
 
     const factors: ScoringFactor[] = [];
@@ -101,8 +95,8 @@ export class KeywordMatchingCalculator extends ScoreCalculator {
 
     jdKeywords.forEach((keyword) => {
       const escaped = this.escapeRegex(keyword);
-      const regex = new RegExp(`\\b${escaped}\\b`, 'i');
-      
+      const regex = new RegExp(`\\b${escaped}\\b`, "i");
+
       if (regex.test(resumeLower)) {
         foundKeywords.push(keyword);
       } else {
@@ -110,12 +104,13 @@ export class KeywordMatchingCalculator extends ScoreCalculator {
       }
     });
 
-    const presenceScore = jdKeywords.length > 0
-      ? (foundKeywords.length / jdKeywords.length) * 100
-      : 100;
+    const presenceScore =
+      jdKeywords.length > 0
+        ? (foundKeywords.length / jdKeywords.length) * 100
+        : 100;
 
     factors.push({
-      name: 'Keyword Presence',
+      name: "Keyword Presence",
       score: this.normalizeScore(presenceScore),
       weight: 60,
       description: `${foundKeywords.length} of ${jdKeywords.length} keywords found`,
@@ -126,7 +121,7 @@ export class KeywordMatchingCalculator extends ScoreCalculator {
     let densityScore = 100;
     const keywordOccurrences = jdKeywords.reduce((count, keyword) => {
       const escaped = this.escapeRegex(keyword);
-      const regex = new RegExp(escaped, 'gi');
+      const regex = new RegExp(escaped, "gi");
       const matches = resumeLower.match(regex);
       return count + (matches ? matches.length : 0);
     }, 0);
@@ -139,27 +134,28 @@ export class KeywordMatchingCalculator extends ScoreCalculator {
     else if (density < 1) densityScore = 70;
     else if (density <= 3) densityScore = 100;
     else if (density <= 5) densityScore = 80;
-    else densityScore = 60; // Over-optimization penalty
+    else densityScore = 60;
 
     factors.push({
-      name: 'Keyword Density',
+      name: "Keyword Density",
       score: this.normalizeScore(densityScore),
       weight: 25,
       description: `Keyword density: ${density.toFixed(2)}% (optimal: 1-3%)`,
     });
 
     // Factor 3: Keyword Distribution (15% of this component)
-    const sections = ['summary', 'experience', 'skills', 'projects'];
+    const sections = ["summary", "experience", "skills", "projects"];
     const sectionsWithKeywords = sections.filter((section) => {
       const escaped = this.escapeRegex(section);
-      const sectionRegex = new RegExp(`${escaped}`, 'i');
+      const sectionRegex = new RegExp(`${escaped}`, "i");
       return sectionRegex.test(resumeLower);
     });
 
-    const distributionScore = (sectionsWithKeywords.length / sections.length) * 100;
+    const distributionScore =
+      (sectionsWithKeywords.length / sections.length) * 100;
 
     factors.push({
-      name: 'Keyword Distribution',
+      name: "Keyword Distribution",
       score: this.normalizeScore(distributionScore),
       weight: 15,
       description: `Keywords found in ${sectionsWithKeywords.length} of ${sections.length} sections`,
@@ -171,7 +167,7 @@ export class KeywordMatchingCalculator extends ScoreCalculator {
     // Apply bonus for critical keywords
     const criticalKeywordBonus = this.calculateCriticalKeywordBonus(
       foundKeywords,
-      jdKeywords
+      jdKeywords,
     );
     totalScore = Math.min(100, totalScore + criticalKeywordBonus);
 
@@ -179,34 +175,34 @@ export class KeywordMatchingCalculator extends ScoreCalculator {
       totalScore,
       this.config.weights.keywordMatching,
       `${foundKeywords.length}/${jdKeywords.length} keywords matched | Density: ${density.toFixed(1)}%`,
-      factors
+      factors,
     );
   }
 
   private escapeRegex(string: string): string {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   private calculateCriticalKeywordBonus(
     foundKeywords: string[],
-    allKeywords: string[]
+    allKeywords: string[],
   ): number {
     // Bonus for matching high-frequency industry keywords
     const criticalKeywords = [
-      'javascript',
-      'typescript',
-      'react',
-      'node',
-      'python',
-      'aws',
-      'docker',
-      'kubernetes',
+      "javascript",
+      "typescript",
+      "react",
+      "node",
+      "python",
+      "aws",
+      "docker",
+      "kubernetes",
     ];
 
     const matchedCritical = criticalKeywords.filter(
       (k) =>
         foundKeywords.some((f) => f.toLowerCase().includes(k)) &&
-        allKeywords.some((a) => a.toLowerCase().includes(k))
+        allKeywords.some((a) => a.toLowerCase().includes(k)),
     );
 
     return matchedCritical.length * 3; // 3 points per critical keyword
@@ -220,33 +216,38 @@ export class KeywordMatchingCalculator extends ScoreCalculator {
 export class SkillsMatchCalculator extends ScoreCalculator {
   private skillAliases: Record<string, string[]> = {
     // Programming Languages
-    javascript: ['js', 'es6', 'es2015', 'ecmascript'],
-    typescript: ['ts', 'typescript'],
-    python: ['python3', 'python 3'],
-    java: ['java', 'java 8', 'java 11'],
-    
+    javascript: ["js", "es6", "es2015", "ecmascript"],
+    typescript: ["ts", "typescript"],
+    python: ["python3", "python 3"],
+    java: ["java", "java 8", "java 11"],
+
     // Frameworks
-    react: ['reactjs', 'react.js', 'react hooks'],
-    'react native': ['reactnative', 'react-native'],
-    'node.js': ['nodejs', 'node', 'express'],
-    angular: ['angularjs', 'angular 2+'],
-    vue: ['vuejs', 'vue.js'],
-    nextjs: ['next.js', 'next'],
-    nestjs: ['nest.js', 'nestjs'],
-    
+    react: ["reactjs", "react.js", "react hooks"],
+    "react native": ["reactnative", "react-native"],
+    "node.js": ["nodejs", "node", "express"],
+    angular: ["angularjs", "angular 2+"],
+    vue: ["vuejs", "vue.js"],
+    nextjs: ["next.js", "next"],
+    nestjs: ["nest.js", "nestjs"],
+
     // Databases
-    mongodb: ['mongo', 'mongoose'],
-    postgresql: ['postgres', 'psql'],
-    mysql: ['mysql', 'my sql'],
-    
+    mongodb: ["mongo", "mongoose"],
+    postgresql: ["postgres", "psql"],
+    mysql: ["mysql", "my sql"],
+
     // Cloud & DevOps
-    aws: ['amazon web services', 'ec2', 's3', 'lambda'],
-    docker: ['docker', 'containerization'],
-    kubernetes: ['k8s', 'kubernetes'],
-    'ci/cd': ['cicd', 'ci cd', 'continuous integration', 'continuous deployment'],
-    
+    aws: ["amazon web services", "ec2", "s3", "lambda"],
+    docker: ["docker", "containerization"],
+    kubernetes: ["k8s", "kubernetes"],
+    "ci/cd": [
+      "cicd",
+      "ci cd",
+      "continuous integration",
+      "continuous deployment",
+    ],
+
     // Tools
-    git: ['git', 'github', 'gitlab', 'bitbucket'],
+    git: ["git", "github", "gitlab", "bitbucket"],
   };
 
   calculate(data: {
@@ -255,7 +256,8 @@ export class SkillsMatchCalculator extends ScoreCalculator {
     jdRequiredSkills: string[];
     jdPreferredSkills: string[];
   }): ScoreComponent {
-    const { resumeSkills, jdSkills, jdRequiredSkills, jdPreferredSkills } = data;
+    const { resumeSkills, jdSkills, jdRequiredSkills, jdPreferredSkills } =
+      data;
 
     const factors: ScoringFactor[] = [];
 
@@ -266,13 +268,17 @@ export class SkillsMatchCalculator extends ScoreCalculator {
     const normalizedPreferred = this.normalizeSkills(jdPreferredSkills);
 
     // Factor 1: Required Skills Match (50% weight)
-    const requiredMatches = this.matchSkills(normalizedResume, normalizedRequired);
-    const requiredScore = normalizedRequired.length > 0
-      ? (requiredMatches.length / normalizedRequired.length) * 100
-      : 100;
+    const requiredMatches = this.matchSkills(
+      normalizedResume,
+      normalizedRequired,
+    );
+    const requiredScore =
+      normalizedRequired.length > 0
+        ? (requiredMatches.length / normalizedRequired.length) * 100
+        : 100;
 
     factors.push({
-      name: 'Required Skills Match',
+      name: "Required Skills Match",
       score: this.normalizeScore(requiredScore),
       weight: 50,
       description: `${requiredMatches.length} of ${normalizedRequired.length} required skills matched`,
@@ -280,13 +286,17 @@ export class SkillsMatchCalculator extends ScoreCalculator {
     });
 
     // Factor 2: Preferred Skills Match (30% weight)
-    const preferredMatches = this.matchSkills(normalizedResume, normalizedPreferred);
-    const preferredScore = normalizedPreferred.length > 0
-      ? (preferredMatches.length / normalizedPreferred.length) * 100
-      : 100;
+    const preferredMatches = this.matchSkills(
+      normalizedResume,
+      normalizedPreferred,
+    );
+    const preferredScore =
+      normalizedPreferred.length > 0
+        ? (preferredMatches.length / normalizedPreferred.length) * 100
+        : 100;
 
     factors.push({
-      name: 'Preferred Skills Match',
+      name: "Preferred Skills Match",
       score: this.normalizeScore(preferredScore),
       weight: 30,
       description: `${preferredMatches.length} of ${normalizedPreferred.length} preferred skills matched`,
@@ -298,7 +308,7 @@ export class SkillsMatchCalculator extends ScoreCalculator {
     const depthScore = Math.min(100, 50 + uniqueResumeSkills.size * 3);
 
     factors.push({
-      name: 'Skill Depth',
+      name: "Skill Depth",
       score: this.normalizeScore(depthScore),
       weight: 20,
       description: `${uniqueResumeSkills.size} unique skills identified`,
@@ -314,7 +324,7 @@ export class SkillsMatchCalculator extends ScoreCalculator {
     // Apply penalty for missing critical required skills
     const criticalPenalty = this.calculateCriticalPenalty(
       requiredMatches,
-      normalizedRequired
+      normalizedRequired,
     );
     totalScore = Math.max(0, totalScore - criticalPenalty);
 
@@ -322,13 +332,13 @@ export class SkillsMatchCalculator extends ScoreCalculator {
       totalScore,
       this.config.weights.skillsMatch,
       `${requiredMatches.length}/${normalizedRequired.length} required | ${preferredMatches.length}/${normalizedPreferred.length} preferred`,
-      factors
+      factors,
     );
   }
 
   private normalizeSkills(skills: string[]): string[] {
     const normalized: string[] = [];
-    
+
     skills.forEach((skill) => {
       const lower = skill.toLowerCase().trim();
       if (!lower) return;
@@ -370,18 +380,18 @@ export class SkillsMatchCalculator extends ScoreCalculator {
   private calculateProficiencyBonus(skills: string[]): number {
     // Bonus for skills with proficiency indicators
     const proficiencyIndicators = [
-      'expert',
-      'advanced',
-      'senior',
-      'proficient',
-      'specialized',
-      'certified',
+      "expert",
+      "advanced",
+      "senior",
+      "proficient",
+      "specialized",
+      "certified",
     ];
 
     const hasProficiency = skills.some((skill) =>
       proficiencyIndicators.some((indicator) =>
-        skill.toLowerCase().includes(indicator)
-      )
+        skill.toLowerCase().includes(indicator),
+      ),
     );
 
     return hasProficiency ? 5 : 0;
@@ -389,21 +399,21 @@ export class SkillsMatchCalculator extends ScoreCalculator {
 
   private calculateCriticalPenalty(
     matched: string[],
-    required: string[]
+    required: string[],
   ): number {
     // Penalty for missing critical skills
     const criticalSkills = [
-      'javascript',
-      'typescript',
-      'react',
-      'node.js',
-      'python',
+      "javascript",
+      "typescript",
+      "react",
+      "node.js",
+      "python",
     ];
 
     const missingCritical = required.filter(
       (skill) =>
         !matched.includes(skill) &&
-        criticalSkills.some((c) => skill.toLowerCase().includes(c))
+        criticalSkills.some((c) => skill.toLowerCase().includes(c)),
     );
 
     return missingCritical.length * 10; // 10 points penalty per critical skill
@@ -416,23 +426,20 @@ export class SkillsMatchCalculator extends ScoreCalculator {
  */
 export class SectionCompletenessCalculator extends ScoreCalculator {
   private criticalSections = [
-    { name: 'summary', label: 'Professional Summary', minWords: 30 },
-    { name: 'skills', label: 'Technical Skills', minItems: 5 },
-    { name: 'experience', label: 'Work Experience', minEntries: 1 },
-    { name: 'projects', label: 'Projects', minEntries: 1 },
+    { name: "summary", label: "Professional Summary", minWords: 30 },
+    { name: "skills", label: "Technical Skills", minItems: 5 },
+    { name: "experience", label: "Work Experience", minEntries: 1 },
+    { name: "projects", label: "Projects", minEntries: 1 },
   ];
 
   private optionalSections = [
-    { name: 'education', label: 'Education' },
-    { name: 'certifications', label: 'Certifications' },
-    { name: 'achievements', label: 'Achievements' },
-    { name: 'volunteer', label: 'Volunteer Experience' },
+    { name: "education", label: "Education" },
+    { name: "certifications", label: "Certifications" },
+    { name: "achievements", label: "Achievements" },
+    { name: "volunteer", label: "Volunteer Experience" },
   ];
 
-  calculate(data: {
-    resume: any;
-    resumeText: string;
-  }): ScoreComponent {
+  calculate(data: { resume: any; resumeText: string }): ScoreComponent {
     const { resume } = data;
     const factors: ScoringFactor[] = [];
 
@@ -442,8 +449,10 @@ export class SectionCompletenessCalculator extends ScoreCalculator {
 
     this.criticalSections.forEach((section) => {
       const isPresent = this.checkSectionPresent(resume, section.name);
-      const quality = isPresent ? this.evaluateSectionQuality(resume, section) : 'Missing';
-      
+      const quality = isPresent
+        ? this.evaluateSectionQuality(resume, section)
+        : "Missing";
+
       if (isPresent) {
         criticalScore += 25; // Each critical section worth 25 points
         criticalDetails.push(`${section.label}: ${quality}`);
@@ -453,10 +462,10 @@ export class SectionCompletenessCalculator extends ScoreCalculator {
     });
 
     factors.push({
-      name: 'Critical Sections',
+      name: "Critical Sections",
       score: this.normalizeScore(criticalScore),
       weight: 60,
-      description: `${criticalDetails.filter(d => !d.includes('Missing')).length}/${this.criticalSections.length} critical sections present`,
+      description: `${criticalDetails.filter((d) => !d.includes("Missing")).length}/${this.criticalSections.length} critical sections present`,
       evidence: criticalDetails,
     });
 
@@ -478,10 +487,10 @@ export class SectionCompletenessCalculator extends ScoreCalculator {
     }
 
     factors.push({
-      name: 'Section Quality',
+      name: "Section Quality",
       score: this.normalizeScore(qualityScore),
       weight: 25,
-      description: 'Average quality of present sections',
+      description: "Average quality of present sections",
       evidence: qualityDetails,
     });
 
@@ -497,7 +506,7 @@ export class SectionCompletenessCalculator extends ScoreCalculator {
     });
 
     factors.push({
-      name: 'Additional Sections',
+      name: "Additional Sections",
       score: this.normalizeScore(optionalScore),
       weight: 15,
       description: `${optionalDetails.length} optional sections present`,
@@ -514,53 +523,56 @@ export class SectionCompletenessCalculator extends ScoreCalculator {
     return this.createScoreComponent(
       finalScore,
       this.config.weights.sectionCompleteness,
-      `${criticalDetails.filter(d => !d.includes('Missing')).length}/${this.criticalSections.length} critical | ${optionalDetails.length} additional sections`,
-      factors
+      `${criticalDetails.filter((d) => !d.includes("Missing")).length}/${this.criticalSections.length} critical | ${optionalDetails.length} additional sections`,
+      factors,
     );
   }
 
   private checkSectionPresent(resume: any, sectionName: string): boolean {
     const section = resume[sectionName];
-    
+
     if (!section) return false;
-    
+
     if (Array.isArray(section)) {
       return section.length > 0;
     }
-    
-    if (typeof section === 'string') {
+
+    if (typeof section === "string") {
       return section.trim().length > 0;
     }
-    
+
     return true;
   }
 
-  private evaluateSectionQuality(resume: any, section: any): 'Excellent' | 'Good' | 'Fair' | 'Poor' {
+  private evaluateSectionQuality(
+    resume: any,
+    section: any,
+  ): "Excellent" | "Good" | "Fair" | "Poor" {
     const sectionData = resume[section.name];
-    
-    if (!sectionData) return 'Poor';
-    
+
+    if (!sectionData) return "Poor";
+
     if (section.minWords) {
       const wordCount = sectionData.split(/\s+/).length;
-      if (wordCount >= section.minWords * 2) return 'Excellent';
-      if (wordCount >= section.minWords * 1.5) return 'Good';
-      if (wordCount >= section.minWords) return 'Fair';
-      return 'Poor';
+      if (wordCount >= section.minWords * 2) return "Excellent";
+      if (wordCount >= section.minWords * 1.5) return "Good";
+      if (wordCount >= section.minWords) return "Fair";
+      return "Poor";
     }
-    
+
     if (section.minItems) {
       const itemCount = Array.isArray(sectionData) ? sectionData.length : 0;
-      if (itemCount >= section.minItems * 2) return 'Excellent';
-      if (itemCount >= section.minItems * 1.5) return 'Good';
-      if (itemCount >= section.minItems) return 'Fair';
-      return 'Poor';
+      if (itemCount >= section.minItems * 2) return "Excellent";
+      if (itemCount >= section.minItems * 1.5) return "Good";
+      if (itemCount >= section.minItems) return "Fair";
+      return "Poor";
     }
-    
+
     if (Array.isArray(sectionData)) {
-      return sectionData.length > 0 ? 'Good' : 'Poor';
+      return sectionData.length > 0 ? "Good" : "Poor";
     }
-    
-    return 'Fair';
+
+    return "Fair";
   }
 
   private getQualityScore(quality: string): number {
@@ -575,24 +587,26 @@ export class SectionCompletenessCalculator extends ScoreCalculator {
 
   private calculateExcellenceBonus(resume: any): number {
     let bonus = 0;
-    
+
     // Bonus for quantified achievements
-    if (resume.experience?.some((exp: any) => 
-      exp.description?.match(/\d+%|\$\d+|\d+x/)
-    )) {
+    if (
+      resume.experience?.some((exp: any) =>
+        exp.description?.match(/\d+%|\$\d+|\d+x/),
+      )
+    ) {
       bonus += 5;
     }
-    
+
     // Bonus for certifications
     if (resume.certifications?.length > 0) {
       bonus += 3;
     }
-    
+
     // Bonus for projects with links
     if (resume.projects?.some((p: any) => p.links?.live || p.links?.github)) {
       bonus += 2;
     }
-    
+
     return bonus;
   }
 }
@@ -614,19 +628,20 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
     const jdLower = jdText.toLowerCase();
     const experience = resume.experience || [];
 
-    console.log('[ExperienceRelevance] Experience array:', experience);
-    console.log('[ExperienceRelevance] Experience length:', experience.length);
-    console.log('[ExperienceRelevance] JD Keywords:', jdKeywords.length);
+    console.log("[ExperienceRelevance] Experience array:", experience);
+    console.log("[ExperienceRelevance] Experience length:", experience.length);
+    console.log("[ExperienceRelevance] JD Keywords:", jdKeywords.length);
 
     // Factor 1: Keyword Match in Experience (40% weight)
     let keywordMatchScore = 0;
     let totalKeywordMatches = 0;
 
     experience.forEach((exp: any) => {
-      const expText = `${exp.title} ${exp.company} ${exp.description}`.toLowerCase();
+      const expText =
+        `${exp.title} ${exp.company} ${exp.description}`.toLowerCase();
       const matches = jdKeywords.filter((keyword) => {
         const escaped = this.escapeRegex(keyword);
-        const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+        const regex = new RegExp(`\\b${escaped}\\b`, "i");
         return regex.test(expText);
       });
       totalKeywordMatches += matches.length;
@@ -635,12 +650,14 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
     if (experience.length > 0 && jdKeywords.length > 0) {
       keywordMatchScore = Math.min(
         100,
-        (totalKeywordMatches / (experience.length * jdKeywords.length)) * 100 * 3
+        (totalKeywordMatches / (experience.length * jdKeywords.length)) *
+          100 *
+          3,
       );
     }
 
     factors.push({
-      name: 'Experience Keywords',
+      name: "Experience Keywords",
       score: this.normalizeScore(keywordMatchScore),
       weight: 40,
       description: `${totalKeywordMatches} keyword matches across ${experience.length} positions`,
@@ -661,44 +678,47 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
     }
 
     factors.push({
-      name: 'Experience Duration',
+      name: "Experience Duration",
       score: this.normalizeScore(yearsScore),
       weight: 30,
-      description: `${yearsExp} years experience${jdYears > 0 ? ` (JD requires ${jdYears}+)` : ''}`,
+      description: `${yearsExp} years experience${jdYears > 0 ? ` (JD requires ${jdYears}+)` : ""}`,
     });
 
     // Factor 3: Responsibility Match (30% weight)
     const actionVerbs = [
-      'managed',
-      'led',
-      'developed',
-      'designed',
-      'implemented',
-      'created',
-      'built',
-      'optimized',
-      'improved',
-      'increased',
+      "managed",
+      "led",
+      "developed",
+      "designed",
+      "implemented",
+      "created",
+      "built",
+      "optimized",
+      "improved",
+      "increased",
     ];
 
     const jdVerbs = actionVerbs.filter((v) => jdLower.includes(v));
     const resumeVerbs = actionVerbs.filter((v) =>
-      experience.some((exp: any) => exp.description?.toLowerCase().includes(v))
+      experience.some((exp: any) => exp.description?.toLowerCase().includes(v)),
     );
 
-    const responsibilityScore = experience.length === 0
-      ? 0
-      : jdVerbs.length > 0
-      ? (resumeVerbs.filter((v) => jdVerbs.includes(v)).length / jdVerbs.length) * 100
-      : resumeVerbs.length > 0
-      ? 80
-      : 50;
+    const responsibilityScore =
+      experience.length === 0
+        ? 0
+        : jdVerbs.length > 0
+          ? (resumeVerbs.filter((v) => jdVerbs.includes(v)).length /
+              jdVerbs.length) *
+            100
+          : resumeVerbs.length > 0
+            ? 80
+            : 50;
 
     factors.push({
-      name: 'Responsibility Alignment',
+      name: "Responsibility Alignment",
       score: this.normalizeScore(responsibilityScore),
       weight: 30,
-      description: `${resumeVerbs.filter(v => jdVerbs.includes(v)).length}/${jdVerbs.length} action verbs matched`,
+      description: `${resumeVerbs.filter((v) => jdVerbs.includes(v)).length}/${jdVerbs.length} action verbs matched`,
       evidence: resumeVerbs,
     });
 
@@ -717,14 +737,14 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
       totalScore,
       this.config.weights.experienceRelevance,
       experience.length === 0
-        ? 'No work experience provided'
-        : `${yearsExp} years | ${totalKeywordMatches} keyword matches | ${resumeVerbs.filter(v => jdVerbs.includes(v)).length}/${jdVerbs.length} responsibilities`,
-      factors
+        ? "No work experience provided"
+        : `${yearsExp} years | ${totalKeywordMatches} keyword matches | ${resumeVerbs.filter((v) => jdVerbs.includes(v)).length}/${jdVerbs.length} responsibilities`,
+      factors,
     );
   }
 
   private escapeRegex(string: string): string {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   private calculateYearsOfExperience(experience: any[]): number {
@@ -733,13 +753,13 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
     experience.forEach((exp) => {
       if (exp.startDate) {
         const start = new Date(exp.startDate);
-        const end = exp.current || !exp.endDate
-          ? new Date()
-          : new Date(exp.endDate);
-        
-        const months = (end.getFullYear() - start.getFullYear()) * 12 +
+        const end =
+          exp.current || !exp.endDate ? new Date() : new Date(exp.endDate);
+
+        const months =
+          (end.getFullYear() - start.getFullYear()) * 12 +
           (end.getMonth() - start.getMonth());
-        
+
         totalMonths += Math.max(0, months);
       }
     });
@@ -756,17 +776,17 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
     if (experience.length < 2) return 0;
 
     const seniorityLevels = [
-      'intern',
-      'junior',
-      'mid',
-      'senior',
-      'lead',
-      'principal',
-      'staff',
-      'manager',
-      'director',
-      'vp',
-      'cto',
+      "intern",
+      "junior",
+      "mid",
+      "senior",
+      "lead",
+      "principal",
+      "staff",
+      "manager",
+      "director",
+      "vp",
+      "cto",
     ];
 
     const getLevel = (title: string): number => {
@@ -777,8 +797,10 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
       return -1;
     };
 
-    const levels = experience.map((exp) => getLevel(exp.title)).filter((l) => l >= 0);
-    
+    const levels = experience
+      .map((exp) => getLevel(exp.title))
+      .filter((l) => l >= 0);
+
     if (levels.length < 2) return 0;
 
     // Check if there's progression (later jobs have higher levels)
@@ -794,18 +816,18 @@ export class ExperienceRelevanceCalculator extends ScoreCalculator {
 
   private calculateTitleBonus(experience: any[], jdText: string): number {
     const jdLower = jdText.toLowerCase();
-    
+
     const relevantTitles = [
-      'engineer',
-      'developer',
-      'programmer',
-      'architect',
-      'consultant',
-      'specialist',
+      "engineer",
+      "developer",
+      "programmer",
+      "architect",
+      "consultant",
+      "specialist",
     ];
 
     const hasRelevantTitle = experience.some((exp) =>
-      relevantTitles.some((t) => exp.title?.toLowerCase().includes(t))
+      relevantTitles.some((t) => exp.title?.toLowerCase().includes(t)),
     );
 
     const titleInJD = relevantTitles.some((t) => jdLower.includes(t));

@@ -1,9 +1,4 @@
-/**
- * Common Reusable Types
- * All type definitions used across multiple files in the backend
- */
-
-import { Request } from 'express';
+import { Request } from "express";
 
 // ============================================================================
 // Request Types
@@ -232,7 +227,7 @@ export interface SectionAnalysis {
 export interface SectionScore {
   present: boolean;
   score: number;
-  quality: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Missing';
+  quality: "Excellent" | "Good" | "Fair" | "Poor" | "Missing";
   wordCount?: number;
   issues: SectionIssue[];
   recommendations: string[];
@@ -246,8 +241,14 @@ export interface AdditionalSectionScore {
 }
 
 export interface SectionIssue {
-  type: 'Missing' | 'Too Short' | 'Too Long' | 'Poor Structure' | 'Missing Keywords' | 'Formatting';
-  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  type:
+    | "Missing"
+    | "Too Short"
+    | "Too Long"
+    | "Poor Structure"
+    | "Missing Keywords"
+    | "Formatting";
+  severity: "Critical" | "High" | "Medium" | "Low";
   description: string;
   suggestion: string;
 }
@@ -269,7 +270,7 @@ export interface SkillsAnalysis {
 export interface SkillMatch {
   name: string;
   category: SkillCategory;
-  matchType: 'Exact' | 'Partial' | 'Related' | 'Equivalent';
+  matchType: "Exact" | "Partial" | "Related" | "Equivalent";
   matchScore: number;
   foundIn: string[];
   context: string[];
@@ -280,7 +281,7 @@ export interface SkillMatch {
 export interface SkillGap {
   name: string;
   category: SkillCategory;
-  priority: 'Critical' | 'High' | 'Medium' | 'Low';
+  priority: "Critical" | "High" | "Medium" | "Low";
   isRequired: boolean;
   suggestions: string[];
   learningResources?: string[];
@@ -331,7 +332,7 @@ export interface PositionAnalysis {
 export interface CareerProgression {
   hasProgression: boolean;
   progressionScore: number;
-  titleProgression: 'Increasing' | 'Lateral' | 'Decreasing' | 'Unclear';
+  titleProgression: "Increasing" | "Lateral" | "Decreasing" | "Unclear";
   responsibilityGrowth: boolean;
   skillGrowth: boolean;
 }
@@ -362,7 +363,7 @@ export interface EmploymentGap {
   endDate: string;
   durationMonths: number;
   isExplained: boolean;
-  severity: 'Critical' | 'Moderate' | 'Minor';
+  severity: "Critical" | "Moderate" | "Minor";
 }
 
 // ============================================================================
@@ -399,21 +400,21 @@ export interface KeywordMatch {
 export interface KeywordGap {
   keyword: string;
   category: KeywordCategory;
-  importance: 'Critical' | 'High' | 'Medium' | 'Low';
+  importance: "Critical" | "High" | "Medium" | "Low";
   frequency: number;
   suggestions: string[];
 }
 
 export type KeywordCategory =
-  | 'Technical Skill'
-  | 'Tool'
-  | 'Technology'
-  | 'Methodology'
-  | 'Certification'
-  | 'Soft Skill'
-  | 'Action Verb'
-  | 'Industry Term'
-  | 'Domain Knowledge';
+  | "Technical Skill"
+  | "Tool"
+  | "Technology"
+  | "Methodology"
+  | "Certification"
+  | "Soft Skill"
+  | "Action Verb"
+  | "Industry Term"
+  | "Domain Knowledge";
 
 export interface OverusedKeyword {
   keyword: string;
@@ -435,11 +436,11 @@ export interface SemanticKeyword {
 export interface Recommendation {
   id: string;
   category: RecommendationCategory;
-  priority: 'Critical' | 'High' | 'Medium' | 'Low';
+  priority: "Critical" | "High" | "Medium" | "Low";
   title: string;
   description: string;
-  impact: 'High' | 'Medium' | 'Low';
-  effort: 'High' | 'Medium' | 'Low';
+  impact: "High" | "Medium" | "Low";
+  effort: "High" | "Medium" | "Low";
   actionItems: ActionItem[];
   estimatedScoreImprovement: number;
 }
@@ -453,15 +454,15 @@ export interface ActionItem {
 }
 
 export type RecommendationCategory =
-  | 'Content'
-  | 'Skills'
-  | 'Keywords'
-  | 'Formatting'
-  | 'Structure'
-  | 'Achievements'
-  | 'Experience'
-  | 'Education'
-  | 'ATS Optimization';
+  | "Content"
+  | "Skills"
+  | "Keywords"
+  | "Formatting"
+  | "Structure"
+  | "Achievements"
+  | "Experience"
+  | "Education"
+  | "ATS Optimization";
 
 // ============================================================================
 // Metadata Types
@@ -479,8 +480,8 @@ export interface AnalysisMetadata {
 }
 
 export interface DataQuality {
-  resumeQuality: 'Excellent' | 'Good' | 'Fair' | 'Poor';
-  jdQuality: 'Excellent' | 'Good' | 'Fair' | 'Poor';
+  resumeQuality: "Excellent" | "Good" | "Fair" | "Poor";
+  jdQuality: "Excellent" | "Good" | "Fair" | "Poor";
   parseSuccess: boolean;
   completenessScore: number;
 }
@@ -494,8 +495,8 @@ export interface ParsedJobDescription {
   jobTitle?: string;
   company?: string;
   location?: string;
-  jobType?: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote';
-  experienceLevel?: 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Principal';
+  jobType?: "Full-time" | "Part-time" | "Contract" | "Internship" | "Remote";
+  experienceLevel?: "Entry" | "Mid" | "Senior" | "Lead" | "Principal";
   requiredSkills: SkillRequirement[];
   preferredSkills: SkillRequirement[];
   requiredExperience?: ExperienceRequirement;
@@ -511,22 +512,22 @@ export interface SkillRequirement {
   name: string;
   category: SkillCategory;
   isRequired: boolean;
-  priority: 'Critical' | 'High' | 'Medium' | 'Nice-to-have';
+  priority: "Critical" | "High" | "Medium" | "Nice-to-have";
   yearsRequired?: number;
 }
 
 export type SkillCategory =
-  | 'Programming Language'
-  | 'Framework'
-  | 'Library'
-  | 'Database'
-  | 'Cloud Platform'
-  | 'DevOps Tool'
-  | 'Testing Tool'
-  | 'Soft Skill'
-  | 'Domain Knowledge'
-  | 'Methodology'
-  | 'Certification';
+  | "Programming Language"
+  | "Framework"
+  | "Library"
+  | "Database"
+  | "Cloud Platform"
+  | "DevOps Tool"
+  | "Testing Tool"
+  | "Soft Skill"
+  | "Domain Knowledge"
+  | "Methodology"
+  | "Certification";
 
 export interface ExperienceRequirement {
   minYears?: number;
@@ -596,12 +597,12 @@ export interface JWTPayload {
 /**
  * User subscription plan types
  */
-export type SubscriptionPlan = 'free' | 'pro';
+export type SubscriptionPlan = "free" | "pro";
 
 /**
  * User theme preference types
  */
-export type ThemePreference = 'light' | 'dark' | 'system';
+export type ThemePreference = "light" | "dark" | "system";
 
 /**
  * User document interface
@@ -660,7 +661,9 @@ export interface PaginatedResponse<T = any> extends ApiResponse<T> {
 /**
  * Supported file types for upload
  */
-export type SupportedFileType = 'application/pdf' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+export type SupportedFileType =
+  | "application/pdf"
+  | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 /**
  * File upload configuration

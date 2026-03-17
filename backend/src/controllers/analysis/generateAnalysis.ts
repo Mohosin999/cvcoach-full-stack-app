@@ -1,13 +1,9 @@
-import { Response } from 'express';
-import { AuthRequest } from '../../types';
-import { Analysis } from '../../models/Analysis';
+import { Response } from "express";
+import { AuthRequest } from "../../types";
+import { Analysis } from "../../models/Analysis";
 import { Resume } from "../../models/Resume";
 import { User } from "../../models/User";
-import { resumeAnalysisService } from "../../services/analysis";
-import {
-  extractSkillsFromResume,
-  parseJobDescription,
-} from "../../services/analysis";
+import { resumeAnalysisService } from "../../services/analysis/analysisService";
 
 export const generateAnalysis = async (req: AuthRequest, res: Response) => {
   try {
@@ -167,8 +163,10 @@ function transformToAnalysisData(
 ): any {
   // Calculate ATS Score based on industry standards
   const atsBreakdown = result.scoreBreakdown?.ats;
-  const atsScore = atsBreakdown ? calculateATSScore(atsBreakdown) : result.jobMatchScore;
-  
+  const atsScore = atsBreakdown
+    ? calculateATSScore(atsBreakdown)
+    : result.jobMatchScore;
+
   return {
     userId,
     resumeId,
@@ -177,32 +175,34 @@ function transformToAnalysisData(
     company: "",
     score: result.jobMatchScore,
     atsScore,
-    atsBreakdown: atsBreakdown ? {
-      keywordMatch: {
-        score: atsBreakdown.keywordMatching.score,
-        details: `${atsBreakdown.keywordMatching.details}`,
-      },
-      formattingCompatibility: {
-        score: atsBreakdown.sectionCompleteness.score,
-        details: `${atsBreakdown.sectionCompleteness.details}`,
-      },
-      skillsSection: {
-        score: atsBreakdown.skillsMatch.score,
-        details: `${atsBreakdown.skillsMatch.details}`,
-      },
-      experienceRelevance: {
-        score: atsBreakdown.experienceRelevance.score,
-        details: `${atsBreakdown.experienceRelevance.details}`,
-      },
-      readabilityLength: {
-        score: calculateReadabilityScore(result),
-        details: getReadabilityDetails(result),
-      },
-      contactInfo: {
-        score: calculateContactInfoScore(result),
-        details: getContactInfoDetails(result),
-      },
-    } : undefined,
+    atsBreakdown: atsBreakdown
+      ? {
+          keywordMatch: {
+            score: atsBreakdown.keywordMatching.score,
+            details: `${atsBreakdown.keywordMatching.details}`,
+          },
+          formattingCompatibility: {
+            score: atsBreakdown.sectionCompleteness.score,
+            details: `${atsBreakdown.sectionCompleteness.details}`,
+          },
+          skillsSection: {
+            score: atsBreakdown.skillsMatch.score,
+            details: `${atsBreakdown.skillsMatch.details}`,
+          },
+          experienceRelevance: {
+            score: atsBreakdown.experienceRelevance.score,
+            details: `${atsBreakdown.experienceRelevance.details}`,
+          },
+          readabilityLength: {
+            score: calculateReadabilityScore(result),
+            details: getReadabilityDetails(result),
+          },
+          contactInfo: {
+            score: calculateContactInfoScore(result),
+            details: getContactInfoDetails(result),
+          },
+        }
+      : undefined,
     atsSuggestions: generateATSSuggestions(result, atsBreakdown),
     jobMatchSuggestions: generateJobMatchSuggestions(result),
     jobMatchingBreakdown: {
@@ -239,12 +239,12 @@ function transformToAnalysisData(
         matched:
           result.skillsAnalysis?.matchedSkills?.map((s: any) => s.name) ||
           result.keywordAnalysis?.foundKeywords?.map((k: any) => k.keyword) ||
-          result.keywords?.found || 
+          result.keywords?.found ||
           [],
         missing:
           result.skillsAnalysis?.missingSkills?.map((s: any) => s.name) ||
           result.keywordAnalysis?.missingKeywords?.map((k: any) => k.keyword) ||
-          result.keywords?.missing || 
+          result.keywords?.missing ||
           [],
       },
       experience: {
@@ -261,10 +261,7 @@ function transformToAnalysisData(
           : "No education listed",
       },
       format: {
-        score: Math.min(
-          100,
-          Math.round(result.jobMatchScore),
-        ),
+        score: Math.min(100, Math.round(result.jobMatchScore)),
         details: "Resume format evaluated",
       },
     },
@@ -432,11 +429,11 @@ function calculateATSScore(atsBreakdown: any): number {
   // - Experience Relevance: 15%
   // - Readability: 5%
   return Math.round(
-    atsBreakdown.keywordMatching.score * 0.30 +
-    atsBreakdown.sectionCompleteness.score * 0.25 +
-    atsBreakdown.skillsMatch.score * 0.25 +
-    atsBreakdown.experienceRelevance.score * 0.15 +
-    80 * 0.05 // Default readability score
+    atsBreakdown.keywordMatching.score * 0.3 +
+      atsBreakdown.sectionCompleteness.score * 0.25 +
+      atsBreakdown.skillsMatch.score * 0.25 +
+      atsBreakdown.experienceRelevance.score * 0.15 +
+      80 * 0.05, // Default readability score
   );
 }
 
@@ -456,7 +453,8 @@ function calculateReadabilityScore(result: any): number {
   }
 
   // Check for quantified achievements
-  const hasMetrics = result.experienceAnalysis?.achievementMetrics?.quantifiedCount > 0;
+  const hasMetrics =
+    result.experienceAnalysis?.achievementMetrics?.quantifiedCount > 0;
   if (hasMetrics) score += 10;
 
   // Check bullet points
@@ -471,8 +469,9 @@ function calculateReadabilityScore(result: any): number {
  */
 function getReadabilityDetails(result: any): string {
   const wordCount = result.metadata?.resumeWordCount || 0;
-  const hasMetrics = result.experienceAnalysis?.achievementMetrics?.quantifiedCount > 0;
-  
+  const hasMetrics =
+    result.experienceAnalysis?.achievementMetrics?.quantifiedCount > 0;
+
   if (hasMetrics) {
     return `Resume length: ${wordCount} words | Contains quantified achievements`;
   }
@@ -485,18 +484,18 @@ function getReadabilityDetails(result: any): string {
 function calculateContactInfoScore(result: any): number {
   const personalInfo = result.sectionAnalysis;
   let score = 0;
-  
+
   // Check for key contact elements
   const hasName = !!result.metadata;
   const hasEmail = true; // Assumed from user account
   const hasLocation = true; // Assumed
   const hasLinkedIn = false; // Would need to parse
-  
+
   if (hasName) score += 30;
   if (hasEmail) score += 30;
   if (hasLocation) score += 20;
   if (hasLinkedIn) score += 20;
-  
+
   return Math.min(100, score);
 }
 
@@ -506,7 +505,7 @@ function calculateContactInfoScore(result: any): number {
 function getContactInfoDetails(result: any): string {
   const hasName = !!result.metadata;
   const hasEmail = true;
-  
+
   if (hasName && hasEmail) {
     return "Contact information present (name, email)";
   }
@@ -522,60 +521,59 @@ function generateATSSuggestions(result: any, atsBreakdown: any): string[] {
   // Keyword optimization suggestions
   if (atsBreakdown?.keywordMatching?.score < 70) {
     suggestions.push(
-      "Add more keywords from the job description naturally throughout your resume"
+      "Add more keywords from the job description naturally throughout your resume",
     );
   }
 
   // Section completeness suggestions
   if (!result.sectionAnalysis?.summary?.present) {
     suggestions.push(
-      "Add a professional summary (3-5 sentences) at the top of your resume"
+      "Add a professional summary (3-5 sentences) at the top of your resume",
     );
   } else if (result.sectionAnalysis?.summary?.wordCount < 30) {
-    suggestions.push(
-      "Expand your professional summary to at least 30 words"
-    );
+    suggestions.push("Expand your professional summary to at least 30 words");
   }
 
-  if (!result.sectionAnalysis?.skills?.present || result.skillsAnalysis?.totalSkillsFound < 5) {
+  if (
+    !result.sectionAnalysis?.skills?.present ||
+    result.skillsAnalysis?.totalSkillsFound < 5
+  ) {
     suggestions.push(
-      "Add a dedicated skills section with at least 10 relevant technical skills"
+      "Add a dedicated skills section with at least 10 relevant technical skills",
     );
   }
 
   if (!result.sectionAnalysis?.experience?.present) {
     suggestions.push(
-      "Add work experience with detailed descriptions using action verbs"
+      "Add work experience with detailed descriptions using action verbs",
     );
   }
 
   // Skills suggestions
   if (result.skillsAnalysis?.missingSkills?.length > 3) {
-    const topMissing = result.skillsAnalysis.missingSkills.slice(0, 3).map((s: any) => s.name);
-    suggestions.push(
-      `Add missing skills: ${topMissing.join(", ")}`
-    );
+    const topMissing = result.skillsAnalysis.missingSkills
+      .slice(0, 3)
+      .map((s: any) => s.name);
+    suggestions.push(`Add missing skills: ${topMissing.join(", ")}`);
   }
 
   // Quantified achievements suggestion
   if (!result.experienceAnalysis?.achievementMetrics?.quantifiedCount) {
     suggestions.push(
-      "Add quantified achievements (%, $, numbers) to demonstrate impact"
+      "Add quantified achievements (%, $, numbers) to demonstrate impact",
     );
   }
 
   // Formatting suggestions
   if (result.metadata?.resumeWordCount < 200) {
     suggestions.push(
-      "Expand your resume to at least 200 words for better ATS parsing"
+      "Expand your resume to at least 200 words for better ATS parsing",
     );
   }
 
   // Certifications suggestion
   if (!result.sectionAnalysis?.certifications?.present) {
-    suggestions.push(
-      "Add relevant certifications to boost ATS score"
-    );
+    suggestions.push("Add relevant certifications to boost ATS score");
   }
 
   return suggestions.slice(0, 8);
@@ -590,51 +588,53 @@ function generateJobMatchSuggestions(result: any): string[] {
   // Required skills gap
   if (result.scoreBreakdown?.jobMatch?.requiredSkillsMatch?.score < 70) {
     suggestions.push(
-      "Focus on adding the required skills mentioned in the job description"
+      "Focus on adding the required skills mentioned in the job description",
     );
   }
 
   // Preferred skills
-  if (result.scoreBreakdown?.jobMatch?.preferredSkillsMatch?.score < 50 && 
-      result.scoreBreakdown?.jobMatch?.preferredSkillsMatch?.weight > 0) {
+  if (
+    result.scoreBreakdown?.jobMatch?.preferredSkillsMatch?.score < 50 &&
+    result.scoreBreakdown?.jobMatch?.preferredSkillsMatch?.weight > 0
+  ) {
     suggestions.push(
-      "Highlight any preferred skills you have from the job posting"
+      "Highlight any preferred skills you have from the job posting",
     );
   }
 
   // Experience alignment
   if (result.scoreBreakdown?.jobMatch?.experienceAlignment?.score < 60) {
     suggestions.push(
-      "Emphasize relevant experience that matches the job requirements"
+      "Emphasize relevant experience that matches the job requirements",
     );
   }
 
   // Responsibility match
   if (result.scoreBreakdown?.jobMatch?.responsibilityMatch?.score < 60) {
     suggestions.push(
-      "Use similar action verbs and responsibility language from the job description"
+      "Use similar action verbs and responsibility language from the job description",
     );
   }
 
   // Education alignment
   if (result.scoreBreakdown?.jobMatch?.educationAlignment?.score < 60) {
-    suggestions.push(
-      "Add or highlight your educational background"
-    );
+    suggestions.push("Add or highlight your educational background");
   }
 
   // Career progression
-  if (result.experienceAnalysis?.careerProgression?.hasProgression === false && 
-      result.experienceAnalysis?.positions?.length > 1) {
+  if (
+    result.experienceAnalysis?.careerProgression?.hasProgression === false &&
+    result.experienceAnalysis?.positions?.length > 1
+  ) {
     suggestions.push(
-      "Highlight career progression and increasing responsibilities"
+      "Highlight career progression and increasing responsibilities",
     );
   }
 
   // Industry-specific keywords
   if (result.keywordAnalysis?.missingKeywords?.length > 5) {
     suggestions.push(
-      "Incorporate industry-specific keywords from the job description"
+      "Incorporate industry-specific keywords from the job description",
     );
   }
 
