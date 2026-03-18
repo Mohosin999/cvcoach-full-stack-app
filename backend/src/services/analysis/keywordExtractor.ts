@@ -1,8 +1,3 @@
-/**
- * Keyword Extraction Service
- * Professional keyword extraction and categorization
- */
-
 export interface ExtractedKeywords {
   technical: KeywordGroup;
   soft: KeywordGroup;
@@ -22,47 +17,151 @@ export interface KeywordGroup {
  */
 export const SKILL_TAXONOMY = {
   programmingLanguages: [
-    'javascript', 'typescript', 'python', 'java', 'c++', 'c#', 'ruby', 'go',
-    'rust', 'php', 'swift', 'kotlin', 'scala', 'r', 'matlab', 'sql',
-    'html', 'css', 'dart', 'shell', 'bash', 'perl', 'lua',
+    "javascript",
+    "typescript",
+    "python",
+    "java",
+    "c++",
+    "c#",
+    "ruby",
+    "go",
+    "rust",
+    "php",
+    "swift",
+    "kotlin",
+    "scala",
+    "r",
+    "matlab",
+    "sql",
+    "html",
+    "css",
+    "dart",
+    "shell",
+    "bash",
+    "perl",
+    "lua",
   ],
   frontendFrameworks: [
-    'react', 'angular', 'vue', 'svelte', 'next.js', 'nuxt', 'gatsby',
-    'remix', 'solid', 'qwik', 'ember', 'backbone',
+    "react",
+    "angular",
+    "vue",
+    "svelte",
+    "next.js",
+    "nuxt",
+    "gatsby",
+    "remix",
+    "solid",
+    "qwik",
+    "ember",
+    "backbone",
   ],
   backendFrameworks: [
-    'express', 'fastify', 'nestjs', 'django', 'flask', 'fastapi', 'spring',
-    'rails', 'laravel', 'symfony', 'asp.net', 'gin', 'fiber',
+    "express",
+    "fastify",
+    "nestjs",
+    "django",
+    "flask",
+    "fastapi",
+    "spring",
+    "rails",
+    "laravel",
+    "symfony",
+    "asp.net",
+    "gin",
+    "fiber",
   ],
   databases: [
-    'mongodb', 'postgresql', 'mysql', 'redis', 'sqlite', 'elasticsearch',
-    'dynamodb', 'cassandra', 'mariadb', 'oracle', 'mssql', 'firebase',
-    'supabase', 'prisma', 'mongoose', 'sequelize', 'typeorm',
+    "mongodb",
+    "postgresql",
+    "mysql",
+    "redis",
+    "sqlite",
+    "elasticsearch",
+    "dynamodb",
+    "cassandra",
+    "mariadb",
+    "oracle",
+    "mssql",
+    "firebase",
+    "supabase",
+    "prisma",
+    "mongoose",
+    "sequelize",
+    "typeorm",
   ],
   cloudPlatforms: [
-    'aws', 'azure', 'gcp', 'digitalocean', 'heroku', 'vercel', 'netlify',
-    'cloudflare', 'linode', 'vultr', 'ibm cloud', 'oracle cloud',
+    "aws",
+    "azure",
+    "gcp",
+    "digitalocean",
+    "heroku",
+    "vercel",
+    "netlify",
+    "cloudflare",
+    "linode",
+    "vultr",
+    "ibm cloud",
+    "oracle cloud",
   ],
   devopsTools: [
-    'docker', 'kubernetes', 'jenkins', 'gitlab ci', 'github actions',
-    'circleci', 'travis ci', 'ansible', 'terraform', 'puppet', 'chef',
-    'prometheus', 'grafana', 'datadog', 'new relic',
+    "docker",
+    "kubernetes",
+    "jenkins",
+    "gitlab ci",
+    "github actions",
+    "circleci",
+    "travis ci",
+    "ansible",
+    "terraform",
+    "puppet",
+    "chef",
+    "prometheus",
+    "grafana",
+    "datadog",
+    "new relic",
   ],
   testingTools: [
-    'jest', 'mocha', 'cypress', 'playwright', 'selenium', 'vitest',
-    'testing library', 'jasmine', 'pytest', 'junit', 'postman',
+    "jest",
+    "mocha",
+    "cypress",
+    "playwright",
+    "selenium",
+    "vitest",
+    "testing library",
+    "jasmine",
+    "pytest",
+    "junit",
+    "postman",
   ],
-  versionControl: [
-    'git', 'github', 'gitlab', 'bitbucket', 'svn', 'mercurial',
-  ],
+  versionControl: ["git", "github", "gitlab", "bitbucket", "svn", "mercurial"],
   methodologies: [
-    'agile', 'scrum', 'kanban', 'lean', 'devops', 'ci/cd', 'tdd', 'bdd',
-    'microservices', 'serverless', 'event-driven', 'rest', 'graphql',
+    "agile",
+    "scrum",
+    "kanban",
+    "lean",
+    "devops",
+    "ci/cd",
+    "tdd",
+    "bdd",
+    "microservices",
+    "serverless",
+    "event-driven",
+    "rest",
+    "graphql",
   ],
   softSkills: [
-    'leadership', 'communication', 'teamwork', 'problem solving',
-    'critical thinking', 'time management', 'adaptability', 'collaboration',
-    'mentoring', 'presentation', 'negotiation', 'conflict resolution',
+    "leadership",
+    "communication",
+    "teamwork",
+    "problem solving",
+    "critical thinking",
+    "time management",
+    "adaptability",
+    "collaboration",
+    "mentoring",
+    "presentation",
+    "negotiation",
+    "conflict resolution",
   ],
 };
 
@@ -71,32 +170,80 @@ export const SKILL_TAXONOMY = {
  */
 export const ACTION_VERBS = [
   // Technical Actions
-  'developed', 'designed', 'implemented', 'architected', 'engineered',
-  'programmed', 'coded', 'debugged', 'tested', 'deployed',
-  
+  "developed",
+  "designed",
+  "implemented",
+  "architected",
+  "engineered",
+  "programmed",
+  "coded",
+  "debugged",
+  "tested",
+  "deployed",
+
   // Leadership Actions
-  'led', 'managed', 'directed', 'supervised', 'mentored', 'coordinated',
-  'facilitated', 'guided', 'trained', 'delegated',
-  
+  "led",
+  "managed",
+  "directed",
+  "supervised",
+  "mentored",
+  "coordinated",
+  "facilitated",
+  "guided",
+  "trained",
+  "delegated",
+
   // Improvement Actions
-  'optimized', 'improved', 'enhanced', 'refactored', 'streamlined',
-  'automated', 'modernized', 'upgraded', 'migrated',
-  
+  "optimized",
+  "improved",
+  "enhanced",
+  "refactored",
+  "streamlined",
+  "automated",
+  "modernized",
+  "upgraded",
+  "migrated",
+
   // Creation Actions
-  'created', 'built', 'established', 'founded', 'initiated', 'launched',
-  'introduced', 'pioneered', 'conceptualized',
-  
+  "created",
+  "built",
+  "established",
+  "founded",
+  "initiated",
+  "launched",
+  "introduced",
+  "pioneered",
+  "conceptualized",
+
   // Analysis Actions
-  'analyzed', 'evaluated', 'assessed', 'investigated', 'researched',
-  'identified', 'diagnosed', 'audited',
-  
+  "analyzed",
+  "evaluated",
+  "assessed",
+  "investigated",
+  "researched",
+  "identified",
+  "diagnosed",
+  "audited",
+
   // Communication Actions
-  'communicated', 'presented', 'documented', 'reported', 'collaborated',
-  'negotiated', 'persuaded', 'influenced',
-  
+  "communicated",
+  "presented",
+  "documented",
+  "reported",
+  "collaborated",
+  "negotiated",
+  "persuaded",
+  "influenced",
+
   // Achievement Actions
-  'achieved', 'delivered', 'exceeded', 'accomplished', 'attained',
-  'secured', 'won', 'earned',
+  "achieved",
+  "delivered",
+  "exceeded",
+  "accomplished",
+  "attained",
+  "secured",
+  "won",
+  "earned",
 ];
 
 /**
@@ -104,29 +251,77 @@ export const ACTION_VERBS = [
  */
 export const INDUSTRY_TERMS = {
   softwareDevelopment: [
-    'sdlc', 'code review', 'version control', 'branching', 'merging',
-    'pull request', 'continuous integration', 'continuous deployment',
-    'api', 'microservice', 'monolith', 'serverless', 'cloud-native',
+    "sdlc",
+    "code review",
+    "version control",
+    "branching",
+    "merging",
+    "pull request",
+    "continuous integration",
+    "continuous deployment",
+    "api",
+    "microservice",
+    "monolith",
+    "serverless",
+    "cloud-native",
   ],
   webDevelopment: [
-    'responsive', 'spa', 'ssr', 'ssg', 'pwa', 'seo', 'accessibility',
-    'wcag', 'cross-browser', 'mobile-first', 'performance optimization',
+    "responsive",
+    "spa",
+    "ssr",
+    "ssg",
+    "pwa",
+    "seo",
+    "accessibility",
+    "wcag",
+    "cross-browser",
+    "mobile-first",
+    "performance optimization",
   ],
   dataEngineering: [
-    'etl', 'data pipeline', 'data warehouse', 'data lake', 'big data',
-    'streaming', 'batch processing', 'data modeling', 'data governance',
+    "etl",
+    "data pipeline",
+    "data warehouse",
+    "data lake",
+    "big data",
+    "streaming",
+    "batch processing",
+    "data modeling",
+    "data governance",
   ],
   machineLearning: [
-    'machine learning', 'deep learning', 'neural network', 'nlp', 'cv',
-    'model training', 'feature engineering', 'hyperparameter tuning',
+    "machine learning",
+    "deep learning",
+    "neural network",
+    "nlp",
+    "cv",
+    "model training",
+    "feature engineering",
+    "hyperparameter tuning",
   ],
   cybersecurity: [
-    'security', 'encryption', 'authentication', 'authorization', 'oauth',
-    'jwt', 'ssl', 'tls', 'penetration testing', 'vulnerability assessment',
+    "security",
+    "encryption",
+    "authentication",
+    "authorization",
+    "oauth",
+    "jwt",
+    "ssl",
+    "tls",
+    "penetration testing",
+    "vulnerability assessment",
   ],
   projectManagement: [
-    'stakeholder', 'roadmap', 'milestone', 'deliverable', 'sprint',
-    'backlog', 'retrospective', 'standup', 'planning', 'estimation',
+    "stakeholder",
+    "roadmap",
+    "milestone",
+    "deliverable",
+    "sprint",
+    "backlog",
+    "retrospective",
+    "standup",
+    "planning",
+    "estimation",
   ],
 };
 
@@ -135,7 +330,7 @@ export const INDUSTRY_TERMS = {
  */
 export function extractKeywords(text: string): ExtractedKeywords {
   const textLower = text.toLowerCase();
-  
+
   const result: ExtractedKeywords = {
     technical: { keywords: [], categories: {}, frequency: {} },
     soft: { keywords: [], categories: {}, frequency: {} },
@@ -146,11 +341,11 @@ export function extractKeywords(text: string): ExtractedKeywords {
 
   // Extract technical skills
   Object.entries(SKILL_TAXONOMY).forEach(([category, skills]) => {
-    if (category === 'softSkills') return;
-    
+    if (category === "softSkills") return;
+
     const matchedSkills = skills.filter((skill) => {
       const escaped = escapeRegex(skill);
-      const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+      const regex = new RegExp(`\\b${escaped}\\b`, "i");
       return regex.test(textLower);
     });
 
@@ -166,13 +361,13 @@ export function extractKeywords(text: string): ExtractedKeywords {
   // Extract soft skills
   const matchedSoftSkills = SKILL_TAXONOMY.softSkills.filter((skill) => {
     const escaped = escapeRegex(skill);
-    const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+    const regex = new RegExp(`\\b${escaped}\\b`, "i");
     return regex.test(textLower);
   });
 
   if (matchedSoftSkills.length > 0) {
     result.soft.keywords = matchedSoftSkills;
-    result.soft.categories['interpersonal'] = matchedSoftSkills;
+    result.soft.categories["interpersonal"] = matchedSoftSkills;
     matchedSoftSkills.forEach((skill) => {
       result.soft.frequency[skill] = countOccurrences(textLower, skill);
     });
@@ -181,7 +376,7 @@ export function extractKeywords(text: string): ExtractedKeywords {
   // Extract action verbs
   const matchedVerbs = ACTION_VERBS.filter((verb) => {
     const escaped = escapeRegex(verb);
-    const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+    const regex = new RegExp(`\\b${escaped}\\b`, "i");
     return regex.test(textLower);
   });
 
@@ -196,7 +391,7 @@ export function extractKeywords(text: string): ExtractedKeywords {
   Object.entries(INDUSTRY_TERMS).forEach(([domain, terms]) => {
     const matchedTerms = terms.filter((term) => {
       const escaped = escapeRegex(term);
-      const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+      const regex = new RegExp(`\\b${escaped}\\b`, "i");
       return regex.test(textLower);
     });
 
@@ -229,7 +424,7 @@ export function extractSkillsFromResume(resume: any): string[] {
   // Explicit skills section
   if (Array.isArray(resume.skills)) {
     resume.skills.forEach((skill: string) => {
-      if (skill && typeof skill === 'string') {
+      if (skill && typeof skill === "string") {
         skills.add(skill.toLowerCase().trim());
       }
     });
@@ -243,7 +438,9 @@ export function extractSkillsFromResume(resume: any): string[] {
         extracted.technical.keywords.forEach((s) => skills.add(s));
       }
       if (Array.isArray(exp.technologies)) {
-        exp.technologies.forEach((t: string) => skills.add(t.toLowerCase().trim()));
+        exp.technologies.forEach((t: string) =>
+          skills.add(t.toLowerCase().trim()),
+        );
       }
     });
   }
@@ -256,7 +453,9 @@ export function extractSkillsFromResume(resume: any): string[] {
         extracted.technical.keywords.forEach((s) => skills.add(s));
       }
       if (Array.isArray(proj.technologies)) {
-        proj.technologies.forEach((t: string) => skills.add(t.toLowerCase().trim()));
+        proj.technologies.forEach((t: string) =>
+          skills.add(t.toLowerCase().trim()),
+        );
       }
     });
   }
@@ -275,10 +474,7 @@ export function parseJobDescription(jdText: string): {
   experienceYears: number;
 } {
   const keywords = extractKeywords(jdText);
-  const allSkills = [
-    ...keywords.technical.keywords,
-    ...keywords.soft.keywords,
-  ];
+  const allSkills = [...keywords.technical.keywords, ...keywords.soft.keywords];
 
   // Try to identify required vs preferred skills
   const requiredSkills: string[] = [];
@@ -340,12 +536,12 @@ export function parseJobDescription(jdText: string): {
 }
 
 function escapeRegex(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function countOccurrences(text: string, substring: string): number {
   const escaped = escapeRegex(substring);
-  const regex = new RegExp(escaped, 'gi');
+  const regex = new RegExp(escaped, "gi");
   const matches = text.match(regex);
   return matches ? matches.length : 0;
 }
