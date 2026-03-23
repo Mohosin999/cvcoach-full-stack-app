@@ -4,7 +4,7 @@ Resume Preview Component
 import { ResumeContent } from "../../types";
 import {
   ResumePersonalInfo, ResumeSummary, ResumeExperience,
-  ResumeProjects, ResumeAchievements, ResumeCertifications,
+  ResumeProjects, ResumeAchievements,
   ResumeEducation, ResumeSkills,
 } from "../../components/shared";
 
@@ -41,7 +41,6 @@ export default function ResumePreview({ content, forPdf = false }: ResumePreview
       {content.experience.length > 0 && <ResumeExperience experience={content.experience} forPdf={forPdf} formatDescription={formatDescription} />}
       {content.projects && content.projects.length > 0 && <ResumeProjects projects={content.projects} forPdf={forPdf} formatDescription={formatDescription} />}
       {content.achievements && content.achievements.length > 0 && <ResumeAchievements achievements={content.achievements} forPdf={forPdf} />}
-      {content.certifications && content.certifications.length > 0 && <ResumeCertifications certifications={content.certifications} forPdf={forPdf} />}
       {content.education.length > 0 && <ResumeEducation education={content.education} forPdf={forPdf} />}
       {content.skills.length > 0 && <ResumeSkills content={content} forPdf={forPdf} />}
     </div>

@@ -886,9 +886,6 @@ export const analyzeResume = async (
       skills: resume.skills && resume.skills.length > 0,
       summary: !!(resume.summary && resume.summary.length > 10),
       projects: !!(resume.projects && resume.projects.length > 0),
-      certifications: !!(
-        resume.certifications && resume.certifications.length > 0
-      ),
     };
 
     const missingKeywords = categorizeMissingKeywords(
@@ -1358,9 +1355,6 @@ const fallbackAnalysis = (
     skills: resume.skills && resume.skills.length > 0,
     summary: !!(resume.summary && resume.summary.length > 10),
     projects: !!(resume.projects && resume.projects.length > 0),
-    certifications: !!(
-      resume.certifications && resume.certifications.length > 0
-    ),
   };
 
   const missingKeywords = categorizeMissingKeywords(resumeSkills, resume);

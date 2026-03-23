@@ -29,7 +29,7 @@ export default function BuilderProgress({ sections, currentStep }: BuilderProgre
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                       isActive
-                        ? "bg-gradient-to-br from-cyan-400 to-cyan-600 text-white scale-110 shadow-lg shadow-cyan-500/50 ring-2 ring-cyan-400/30"
+                        ? "bg-gradient-to-br from-emerald-400 to-emerald-600 text-white scale-110 shadow-lg shadow-emerald-500/50 ring-2 ring-emerald-400/30"
                         : isCompleted || isPast
                         ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30"
                         : "bg-gray-800 text-gray-500 border border-gray-700"
@@ -45,7 +45,7 @@ export default function BuilderProgress({ sections, currentStep }: BuilderProgre
                   </div>
                   <span
                     className={`text-xs mt-2 text-center truncate w-full ${
-                      isActive ? "text-cyan-400 font-semibold" : "text-gray-500"
+                      isActive ? "text-emerald-400 font-semibold" : "text-gray-500"
                     }`}
                   >
                     {section.title.split(" ")[0]}

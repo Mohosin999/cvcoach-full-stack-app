@@ -457,26 +457,6 @@ export class ResumeAnalysisService {
             ? ["Education section present"]
             : [],
       },
-      certifications: {
-        present: !!(resume.certifications && resume.certifications.length > 0),
-        score:
-          resume.certifications && resume.certifications.length > 0 ? 85 : 50,
-        quality:
-          resume.certifications && resume.certifications.length > 2
-            ? "Excellent"
-            : resume.certifications && resume.certifications.length > 0
-              ? "Good"
-              : "Fair",
-        issues: [],
-        recommendations:
-          !resume.certifications || resume.certifications.length === 0
-            ? ["Consider adding relevant certifications"]
-            : [],
-        strengths:
-          resume.certifications && resume.certifications.length > 0
-            ? [`${resume.certifications.length} certifications listed`]
-            : [],
-      },
       additionalSections: [],
     };
   }
@@ -999,7 +979,6 @@ export class ResumeAnalysisService {
     if (resume.skills && resume.skills.length > 0) score += 20;
     if (resume.education && resume.education.length > 0) score += 15;
     if (resume.projects && resume.projects.length > 0) score += 10;
-    if (resume.certifications && resume.certifications.length > 0) score += 10;
     return Math.min(100, score);
   }
 }

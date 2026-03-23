@@ -20,9 +20,15 @@ export default function ProjectsEditor({
   const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
 
   const handleAIGenerate = async (index: number) => {
+    const project = projects[index];
+    
+    if (!project.name?.trim()) {
+      toast.error('Please provide a Project Name first to generate description.');
+      return;
+    }
+
     try {
       setGeneratingIndex(index);
-      const project = projects[index];
       const response = await resumeBuilderApi.generateSection({
         section: 'Project Description',
         context: {
@@ -48,7 +54,7 @@ export default function ProjectsEditor({
         <button
           type="button"
           onClick={onAdd}
-          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
+          className="px-3 py-1.5 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 hover:from-emerald-700 hover:to-emerald-500 text-white text-sm rounded-lg transition-all"
         >
           + Add Project
         </button>
@@ -70,15 +76,39 @@ export default function ProjectsEditor({
               </button>
             </div>
 
-            <div>
-              <label className="text-xs text-gray-400">Project Name *</label>
-              <input
-                type="text"
-                value={project.name}
-                onChange={(e) => onUpdate(index, 'name', e.target.value)}
-                className="input w-full text-sm"
-                placeholder="e.g., E-commerce Platform"
-              />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex-1">
+                <label className="text-xs text-gray-400">Project Name *</label>
+                <input
+                  type="text"
+                  value={project.name}
+                  onChange={(e) => onUpdate(index, 'name', e.target.value)}
+                  className="input w-full text-sm"
+                  placeholder="e.g., E-commerce Platform"
+                />
+              </div>
+              <div className="flex items-end gap-2">
+                {project.links?.live && (
+                  <a
+                    href={project.links.live}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-2 bg-emerald-600/30 text-emerald-400 text-xs rounded hover:bg-emerald-600/50 transition-colors"
+                  >
+                    Live
+                  </a>
+                )}
+                {project.links?.github && (
+                  <a
+                    href={project.links.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-2 bg-gray-600/50 text-gray-300 text-xs rounded hover:bg-gray-600 transition-colors"
+                  >
+                    GitHub
+                  </a>
+                )}
+              </div>
             </div>
 
             <div>
@@ -88,7 +118,7 @@ export default function ProjectsEditor({
                   type="button"
                   onClick={() => handleAIGenerate(index)}
                   disabled={generatingIndex === index}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-600 text-white text-xs rounded transition-all disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 hover:from-emerald-700 hover:to-emerald-500 disabled:from-gray-600 disabled:to-gray-600 text-white text-xs rounded transition-all disabled:cursor-not-allowed"
                 >
                   {generatingIndex === index ? (
                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -102,21 +132,8 @@ export default function ProjectsEditor({
                 value={project.description}
                 onChange={(e) => onUpdate(index, 'description', e.target.value)}
                 className="input w-full text-sm"
-                rows={3}
+                style={{ minHeight: '200px', height: 'auto' }}
                 placeholder="Describe the project, your role, and technologies used..."
-              />
-            </div>
-
-            <div>
-              <label className="text-xs text-gray-400">Technologies (comma-separated)</label>
-              <input
-                type="text"
-                value={project.technologies?.join(', ') || ''}
-                onChange={(e) =>
-                  onUpdate(index, 'technologies', e.target.value.split(',').map((t) => t.trim()).filter(Boolean))
-                }
-                className="input w-full text-sm"
-                placeholder="e.g., React, Node.js, MongoDB"
               />
             </div>
 

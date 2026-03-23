@@ -247,26 +247,6 @@ Return ONLY the achievements, one per line, with no numbering or extra text.`;
   return achievements;
 };
 
-export const generateCertification = async (jobTitle: string) => {
-  const prompt = `Suggest 2-3 relevant professional certifications for a ${jobTitle} position.
-These should be well-known, industry-recognized certifications.
-
-Return ONLY the certification names, one per line, with no numbering or extra text.`;
-
-  const response = await generateWithFallback(prompt);
-  
-  const certs = response
-    .split('\n')
-    .map(line => line.replace(/^[-•*]\s*/, '').trim())
-    .filter(line => line.length > 0 && line.length < 100);
-  
-  return certs.map(cert => ({
-    title: cert,
-    link: '',
-    date: ''
-  }));
-};
-
 export interface SummaryLevel {
   level: 'beginner' | 'intermediate' | 'advanced';
   summary: string;

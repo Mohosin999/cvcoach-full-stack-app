@@ -41,7 +41,7 @@ export function useResumeContent(
       ...prev,
       experience: [
         ...prev.experience,
-        { company: "", title: "", startDate: "", endDate: "", description: "", current: false },
+        { company: "", title: "", topSkills: [], startDate: "", endDate: "", description: "", current: false },
       ],
     }));
   }, [setContent]);
@@ -112,28 +112,6 @@ export function useResumeContent(
     }));
   }, [setContent]);
 
-  const addCertification = useCallback(() => {
-    setContent((prev) => ({
-      ...prev,
-      certifications: [...(prev.certifications || []), { title: "", link: "", date: "" }],
-    }));
-  }, [setContent]);
-
-  const updateCertification = useCallback((index: number, field: string, value: string) => {
-    setContent((prev) => {
-      const updated = [...(prev.certifications || [])];
-      updated[index] = { ...updated[index], [field]: value };
-      return { ...prev, certifications: updated };
-    });
-  }, [setContent]);
-
-  const removeCertification = useCallback((index: number) => {
-    setContent((prev) => ({
-      ...prev,
-      certifications: prev.certifications?.filter((_, i) => i !== index) || [],
-    }));
-  }, [setContent]);
-
   const addEducation = useCallback(() => {
     setContent((prev) => ({
       ...prev,
@@ -183,9 +161,6 @@ export function useResumeContent(
     addAchievement,
     updateAchievement,
     removeAchievement,
-    addCertification,
-    updateCertification,
-    removeCertification,
     addEducation,
     updateEducation,
     removeEducation,

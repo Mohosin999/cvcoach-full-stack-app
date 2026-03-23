@@ -434,7 +434,6 @@ export class SectionCompletenessCalculator extends ScoreCalculator {
 
   private optionalSections = [
     { name: "education", label: "Education" },
-    { name: "certifications", label: "Certifications" },
     { name: "achievements", label: "Achievements" },
     { name: "volunteer", label: "Volunteer Experience" },
   ];
@@ -595,11 +594,6 @@ export class SectionCompletenessCalculator extends ScoreCalculator {
       )
     ) {
       bonus += 5;
-    }
-
-    // Bonus for certifications
-    if (resume.certifications?.length > 0) {
-      bonus += 3;
     }
 
     // Bonus for projects with links

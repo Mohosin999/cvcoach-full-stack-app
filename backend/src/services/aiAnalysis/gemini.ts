@@ -183,25 +183,93 @@ Context:
 `
     : '';
 
-  const prompt = `
-Generate professional ${section} content for a resume.
+  let prompt: string;
+
+  if (section === 'Work Experience') {
+    prompt = `
+Generate exactly 3 bullet points for a ${context?.jobTitle || 'professional'} position.
+
 ${contextStr}
 
+Follow this exact format (3 bullet points, each on its own line starting with •):
+Example: "• Led development of customer-facing web applications using React and Node.js, improving user engagement by 35%
+• Collaborated with cross-functional teams to deliver 15+ projects on time and within budget
+• Mentored junior developers and conducted code reviews to ensure code quality standards"
+
 The content should be:
+- Exactly 3 bullet points
+- Each bullet point on a separate line starting with •
 - ATS-friendly (no tables, images, or complex formatting)
-- Professional and concise
-- Action-oriented with quantified achievements where possible
-- Relevant to the specified context
+- Professional and compelling
+- Focus on quantifiable achievements and key responsibilities
+- Use action verbs (Led, Developed, Managed, Improved, etc.)
 
 Provide your response in the following JSON format ONLY:
 {
   "section": "${section}",
-  "content": string (the generated content),
+  "content": string (the generated content with 3 bullet points separated by newlines, each starting with •),
   "tips": [string] (tips for customizing this section)
 }
 
 Return ONLY valid JSON.
 `;
+  } else if (section === 'Project Description') {
+    prompt = `
+Generate exactly 3 bullet points for a project: "${context?.jobTitle || 'Project Name'}".
+${context?.skills && context.skills.length > 0 ? `Technologies used: ${context.skills.join(', ')}.` : ''}
+
+${contextStr}
+
+Follow this exact format (3 bullet points, each on its own line starting with •):
+Example: "• Developed a full-stack e-commerce platform using React, Node.js, and MongoDB with payment integration
+• Implemented user authentication and authorization using JWT for secure access control
+• Deployed application on AWS with CI/CD pipeline, reducing deployment time by 50%"
+
+The content should be:
+- Exactly 3 bullet points
+- Each bullet point on a separate line starting with •
+- ATS-friendly (no tables, images, or complex formatting)
+- Professional and compelling
+- Focus on key features, technologies used, and measurable outcomes
+- Use action verbs (Developed, Implemented, Designed, Built, Created, etc.)
+
+Provide your response in the following JSON format ONLY:
+{
+  "section": "${section}",
+  "content": string (the generated content with 3 bullet points separated by newlines, each starting with •),
+  "tips": [string] (tips for customizing this section)
+}
+
+Return ONLY valid JSON.
+`;
+  } else {
+    prompt = `
+Generate a professional ${section} for a ${context?.jobTitle || 'professional'} based on their job title and skills.
+
+${contextStr}
+
+Follow this exact format (4-5 sentences, each sentence on its own line):
+Example: "A self-motivated front-end developer with 4+ years of experience, skilled in building high-performance and scalable web applications using React, Next.js, and TypeScript. Experienced in developing RESTful APIs using Node.js and Express, JSON data handling, and integrating AI solutions using OpenAI and Gemini APIs. Quick learner with strong problem-solving and debugging skills."
+
+The content should be:
+- Exactly 4-5 complete sentences
+- Each sentence on a separate line
+- ATS-friendly (no tables, images, or complex formatting)
+- Professional and compelling
+- First sentence: Experience level and primary expertise
+- Middle sentences: Key skills and technical competencies
+- Final sentence: Personal qualities or soft skills
+
+Provide your response in the following JSON format ONLY:
+{
+  "section": "${section}",
+  "content": string (the generated content with sentences separated by newlines),
+  "tips": [string] (tips for customizing this section)
+}
+
+Return ONLY valid JSON.
+`;
+  }
 
   try {
     const result = await model.generateContent(prompt);

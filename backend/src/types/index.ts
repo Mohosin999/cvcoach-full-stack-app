@@ -76,11 +76,6 @@ export interface ResumeContent {
     description?: string;
     date?: string;
   }>;
-  certifications?: Array<{
-    title: string;
-    link?: string;
-    date?: string;
-  }>;
   education: Array<{
     institution: string;
     degree: string;
@@ -161,7 +156,6 @@ export interface AnalysisResult {
     skills: boolean;
     summary: boolean;
     projects: boolean;
-    certifications?: boolean;
   };
 }
 
@@ -220,7 +214,6 @@ export interface SectionAnalysis {
   experience: SectionScore;
   projects: SectionScore;
   education: SectionScore;
-  certifications: SectionScore;
   additionalSections: AdditionalSectionScore[];
 }
 

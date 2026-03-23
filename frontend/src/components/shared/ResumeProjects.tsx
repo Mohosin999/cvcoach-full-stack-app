@@ -27,10 +27,10 @@ export default function ResumeProjects({ projects, forPdf, formatDescription }: 
             {(proj.links?.live || proj.links?.github) && (
               <div className={`flex gap-3 text-xs ${linkColor}`}>
                 {proj.links.live && (
-                  <a href={proj.links.live.startsWith("http") ? proj.links.live : `https://${proj.links.live}`} target="_blank" rel="noopener noreferrer" className="hover:underline">Preview</a>
+                  <span onClick={() => window.open(proj.links!.live!.startsWith("http") ? proj.links!.live : `https://${proj.links!.live}`, '_blank')} className="hover:underline cursor-pointer">Live</span>
                 )}
                 {proj.links.github && (
-                  <a href={proj.links.github.startsWith("http") ? proj.links.github : `https://${proj.links.github}`} target="_blank" rel="noopener noreferrer" className="hover:underline">Repo</a>
+                  <span onClick={() => window.open(proj.links!.github!.startsWith("http") ? proj.links!.github : `https://${proj.links!.github}`, '_blank')} className="hover:underline cursor-pointer">GitHub</span>
                 )}
               </div>
             )}

@@ -21,7 +21,7 @@ export default function AchievementsEditor({ achievements, onAdd, onUpdate, onRe
           </div>
           <div className="space-y-3">
             <input type="text" value={ach.title} onChange={(e) => onUpdate(index, 'title', e.target.value)} className="input" placeholder="Achievement Title" />
-            <textarea value={ach.description} onChange={(e) => onUpdate(index, 'description', e.target.value)} className="input min-h-[80px] resize-none" placeholder="Description (optional)" />
+            <textarea value={ach.description} onChange={(e) => onUpdate(index, 'description', e.target.value)} className="input" style={{ minHeight: '200px', height: 'auto' }} placeholder="Description (optional)" />
             <input type="text" value={ach.date || ''} onChange={(e) => onUpdate(index, 'date', e.target.value)} className="input" placeholder="Date (optional)" />
           </div>
         </div>

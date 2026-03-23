@@ -26,6 +26,7 @@ export interface IResumeTemplate extends Document {
     experience: Array<{
       company: string;
       title: string;
+      topSkills?: string[];
       location?: string;
       startDate: string;
       endDate?: string;
@@ -45,11 +46,6 @@ export interface IResumeTemplate extends Document {
     achievements?: Array<{
       title: string;
       description?: string;
-      date?: string;
-    }>;
-    certifications?: Array<{
-      title: string;
-      link?: string;
       date?: string;
     }>;
     education: Array<{
@@ -127,13 +123,6 @@ const resumeTemplateSchema = new Schema<IResumeTemplate>(
         {
           title: String,
           description: String,
-          date: String,
-        },
-      ],
-      certifications: [
-        {
-          title: String,
-          link: String,
           date: String,
         },
       ],

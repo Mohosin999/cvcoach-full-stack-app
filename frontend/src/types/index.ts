@@ -63,7 +63,6 @@ export interface ResumeContent {
   experience: Experience[];
   projects?: Project[];
   achievements?: Achievement[];
-  certifications?: Certification[];
   education: Education[];
   skills: string[];
 }
@@ -71,6 +70,7 @@ export interface ResumeContent {
 export interface Experience {
   company: string;
   title: string;
+  topSkills?: string[];
   location?: string;
   startDate: string;
   endDate?: string;
@@ -92,12 +92,6 @@ export interface Project {
 export interface Achievement {
   title: string;
   description?: string;
-  date?: string;
-}
-
-export interface Certification {
-  title: string;
-  link?: string;
   date?: string;
 }
 

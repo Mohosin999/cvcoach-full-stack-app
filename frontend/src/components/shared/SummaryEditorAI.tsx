@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Sparkles, Loader2 } from 'lucide-react';
-import { toast } from 'react-toastify';
-import { resumeBuilderApi } from '../../api/api';
-import { AISectionSuggestion } from '../../types';
+import { useState } from "react";
+import { Sparkles, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
+import { resumeBuilderApi } from "../../api/api";
+import { AISectionSuggestion } from "../../types";
 
 interface SummaryEditorProps {
   value: string;
@@ -23,10 +23,17 @@ export default function SummaryEditor({
   const [generating, setGenerating] = useState(false);
 
   const handleAIGenerate = async () => {
+    if (!personalInfo?.jobTitle?.trim()) {
+      toast.error(
+        "Please provide a Professional Title first to generate summary.",
+      );
+      return;
+    }
+
     try {
       setGenerating(true);
       const response = await resumeBuilderApi.generateSection({
-        section: 'Professional Summary',
+        section: "Professional Summary",
         context: {
           jobTitle: personalInfo?.jobTitle,
           skills: skills,
@@ -35,9 +42,11 @@ export default function SummaryEditor({
 
       const suggestion = response.data.data as AISectionSuggestion;
       onChange(suggestion.content);
-      toast.success('Summary generated successfully!');
+      toast.success("Summary generated successfully!");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to generate summary');
+      toast.error(
+        error.response?.data?.message || "Failed to generate summary",
+      );
     } finally {
       setGenerating(false);
     }
@@ -53,25 +62,25 @@ export default function SummaryEditor({
           type="button"
           onClick={handleAIGenerate}
           disabled={generating}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-600 text-white text-sm rounded-lg transition-all disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 hover:from-emerald-700 hover:to-emerald-500 disabled:from-gray-600 disabled:to-gray-600 text-white text-sm rounded-lg transition-all disabled:cursor-not-allowed"
         >
           {generating ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <Sparkles className="w-4 h-4" />
           )}
-          {generating ? 'Generating...' : 'AI Generate'}
+          {generating ? "Generating..." : "AI Generate"}
         </button>
       </div>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="input w-full"
-        style={{ minHeight: '120px', height: 'auto' }}
-        placeholder="Write a brief professional summary (30-100 words) highlighting your key achievements and skills..."
+        style={{ minHeight: "200px", height: "auto" }}
       />
       <p className="text-xs text-gray-400">
-        Tip: Include your years of experience, key skills, and notable achievements
+        Tip: Include your years of experience, key skills, and notable
+        achievements
       </p>
     </div>
   );

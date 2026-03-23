@@ -21,7 +21,7 @@ export default function PersonalInfoEditor({ content, updateField }: PersonalInf
             type="text"
             value={content.personalInfo.fullName}
             onChange={(e) => updateField('fullName', e.target.value)}
-            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
+            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:border-transparent transition-all duration-200 placeholder-gray-500"
             placeholder="John Doe"
           />
         </div>
@@ -33,7 +33,7 @@ export default function PersonalInfoEditor({ content, updateField }: PersonalInf
             type="text"
             value={content.personalInfo.jobTitle}
             onChange={(e) => updateField('jobTitle', e.target.value)}
-            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
+            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:border-transparent transition-all duration-200 placeholder-gray-500"
             placeholder="Software Engineer"
           />
         </div>
@@ -49,7 +49,7 @@ export default function PersonalInfoEditor({ content, updateField }: PersonalInf
             type="email"
             value={content.personalInfo.email}
             onChange={(e) => updateField('email', e.target.value)}
-            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
+            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:border-transparent transition-all duration-200 placeholder-gray-500"
             placeholder="john@example.com"
           />
         </div>
@@ -68,7 +68,7 @@ export default function PersonalInfoEditor({ content, updateField }: PersonalInf
                 const value = e.target.value.replace(/[^0-9]/g, '');
                 updateField('whatsapp', `+880${value}`);
               }}
-              className="w-full px-4 py-3 border border-gray-600 rounded-r-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
+              className="w-full px-4 py-3 border border-gray-600 rounded-r-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:border-transparent transition-all duration-200 placeholder-gray-500"
               placeholder="1234567890"
             />
           </div>
@@ -89,7 +89,7 @@ export default function PersonalInfoEditor({ content, updateField }: PersonalInf
               type="text"
               value={content.personalInfo.address?.city}
               onChange={(e) => updateField('address.city', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
+              className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:border-transparent transition-all duration-200 placeholder-gray-500"
               placeholder="Sherpur"
             />
           </div>
@@ -101,7 +101,7 @@ export default function PersonalInfoEditor({ content, updateField }: PersonalInf
               type="text"
               value={content.personalInfo.address?.division}
               onChange={(e) => updateField('address.division', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
+              className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:border-transparent transition-all duration-200 placeholder-gray-500"
               placeholder="Mymensingh"
             />
           </div>
@@ -113,7 +113,7 @@ export default function PersonalInfoEditor({ content, updateField }: PersonalInf
               type="text"
               value={content.personalInfo.address?.zipCode}
               onChange={(e) => updateField('address.zipCode', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
+              className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:border-transparent transition-all duration-200 placeholder-gray-500"
               placeholder="2100"
             />
           </div>
@@ -132,7 +132,7 @@ export default function PersonalInfoEditor({ content, updateField }: PersonalInf
             const value = e.target.value.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '').replace(/^linkedin\.com\/in\//, '');
             updateField('linkedIn', value);
           }}
-          className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
+          className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800/50 text-gray-100 focus:outline-none focus:border-transparent transition-all duration-200 placeholder-gray-500"
           placeholder="your-username"
         />
       </div>

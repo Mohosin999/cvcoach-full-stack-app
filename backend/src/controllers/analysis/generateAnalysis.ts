@@ -571,11 +571,6 @@ function generateATSSuggestions(result: any, atsBreakdown: any): string[] {
     );
   }
 
-  // Certifications suggestion
-  if (!result.sectionAnalysis?.certifications?.present) {
-    suggestions.push("Add relevant certifications to boost ATS score");
-  }
-
   return suggestions.slice(0, 8);
 }
 

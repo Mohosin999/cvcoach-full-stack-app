@@ -21,7 +21,6 @@ export const createResumeTemplate = async (
       skills: [],
       projects: [],
       achievements: [],
-      certifications: [],
     },
     isDraft: true,
   });

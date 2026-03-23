@@ -13,7 +13,7 @@ export default function SummaryEditor({ value, onChange }: SummaryEditorProps) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="input w-full"
-        style={{ minHeight: '80px', height: 'auto' }}
+        style={{ minHeight: '200px', height: 'auto' }}
         placeholder="Write a brief professional summary..."
       />
     </div>

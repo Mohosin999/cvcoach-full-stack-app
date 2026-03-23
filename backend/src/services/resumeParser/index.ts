@@ -48,7 +48,6 @@ const parseTextToResume = (text: string): ResumeContent => {
     education: [],
     skills: [],
     projects: [],
-    certifications: [],
   };
 
   const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
@@ -77,7 +76,6 @@ const parseTextToResume = (text: string): ResumeContent => {
     education: { regex: /^(education|academic|qualification|academic\s+background)/i, order: 2 },
     skills: { regex: /^(skills|technical\s+skills|core\s+competencies|technologies|tech\s+stack)/i, order: 3 },
     projects: { regex: /^(projects|portfolio|key\s+projects|personal\s+projects|side\s+projects)/i, order: 4 },
-    certifications: { regex: /^(certifications|certificates|licenses|professional\s+certifications|awards)/i, order: 5 },
   };
 
   const sectionPositions: { [key: string]: number } = {};
@@ -124,9 +122,6 @@ const parseTextToResume = (text: string): ResumeContent => {
         break;
       case 'projects':
         content.projects = parseProjectsSection(lines.slice(startIdx, endIdx));
-        break;
-      case 'certifications':
-        content.certifications = parseCertificationsSection(lines.slice(startIdx, endIdx));
         break;
     }
   }
@@ -408,28 +403,4 @@ const parseProjectsSection = (lines: string[]): ResumeContent['projects'] => {
   }
 
   return projects;
-};
-
-const parseCertificationsSection = (lines: string[]): ResumeContent['certifications'] => {
-  const certifications: ResumeContent['certifications'] = [];
-  const dateRegex = /\d{4}|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/gi;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.length < 5) continue;
-
-    const cert: ResumeContent['certifications'][0] = {
-      title: trimmed,
-      link: '',
-    };
-
-    const dateMatch = trimmed.match(dateRegex);
-    if (dateMatch) {
-      cert.date = dateMatch[0];
-    }
-
-    certifications.push(cert);
-  }
-
-  return certifications;
 };

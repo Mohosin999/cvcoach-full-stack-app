@@ -23,7 +23,6 @@ const defaultContent: ResumeContent = {
   experience: [],
   projects: [],
   achievements: [],
-  certifications: [],
   education: [],
   skills: [],
 };
