@@ -3,7 +3,7 @@ Custom Hook: useResumeContent
 Handles content manipulation for resume builder
 =================================== */
 import { useCallback } from "react";
-import { ResumeContent, Experience, Project, Achievement, Certification, Education } from "../types";
+import { ResumeContent, Experience, Project, Achievement, Education } from "../types";
 
 export function useResumeContent(
   content: ResumeContent,
@@ -134,19 +134,37 @@ export function useResumeContent(
     }));
   }, [setContent]);
 
-  const addSkill = useCallback((skill: string) => {
+  const addTechnicalSkill = useCallback((skill: string) => {
     setContent((prev) => {
-      if (skill && !prev.skills.includes(skill)) {
-        return { ...prev, skills: [...prev.skills, skill] };
+      const currentSkills = prev.technicalSkills || [];
+      if (skill && !currentSkills.includes(skill)) {
+        return { ...prev, technicalSkills: [...currentSkills, skill] };
       }
       return prev;
     });
   }, [setContent]);
 
-  const removeSkill = useCallback((skill: string) => {
+  const removeTechnicalSkill = useCallback((skill: string) => {
     setContent((prev) => ({
       ...prev,
-      skills: prev.skills.filter((s) => s !== skill),
+      technicalSkills: (prev.technicalSkills || []).filter((s) => s !== skill),
+    }));
+  }, [setContent]);
+
+  const addSoftSkill = useCallback((skill: string) => {
+    setContent((prev) => {
+      const currentSkills = prev.softSkills || [];
+      if (skill && !currentSkills.includes(skill)) {
+        return { ...prev, softSkills: [...currentSkills, skill] };
+      }
+      return prev;
+    });
+  }, [setContent]);
+
+  const removeSoftSkill = useCallback((skill: string) => {
+    setContent((prev) => ({
+      ...prev,
+      softSkills: (prev.softSkills || []).filter((s) => s !== skill),
     }));
   }, [setContent]);
 
@@ -164,7 +182,9 @@ export function useResumeContent(
     addEducation,
     updateEducation,
     removeEducation,
-    addSkill,
-    removeSkill,
+    addTechnicalSkill,
+    removeTechnicalSkill,
+    addSoftSkill,
+    removeSoftSkill,
   };
 }

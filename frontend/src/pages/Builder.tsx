@@ -89,7 +89,7 @@ export default function Builder() {
   }, [location.state]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentStep]);
 
   const checkSectionCompletion = (sectionId: string): boolean => {
@@ -201,9 +201,12 @@ export default function Builder() {
       case "skills":
         return (
           <SkillsEditorAI
-            skills={content.skills}
-            onAdd={contentActions.addSkill}
-            onRemove={contentActions.removeSkill}
+            technicalSkills={content.technicalSkills || []}
+            softSkills={content.softSkills || []}
+            onAddTechnicalSkill={contentActions.addTechnicalSkill}
+            onRemoveTechnicalSkill={contentActions.removeTechnicalSkill}
+            onAddSoftSkill={contentActions.addSoftSkill}
+            onRemoveSoftSkill={contentActions.removeSoftSkill}
             jobTitle={content.personalInfo.jobTitle}
           />
         );
@@ -259,33 +262,53 @@ export default function Builder() {
                     {sectionStates.map((section, index) => {
                       const Icon = section.icon;
                       const isActive = index === currentStep;
-                      const isCompleted = section.completed || index < currentStep;
-                      const displayTitle = section.id === "summary" ? "Summary" : section.title.split(" ")[0];
-                      
+                      const isCompleted =
+                        section.completed || index < currentStep;
+                      const displayTitle =
+                        section.id === "summary"
+                          ? "Summary"
+                          : section.title.split(" ")[0];
+
                       return (
                         <button
                           key={section.id}
                           onClick={() => setCurrentStep(index)}
                           className="flex flex-col items-center gap-1"
                         >
-                          <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer hover:scale-105 ${
-                            isActive
-                              ? "bg-white text-emerald-700 shadow-xl ring-2 ring-white/50"
-                              : isCompleted
-                                ? "bg-emerald-500 text-white"
-                                : "bg-white/20 text-white/60"
-                          }`}>
+                          <div
+                            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer hover:scale-105 ${
+                              isActive
+                                ? "bg-white text-emerald-700 shadow-xl ring-2 ring-white/50"
+                                : isCompleted
+                                  ? "bg-emerald-500 text-white"
+                                  : "bg-white/20 text-white/60"
+                            }`}
+                          >
                             {isCompleted ? (
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
                               </svg>
                             ) : (
                               <Icon className="w-4 h-4" />
                             )}
                           </div>
-                          <span className={`text-[9px] whitespace-nowrap ${
-                            isActive ? "text-white font-semibold" : "text-emerald-100/70"
-                          }`}>
+                          <span
+                            className={`text-[9px] whitespace-nowrap ${
+                              isActive
+                                ? "text-white font-semibold"
+                                : "text-emerald-100/70"
+                            }`}
+                          >
                             {displayTitle}
                           </span>
                         </button>
@@ -296,33 +319,53 @@ export default function Builder() {
                     {sectionStates.map((section, index) => {
                       const Icon = section.icon;
                       const isActive = index === currentStep;
-                      const isCompleted = section.completed || index < currentStep;
-                      const displayTitle = section.id === "summary" ? "Summary" : section.title.split(" ")[0];
-                      
+                      const isCompleted =
+                        section.completed || index < currentStep;
+                      const displayTitle =
+                        section.id === "summary"
+                          ? "Summary"
+                          : section.title.split(" ")[0];
+
                       return (
                         <button
                           key={section.id}
                           onClick={() => setCurrentStep(index)}
                           className="flex flex-col items-center gap-1 flex-shrink-0"
                         >
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
-                            isActive
-                              ? "bg-white text-emerald-700 shadow-xl ring-2 ring-white/50 -mt-2"
-                              : isCompleted
-                                ? "bg-emerald-500 text-white"
-                                : "bg-white/20 text-white/60"
-                          }`}>
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                              isActive
+                                ? "bg-white text-emerald-700 shadow-xl ring-2 ring-white/50 -mt-2"
+                                : isCompleted
+                                  ? "bg-emerald-500 text-white"
+                                  : "bg-white/20 text-white/60"
+                            }`}
+                          >
                             {isCompleted ? (
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
                               </svg>
                             ) : (
                               <Icon className="w-4 h-4" />
                             )}
                           </div>
-                          <span className={`text-[10px] whitespace-nowrap ${
-                            isActive ? "text-white font-semibold" : "text-emerald-100/70"
-                          }`}>
+                          <span
+                            className={`text-[10px] whitespace-nowrap ${
+                              isActive
+                                ? "text-white font-semibold"
+                                : "text-emerald-100/70"
+                            }`}
+                          >
                             {displayTitle}
                           </span>
                         </button>
@@ -716,8 +759,12 @@ function ExperiencePreview({
                 {exp.title}
                 {exp.topSkills && exp.topSkills.length > 0 && (
                   <span className="font-normal text-gray-600">
-                    {" - "}{exp.topSkills.map((skill, i) => (
-                      <span key={i} className="italic">{skill}{i < exp.topSkills!.length - 1 ? ', ' : ''}</span>
+                    {" - "}
+                    {exp.topSkills.map((skill, i) => (
+                      <span key={i} className="italic">
+                        {skill}
+                        {i < exp.topSkills!.length - 1 ? ", " : ""}
+                      </span>
                     ))}
                   </span>
                 )}
@@ -761,16 +808,22 @@ function ProjectsPreview({
         <div key={index} className="mb-2 last:mb-0">
           <div className="flex justify-between items-start gap-2">
             <h3 className="text-[10px] font-bold text-gray-900">
-              {project.name || 'Untitled Project'}
+              {project.name || "Untitled Project"}
             </h3>
             <div className="flex items-center gap-2">
               {project.links?.live && (
-                <span onClick={() => window.open(project.links!.live, '_blank')} className="text-[9px] text-emerald-600 hover:text-emerald-500 cursor-pointer">
+                <span
+                  onClick={() => window.open(project.links!.live, "_blank")}
+                  className="text-[9px] text-emerald-600 hover:text-emerald-500 cursor-pointer"
+                >
                   Live
                 </span>
               )}
               {project.links?.github && (
-                <span onClick={() => window.open(project.links!.github, '_blank')} className="text-[9px] text-gray-500 hover:text-gray-400 cursor-pointer">
+                <span
+                  onClick={() => window.open(project.links!.github, "_blank")}
+                  className="text-[9px] text-gray-500 hover:text-gray-400 cursor-pointer"
+                >
                   GitHub
                 </span>
               )}
@@ -833,14 +886,16 @@ function EducationPreview({
         EDUCATION
       </h2>
       {education.map((edu, index) => (
-        <div key={index} className="mb-1.5 last:mb-0">
-          <h3 className="text-[10px] font-bold text-gray-900">
-            {edu.institution}
-          </h3>
-          <p className="text-[9px] text-gray-700">
-            {edu.degree}
-          </p>
-          {edu.date && <p className="text-[9px] text-gray-600">{edu.date}</p>}
+        <div key={index} className="flex items-start mb-1.5 last:mb-0">
+          <div>
+            <h3 className="text-[10px] font-bold text-gray-900">
+              {edu.institution}
+            </h3>
+            <p className="text-[9px] text-gray-700">{edu.degree}</p>
+          </div>
+          <div className="ml-auto">
+            {edu.date && <p className="text-[9px] text-gray-600">{edu.date}</p>}
+          </div>
         </div>
       ))}
     </div>
@@ -854,20 +909,27 @@ function SkillsPreview({
   content: ResumeContent;
   forPdf: boolean;
 }) {
+  const technicalSkills = content.technicalSkills || [];
+  const softSkills = content.softSkills || [];
+
   return (
     <div className="mb-3 px-6 pb-6">
       <h2 className="text-[10px] font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5 mb-1.5">
         SKILLS
       </h2>
-      <div className="flex flex-wrap gap-1.5">
-        {content.skills.map((skill, index) => (
-          <span
-            key={index}
-            className="px-2 py-0.5 bg-gray-100 text-gray-800 text-[9px] font-medium rounded"
-          >
-            {skill}
-          </span>
-        ))}
+      <div className="space-y-1.5">
+        {technicalSkills.length > 0 && (
+          <p className="text-[10px] text-gray-700">
+            <span className="font-bold">• Technical Skills:</span>{" "}
+            {technicalSkills.join(", ")}
+          </p>
+        )}
+        {softSkills.length > 0 && (
+          <p className="text-[10px] text-gray-700">
+            <span className="font-bold">• Soft Skills:</span>{" "}
+            {softSkills.join(", ")}
+          </p>
+        )}
       </div>
     </div>
   );

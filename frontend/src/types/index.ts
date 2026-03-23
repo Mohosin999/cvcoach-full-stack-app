@@ -64,7 +64,8 @@ export interface ResumeContent {
   projects?: Project[];
   achievements?: Achievement[];
   education: Education[];
-  skills: string[];
+  technicalSkills: string[];
+  softSkills: string[];
 }
 
 export interface Experience {
