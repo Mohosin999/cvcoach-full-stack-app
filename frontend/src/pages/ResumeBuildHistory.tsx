@@ -4,13 +4,12 @@ Resume Build History Page
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Trash2, Calendar, FileText, Eye } from "lucide-react";
+import { ArrowLeft, Trash2, Calendar, FileText } from "lucide-react";
 import { toast } from "react-toastify";
 import { resumeBuildHistoryApi } from "../api/api";
 import { ResumeBuildHistory, Resume } from "../types";
 import { LoadingSpinner, Pagination } from "../components/ui";
 import ConfirmModal from "../components/ui/ConfirmModal";
-import ResumePreview from "../components/shared/ResumePreview";
 
 export default function ResumeBuildHistoryPage() {
   const navigate = useNavigate();
@@ -20,7 +19,6 @@ export default function ResumeBuildHistoryPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [clearAllOpen, setClearAllOpen] = useState(false);
-  const [previewResume, setPreviewResume] = useState<ResumeBuildHistory | null>(null);
 
   const fetchHistory = async (pageNum: number = 1) => {
     try {
@@ -63,24 +61,26 @@ export default function ResumeBuildHistoryPage() {
   };
 
   const handleLoadToBuilder = (item: ResumeBuildHistory) => {
-    // Create a resume object from the history item
+    const jobTitle = item.resumeContent?.personalInfo?.jobTitle || "resume";
+    const resumeTitle = `${jobTitle.toLowerCase()} resume`;
+
     const resume: Resume = {
       _id: item._id,
-      userId: '',
+      userId: "",
       content: item.resumeContent,
       metadata: {
-        filename: item.title,
-        originalName: item.title,
+        filename: resumeTitle,
+        originalName: resumeTitle,
         size: 0,
-        type: 'builder',
+        type: "builder",
       },
       tags: [],
       isActive: true,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
-      sourceType: 'builder',
+      sourceType: "builder",
     };
-    navigate('/builder', { state: { resume } });
+    navigate("/builder", { state: { resume } });
   };
 
   return (
@@ -102,7 +102,9 @@ export default function ResumeBuildHistoryPage() {
           className="mb-8 flex items-center justify-between"
         >
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Resume Build History</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Resume Build History
+            </h1>
             <p className="text-gray-400">View all your built resumes</p>
           </div>
           {history.length > 0 && (
@@ -125,10 +127,15 @@ export default function ResumeBuildHistoryPage() {
             <div className="w-16 h-16 rounded-2xl bg-orange-500/20 flex items-center justify-center mb-4">
               <FileText className="w-8 h-8 text-orange-400" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">No Resume Build History</h3>
-            <p className="text-gray-400 mb-6 max-w-md">Your built resumes will appear here once you create your first resume using the builder.</p>
+            <h3 className="text-xl font-semibold text-white mb-2">
+              No Resume Build History
+            </h3>
+            <p className="text-gray-400 mb-6 max-w-md">
+              Your built resumes will appear here once you create your first
+              resume using the builder.
+            </p>
             <button
-              onClick={() => navigate('/builder')}
+              onClick={() => navigate("/builder")}
               className="px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-medium rounded-xl transition-all flex items-center gap-2"
             >
               <FileText className="w-5 h-5" />
@@ -147,11 +154,15 @@ export default function ResumeBuildHistoryPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white mb-1">{item.title}</h3>
+                    <h3 className="text-lg font-semibold text-white mb-1">
+                      {item.resumeContent?.personalInfo?.jobTitle || "Untitled"}{" "}
+                      Resume
+                    </h3>
                     <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
                       <span className="flex items-center gap-1">
                         <FileText className="w-4 h-4" />
-                        {item.resumeContent?.personalInfo?.fullName || 'Untitled'}
+                        {item.resumeContent?.personalInfo?.fullName ||
+                          "Untitled"}
                       </span>
                       {item.resumeContent?.personalInfo?.jobTitle && (
                         <span className="text-gray-300">
@@ -180,21 +191,15 @@ export default function ResumeBuildHistoryPage() {
                           {item.resumeContent.skills.length} Skills
                         </span>
                       )}
-                      {item.resumeContent?.projects && item.resumeContent.projects.length > 0 && (
-                        <span className="px-3 py-1 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-full text-xs">
-                          {item.resumeContent.projects.length} Projects
-                        </span>
-                      )}
+                      {item.resumeContent?.projects &&
+                        item.resumeContent.projects.length > 0 && (
+                          <span className="px-3 py-1 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-full text-xs">
+                            {item.resumeContent.projects.length} Projects
+                          </span>
+                        )}
                     </div>
 
                     <div className="flex gap-3">
-                      <button
-                        onClick={() => setPreviewResume(item)}
-                        className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2"
-                      >
-                        <Eye className="w-4 h-4" />
-                        Preview
-                      </button>
                       <button
                         onClick={() => handleLoadToBuilder(item)}
                         className="px-4 py-2 bg-green-500/20 border border-green-500/30 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
@@ -226,25 +231,6 @@ export default function ResumeBuildHistoryPage() {
           </div>
         )}
       </div>
-
-      {previewResume && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-800">
-              <h3 className="text-lg font-semibold text-white">Resume Preview</h3>
-              <button
-                onClick={() => setPreviewResume(null)}
-                className="p-2 text-gray-400 hover:text-white"
-              >
-                <Eye className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-6">
-              <ResumePreview content={previewResume.resumeContent} />
-            </div>
-          </div>
-        </div>
-      )}
 
       <ConfirmModal
         isOpen={!!deleteId}
