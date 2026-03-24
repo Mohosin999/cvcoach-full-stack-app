@@ -120,7 +120,7 @@ export default function ExperienceEditor({
                   type="text"
                   onKeyDown={(e) => {
                     const value = (e.target as HTMLInputElement).value.trim();
-                    if ((e.key === ' ' || e.key === 'Enter') && value) {
+                    if (e.key === 'Enter' && value) {
                       e.preventDefault();
                       if (value && !exp.topSkills?.includes(value)) {
                         onUpdate(index, 'topSkills', [...(exp.topSkills || []), value]);

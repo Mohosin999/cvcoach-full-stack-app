@@ -227,7 +227,7 @@ export default function Builder() {
 
   const handleExportPDF = async () => {
     try {
-      await exportToPdf(builder.content);
+      await exportToPdf("resume-preview-content");
       toast.success("PDF downloaded successfully!");
     } catch (error) {
       toast.error("Failed to export PDF");
@@ -610,9 +610,9 @@ export default function Builder() {
 
               {/* Preview Content - No scrollbar, full width */}
               <div className="bg-gray-800/50">
-                <div className="bg-white min-h-[800px]">
+                <div className="bg-white min-h-[800px]" id="resume-preview-content">
                   {/* Resume Personal Info */}
-                  <ResumePreview content={builder.content} forPdf={false} />
+                  <ResumePreview content={builder.content} forPdf={true} />
                 </div>
               </div>
             </div>

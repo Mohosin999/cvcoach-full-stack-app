@@ -35,7 +35,7 @@ export default function ResumePreview({ content, forPdf = false }: ResumePreview
   const textColor = forPdf ? "text-gray-900" : "text-sm font-sans";
 
   return (
-    <div className={`${bgColor} rounded-lg shadow-lg p-6 min-h-[800px] ${textColor}`} id="resume-preview-content">
+    <div className={`${bgColor} rounded-lg shadow-lg p-6 min-h-[800px] ${textColor}`}>
       <ResumePersonalInfo content={content} forPdf={forPdf} />
       <ResumeSummary content={content} forPdf={forPdf} />
       {content.experience.length > 0 && <ResumeExperience experience={content.experience} forPdf={forPdf} formatDescription={formatDescription} />}
