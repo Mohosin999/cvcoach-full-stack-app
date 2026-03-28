@@ -56,7 +56,7 @@ export default function HeroSection({ user, onLogout }: HeroSectionProps) {
               transition={{ duration: 0.8, delay: 0.7 }}
               className="mt-10 flex flex-col sm:flex-row gap-4"
             >
-              <Link to="/login" className="group btn-primary text-lg px-8 py-4 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 hover:from-emerald-700 hover:to-emerald-500 shadow-xl shadow-emerald-700/40 hover:shadow-emerald-700/60 transition-all duration-300 flex items-center justify-center gap-2">
+              <Link to="/login" className="group inline-flex items-center justify-center px-8 py-4 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white hover:from-emerald-700 hover:to-emerald-500 shadow-xl shadow-emerald-700/40 hover:shadow-emerald-700/60 text-lg gap-2">
                 Start Free Analysis <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link to="/login" className="group text-lg px-8 py-4 border-2 border-emerald-700 text-emerald-400 rounded-lg hover:bg-emerald-900/30 transition-all duration-300 flex items-center justify-center gap-2 font-semibold">

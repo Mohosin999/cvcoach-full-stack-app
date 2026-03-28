@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useAppDispatch } from "../hooks/redux";
 import { logoutUser } from "../store/slices/authSlice";
 import { ConfirmModal } from "../components/ui";
-import { allFeatures, analysisSteps, creationSteps, testimonials } from "../constants/landingData";
+import { allFeatures, analysisSteps, creationSteps, jobMatchSteps, testimonials } from "../constants/landingData";
 import {
   FloatingOrbs, HeroSection, StatsSection, FeaturesSection,
   HowItWorksSection, TestimonialsSection, CTASection,
@@ -15,7 +15,7 @@ import Footer from "../components/Footer";
 export default function Landing() {
   const dispatch = useAppDispatch();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [activeTab, setActiveTab] = useState<"analysis" | "creation">("analysis");
+  const [activeTab, setActiveTab] = useState<"analysis" | "creation" | "jobmatch">("analysis");
 
   const handleLogout = async () => {
     setShowLogoutConfirm(false);
@@ -30,7 +30,7 @@ export default function Landing() {
           <HeroSection user={undefined} onLogout={() => setShowLogoutConfirm(true)} />
           <StatsSection />
           <FeaturesSection features={allFeatures} />
-          <HowItWorksSection activeTab={activeTab} setActiveTab={setActiveTab} steps={activeTab === "analysis" ? analysisSteps : creationSteps} />
+          <HowItWorksSection activeTab={activeTab} setActiveTab={setActiveTab} steps={activeTab === "analysis" ? analysisSteps : activeTab === "creation" ? creationSteps : jobMatchSteps} />
           <TestimonialsSection testimonials={testimonials} />
           <CTASection />
         </main>

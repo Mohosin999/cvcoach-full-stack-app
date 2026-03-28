@@ -1,6 +1,3 @@
-/* ===================================
-Builder Page - Redesigned with Two-Panel Layout
-=================================== */
 import { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -15,6 +12,7 @@ import {
   Save,
   ChevronLeft,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAppSelector } from "../hooks/redux";
@@ -31,6 +29,7 @@ import {
   AchievementsEditor,
   EducationEditor,
   SkillsEditorAI,
+  PreviewModal,
 } from "../components/shared";
 
 const STORAGE_KEY = "resume_builder_state";
@@ -133,27 +132,30 @@ export default function Builder() {
   const [sectionStates, setSectionStates] = useState<Section[]>(SECTIONS);
   const [loadingResume, setLoadingResume] = useState(false);
 
-  const loadResumeById = useCallback(async (id: string) => {
-    setLoadingResume(true);
-    try {
-      const response = await resumeBuildHistoryApi.getById(id);
-      const resume = response.data.data;
-      if (resume) {
-        builder.setSelectedResume(resume as Resume);
-        builder.setContent(resume.resumeContent);
-        saveToStorage({
-          content: resume.resumeContent,
-          currentStep: 0,
-          resumeId: id,
-        });
+  const loadResumeById = useCallback(
+    async (id: string) => {
+      setLoadingResume(true);
+      try {
+        const response = await resumeBuildHistoryApi.getById(id);
+        const resume = response.data.data;
+        if (resume) {
+          builder.setSelectedResume(resume as Resume);
+          builder.setContent(resume.resumeContent);
+          saveToStorage({
+            content: resume.resumeContent,
+            currentStep: 0,
+            resumeId: id,
+          });
+        }
+      } catch (error) {
+        toast.error("Failed to load resume");
+        navigate("/builder");
+      } finally {
+        setLoadingResume(false);
       }
-    } catch (error) {
-      toast.error("Failed to load resume");
-      navigate("/builder");
-    } finally {
-      setLoadingResume(false);
-    }
-  }, [navigate]);
+    },
+    [navigate],
+  );
 
   useEffect(() => {
     if (resumeId) {
@@ -205,7 +207,9 @@ export default function Builder() {
       case "education":
         return content.education.length > 0;
       case "skills":
-        return content.technicalSkills.length > 0 || content.softSkills.length > 0;
+        return (
+          content.technicalSkills.length > 0 || content.softSkills.length > 0
+        );
       default:
         return false;
     }
@@ -227,10 +231,10 @@ export default function Builder() {
 
   const handleExportPDF = async () => {
     try {
-      await exportToPdf("resume-preview-content");
-      toast.success("PDF downloaded successfully!");
+      await exportToPdf(builder.content);
     } catch (error) {
-      toast.error("Failed to export PDF");
+      console.error("PDF Export Error:", error);
+      toast.error(`Failed to export PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -265,7 +269,10 @@ export default function Builder() {
             value={content.summary || ""}
             onChange={(val) => setContent({ ...content, summary: val })}
             personalInfo={content.personalInfo}
-            skills={[...(content.technicalSkills || []), ...(content.softSkills || [])]}
+            skills={[
+              ...(content.technicalSkills || []),
+              ...(content.softSkills || []),
+            ]}
           />
         );
       case "experience":
@@ -344,7 +351,7 @@ export default function Builder() {
         </div>
 
         {/* Two-Panel Layout */}
-        <div className="flex flex-col xl:flex-row gap-6">
+        <div className="flex flex-col xl:flex-row items-start justify-center gap-6">
           {/* Left Panel - Form Wizard (48% width) */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -610,7 +617,11 @@ export default function Builder() {
 
               {/* Preview Content - No scrollbar, full width */}
               <div className="bg-gray-800/50">
-                <div className="bg-white min-h-[800px]" id="resume-preview-content">
+                <div
+                  className="bg-white min-h-[800px] w-full"
+                  id="resume-preview-content"
+                  style={{ padding: "24px" }}
+                >
                   {/* Resume Personal Info */}
                   <ResumePreview content={builder.content} forPdf={true} />
                 </div>
@@ -633,24 +644,41 @@ interface ResumePreviewProps {
 }
 
 function ResumePreview({ content, forPdf = false }: ResumePreviewProps) {
+  const cleanHtmlContent = (html: string) => {
+    return html
+      .replace(/<p[^>]*>/gi, '<p>')
+      .replace(/<span[^>]*>/gi, '<span>')
+      .replace(/<strong[^>]*>/gi, '<strong>')
+      .replace(/<em[^>]*>/gi, '<em>')
+      .replace(/<u[^>]*>/gi, '<u>')
+      .replace(/<ul[^>]*>/gi, '<ul>')
+      .replace(/<ol[^>]*>/gi, '<ol>')
+      .replace(/<li[^>]*>/gi, '<li>')
+      .replace(/<br[^>]*>/gi, '<br>');
+  };
+
   const formatDescription = (desc: string): React.ReactNode => {
     if (!desc) return null;
     if (desc.includes("<") && desc.includes(">")) {
       return (
         <div
           className="ql-editor"
-          style={{ padding: 0 }}
-          dangerouslySetInnerHTML={{ __html: desc }}
+          style={{ padding: 0, color: "#000000" }}
+          dangerouslySetInnerHTML={{ __html: cleanHtmlContent(desc) }}
         />
       );
     }
     const lines = desc.split("\n").filter((line) => line.trim());
     return (
-      <ul className="list-disc pl-4 space-y-0.5 text-[10px]">
+      <ul className="list-outside list-disc pl-6 space-y-0.5 text-[10px] marker:font-normal text-black">
         {lines.map((line, i) => {
           const cleanLine = line.replace(/^[•\-\*]\s*/, "").trim();
           if (!cleanLine) return null;
-          return <li key={i}>{cleanLine}</li>;
+          return (
+            <li key={i} className="pl-1 text-black">
+              {cleanLine}
+            </li>
+          );
         })}
       </ul>
     );
@@ -665,10 +693,11 @@ function ResumePreview({ content, forPdf = false }: ResumePreviewProps) {
     (content.projects && content.projects.length > 0) ||
     (content.achievements && content.achievements.length > 0) ||
     content.education?.length > 0 ||
-    (content.technicalSkills?.length > 0 || content.softSkills?.length > 0);
+    content.technicalSkills?.length > 0 ||
+    content.softSkills?.length > 0;
 
   return (
-    <div className="text-gray-900 font-sans w-full">
+    <div className="text-gray-950 font-sans w-full">
       {/* Personal Info */}
       <PersonalInfoPreview content={content} forPdf={forPdf} />
 
@@ -707,7 +736,8 @@ function ResumePreview({ content, forPdf = false }: ResumePreviewProps) {
       )}
 
       {/* Skills */}
-      {(content.technicalSkills?.length > 0 || content.softSkills?.length > 0) && (
+      {(content.technicalSkills?.length > 0 ||
+        content.softSkills?.length > 0) && (
         <SkillsPreview content={content} forPdf={forPdf} />
       )}
 
@@ -763,11 +793,11 @@ function PersonalInfoPreview({
       <div className="flex justify-between items-start">
         {/* Left Side - Name and Title */}
         <div className="min-w-[220px]">
-          <h1 className="text-base font-bold text-[#222222] uppercase tracking-wide leading-tight">
+          <h1 className="text-base font-bold text-black uppercase tracking-wide leading-tight">
             {content.personalInfo.fullName || "Your Name"}
           </h1>
           {content.personalInfo.jobTitle && (
-            <p className="text-xs font-medium text-[#222222] mt-1 leading-tight">
+            <p className="text-xs font-medium text-black mt-1 leading-tight">
               {content.personalInfo.jobTitle}
             </p>
           )}
@@ -776,7 +806,7 @@ function PersonalInfoPreview({
         {/* Right Side - Contact Info */}
         <div className="mt-auto items-end text-right min-w-[200px]">
           {/* First Line: Location • Phone */}
-          <div className="text-[10px] text-[#222222] leading-snug">
+          <div className="text-[10px] text-black leading-snug">
             <span>
               {[
                 locationString || "",
@@ -789,17 +819,34 @@ function PersonalInfoPreview({
             </span>
           </div>
           {/* Second Line: Email • LinkedIn */}
-          <div className="text-[10px] text-[#222222] leading-snug mt-0.5">
-            <span>
-              {[
-                content.personalInfo.email || "",
-                content.personalInfo.linkedIn
-                  ? formatLinkedIn(content.personalInfo.linkedIn)
-                  : "",
-              ]
-                .filter(Boolean)
-                .join(" • ")}
-            </span>
+          <div className="text-[10px] text-black leading-snug mt-0.5 flex items-center justify-end gap-1 flex-wrap">
+            {content.personalInfo.email && (
+              <a
+                href={`mailto:${content.personalInfo.email}`}
+                className="text-black"
+                style={{ color: "#000000" }}
+              >
+                {content.personalInfo.email}
+              </a>
+            )}
+            {content.personalInfo.email && content.personalInfo.linkedIn && (
+              <span className="text-black"> • </span>
+            )}
+            {content.personalInfo.linkedIn && (
+              <a
+                href={
+                  content.personalInfo.linkedIn.startsWith("http")
+                    ? content.personalInfo.linkedIn
+                    : `https://${content.personalInfo.linkedIn}`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-black"
+                style={{ color: "#000000" }}
+              >
+                {formatLinkedIn(content.personalInfo.linkedIn)}
+              </a>
+            )}
           </div>
         </div>
       </div>
@@ -814,25 +861,36 @@ function SummaryPreview({
   content: ResumeContent;
   forPdf: boolean;
 }) {
-  const titleColor = "text-gray-900";
+  const cleanHtmlContent = (html: string) => {
+    return html
+      .replace(/<p[^>]*>/gi, '<p>')
+      .replace(/<span[^>]*>/gi, '<span>')
+      .replace(/<strong[^>]*>/gi, '<strong>')
+      .replace(/<em[^>]*>/gi, '<em>')
+      .replace(/<u[^>]*>/gi, '<u>')
+      .replace(/<ul[^>]*>/gi, '<ul>')
+      .replace(/<ol[^>]*>/gi, '<ol>')
+      .replace(/<li[^>]*>/gi, '<li>')
+      .replace(/<br[^>]*>/gi, '<br>');
+  };
 
   if (!content.summary) return null;
 
   return (
     <div className="mb-3 px-6">
       <h2
-        className={`text-[10px] font-bold ${titleColor} uppercase tracking-wide border-b ${forPdf ? "border-gray-300" : "border-gray-300"} pb-0.5 mb-1.5`}
+        className={`text-[10px] font-bold text-black uppercase tracking-wide border-b border-gray-700 mb-1.5`}
       >
         SUMMARY
       </h2>
       {content.summary.includes("<") && content.summary.includes(">") ? (
         <div
-          className={`text-gray-700 text-[10px] leading-relaxed ql-editor`}
-          style={{ padding: 0 }}
-          dangerouslySetInnerHTML={{ __html: content.summary }}
+          className={`text-black text-[10px] leading-relaxed ql-editor`}
+          style={{ padding: 0, color: '#000000' }}
+          dangerouslySetInnerHTML={{ __html: cleanHtmlContent(content.summary) }}
         />
       ) : (
-        <p className={`text-gray-700 text-[10px] leading-relaxed`}>
+        <p className={`text-black text-[10px] leading-relaxed`}>
           {content.summary}
         </p>
       )}
@@ -851,20 +909,20 @@ function ExperiencePreview({
 }) {
   return (
     <div className="mb-3 px-6">
-      <h2 className="text-[10px] font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5 mb-1.5">
+      <h2 className="text-[10px] font-bold text-black uppercase tracking-wide border-b border-gray-700 mb-1.5">
         EXPERIENCE
       </h2>
       {experience.map((exp, index) => (
         <div key={index} className="mb-2.5 last:mb-0">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-[10px] font-bold text-gray-900">
+              <h3 className="text-[10px] font-bold text-black">
                 {exp.company}
               </h3>
-              <p className="text-[9px] text-gray-700 font-medium">
+              <p className="text-[9px] text-black font-medium">
                 {exp.title}
                 {exp.topSkills && exp.topSkills.length > 0 && (
-                  <span className="font-normal text-gray-600">
+                  <span className="font-normal text-black">
                     {" - "}
                     {exp.topSkills.map((skill, i) => (
                       <span key={i} className="italic">
@@ -877,11 +935,11 @@ function ExperiencePreview({
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[9px] text-gray-600">
+              <p className="text-[9px] text-black">
                 {exp.startDate} - {exp.current ? "Present" : exp.endDate || ""}
               </p>
               {exp.location && (
-                <p className="text-[9px] text-gray-600">{exp.location}</p>
+                <p className="text-[9px] text-black">{exp.location}</p>
               )}
             </div>
           </div>
@@ -907,31 +965,37 @@ function ProjectsPreview({
 
   return (
     <div className="mb-3 px-6">
-      <h2 className="text-[10px] font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5 mb-1.5">
+      <h2 className="text-[10px] font-bold text-black uppercase tracking-wide border-b border-gray-700 mb-1.5">
         PROJECTS
       </h2>
       {projects.map((project, index) => (
         <div key={index} className="mb-2 last:mb-0">
           <div className="flex justify-between items-start gap-2">
-            <h3 className="text-[10px] font-bold text-gray-900">
+            <h3 className="text-[10px] font-bold text-black">
               {project.name || "Untitled Project"}
             </h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {project.links?.live && (
-                <span
-                  onClick={() => window.open(project.links!.live, "_blank")}
-                  className="text-[9px] text-emerald-600 hover:text-emerald-500 cursor-pointer"
+                <a
+                  href={project.links.live}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[9px] text-black underline"
+                  style={{ color: "#000000" }}
                 >
                   Live
-                </span>
+                </a>
               )}
               {project.links?.github && (
-                <span
-                  onClick={() => window.open(project.links!.github, "_blank")}
-                  className="text-[9px] text-gray-500 hover:text-gray-400 cursor-pointer"
+                <a
+                  href={project.links.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[9px] text-black underline"
+                  style={{ color: "#000000" }}
                 >
                   GitHub
-                </span>
+                </a>
               )}
             </div>
           </div>
@@ -955,21 +1019,21 @@ function AchievementsPreview({
 
   return (
     <div className="mb-3 px-6">
-      <h2 className="text-[10px] font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5 mb-1.5">
+      <h2 className="text-[10px] font-bold text-black uppercase tracking-wide border-b border-gray-700 mb-1.5">
         ACHIEVEMENTS
       </h2>
       {achievements.map((achievement, index) => (
         <div key={index} className="mb-1.5 last:mb-0">
           <div className="flex justify-between items-start">
-            <h3 className="text-[10px] font-bold text-gray-900">
+            <h3 className="text-[10px] font-bold text-black">
               {achievement.title}
             </h3>
             {achievement.date && (
-              <p className="text-[9px] text-gray-600">{achievement.date}</p>
+              <p className="text-[9px] text-black">{achievement.date}</p>
             )}
           </div>
           {achievement.description && (
-            <p className="text-[10px] text-gray-700 mt-0.5">
+            <p className="text-[10px] text-black mt-0.5">
               {achievement.description}
             </p>
           )}
@@ -988,19 +1052,19 @@ function EducationPreview({
 }) {
   return (
     <div className="mb-3 px-6">
-      <h2 className="text-[10px] font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5 mb-1.5">
+      <h2 className="text-[10px] font-bold text-black uppercase tracking-wide border-b border-gray-700 mb-1.5">
         EDUCATION
       </h2>
       {education.map((edu, index) => (
         <div key={index} className="flex items-start mb-1.5 last:mb-0">
           <div>
-            <h3 className="text-[10px] font-bold text-gray-900">
+            <h3 className="text-[10px] font-bold text-black">
               {edu.institution}
             </h3>
-            <p className="text-[9px] text-gray-700">{edu.degree}</p>
+            <p className="text-[9px] text-black">{edu.degree}</p>
           </div>
           <div className="ml-auto">
-            {edu.date && <p className="text-[9px] text-gray-600">{edu.date}</p>}
+            {edu.date && <p className="text-[9px] text-black">{edu.date}</p>}
           </div>
         </div>
       ))}
@@ -1020,19 +1084,20 @@ function SkillsPreview({
 
   return (
     <div className="mb-3 px-6 pb-6">
-      <h2 className="text-[10px] font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5 mb-1.5">
+      <h2 className="text-[10px] font-bold text-black uppercase tracking-wide border-b border-gray-700 mb-1.5">
         SKILLS
       </h2>
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 pl-3">
         {technicalSkills.length > 0 && (
-          <p className="text-[10px] text-gray-700">
-            <span className="font-bold">• Technical Skills:</span>{" "}
+          <p className="text-[10px] text-black">
+            <span>•</span>{" "}
+            <span className="font-bold pl-2"> Technical Skills:</span>{" "}
             {technicalSkills.join(", ")}
           </p>
         )}
         {softSkills.length > 0 && (
-          <p className="text-[10px] text-gray-700">
-            <span className="font-bold">• Soft Skills:</span>{" "}
+          <p className="text-[10px] text-black">
+            <span>•</span> <span className="font-bold pl-2"> Soft Skills:</span>{" "}
             {softSkills.join(", ")}
           </p>
         )}

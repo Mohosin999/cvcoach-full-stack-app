@@ -65,7 +65,7 @@ export default function Login() {
         <div className="card">
           <button
             onClick={() => dispatch(login())}
-            className="w-full btn-primary py-3 flex items-center justify-center gap-3 text-lg"
+            className="w-full inline-flex items-center justify-center px-4 py-3 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white hover:from-emerald-700 hover:to-emerald-500 shadow-lg shadow-emerald-700/30 text-lg"
           >
             <Chrome className="w-5 h-5" />
             Continue with Google
@@ -148,7 +148,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full btn-primary py-3 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center px-4 py-3 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white hover:from-emerald-700 hover:to-emerald-500 shadow-lg shadow-emerald-700/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

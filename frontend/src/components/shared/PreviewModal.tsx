@@ -58,9 +58,9 @@ export default function PreviewModal({
             </motion.button>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto bg-gray-800 dark p-3 sm:p-6">
-          <div className="transform scale-90 sm:scale-100 origin-top">
-            <ResumePreview content={content} forPdf={false} />
+        <div className="flex-1 overflow-y-auto bg-gray-800 p-3 sm:p-6">
+          <div className="transform scale-90 sm:scale-100 origin-top" id="resume-preview-modal-content">
+            <ResumePreview content={content} forPdf={true} />
           </div>
         </div>
       </motion.div>

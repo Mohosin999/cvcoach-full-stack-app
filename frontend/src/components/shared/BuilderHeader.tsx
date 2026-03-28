@@ -32,19 +32,19 @@ export default function BuilderHeader({
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => navigate('/resume-build-history')}
-          className="btn-outline text-sm px-3 sm:px-4 flex items-center gap-2 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
+          className="inline-flex items-center justify-center px-3 sm:px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 border-2 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
         >
           <History className="w-4 h-4" />
           History
         </button>
-        <button onClick={onNewResume} className="btn-outline text-sm px-3 sm:px-4 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300">
+        <button onClick={onNewResume} className="inline-flex items-center justify-center px-3 sm:px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 border-2 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300">
           New
         </button>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onPreview}
-          className="btn-primary flex items-center gap-2 text-sm px-3 sm:px-4 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 hover:from-emerald-700 hover:to-emerald-500 shadow-lg shadow-emerald-700/30"
+          className="inline-flex items-center justify-center px-3 sm:px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white hover:from-emerald-700 hover:to-emerald-500 shadow-lg shadow-emerald-700/30"
         >
           <Eye className="w-4 h-4" /> <span>Preview</span>
         </motion.button>

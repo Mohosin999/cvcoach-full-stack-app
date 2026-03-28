@@ -164,7 +164,7 @@ const RecentBuilds = ({ builds }: { builds: any[] }) => (
       <div className="text-center py-8">
         <FileText className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
         <p className="text-gray-500 dark:text-gray-400">No resumes yet</p>
-        <Link to="/builder" className="btn-primary mt-4 inline-flex items-center gap-2"><Plus className="w-4 h-4" />Create Resume</Link>
+        <Link to="/builder" className="mt-4 inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white hover:from-emerald-700 hover:to-emerald-500 shadow-lg shadow-emerald-700/30 items-center gap-2"><Plus className="w-4 h-4" />Create Resume</Link>
       </div>
     )}
   </motion.div>
@@ -227,7 +227,7 @@ const QuickStats = ({ credits, totalResumes, totalAtsHistory, totalJobMatchHisto
       <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg">
         <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Need More Credits?</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Get more credits to analyze more resumes.</p>
-        <Link to="/plans" className="w-full btn-secondary text-sm inline-block text-center">Upgrade Plan</Link>
+        <Link to="/plans" className="w-full inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-orange-500 text-white hover:bg-orange-600 text-sm text-center">Upgrade Plan</Link>
       </div>
     )}
   </motion.div>

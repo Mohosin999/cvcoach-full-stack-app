@@ -12,8 +12,8 @@ interface Step {
 }
 
 interface HowItWorksSectionProps {
-  activeTab: "analysis" | "creation";
-  setActiveTab: (tab: "analysis" | "creation") => void;
+  activeTab: "analysis" | "creation" | "jobmatch";
+  setActiveTab: (tab: "analysis" | "creation" | "jobmatch") => void;
   steps: Step[];
 }
 
@@ -65,7 +65,17 @@ export default function HowItWorksSection({ activeTab, setActiveTab, steps }: Ho
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              Resume Creation
+              Resume Builder
+            </button>
+            <button
+              onClick={() => setActiveTab("jobmatch")}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 ${
+                activeTab === "jobmatch"
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              Job Match
             </button>
           </motion.div>
         </motion.div>
@@ -75,7 +85,7 @@ export default function HowItWorksSection({ activeTab, setActiveTab, steps }: Ho
           initial="initial"
           whileInView="animate"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-12"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
         >
           {steps.map((step, index) => (
             <motion.div
@@ -94,12 +104,12 @@ export default function HowItWorksSection({ activeTab, setActiveTab, steps }: Ho
                 >
                   <span className="text-4xl font-bold text-white">{step.number}</span>
                 </motion.div>
-                <h3 className="text-2xl font-bold text-white mb-3">{step.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{step.description}</p>
+                <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
+                <p className="text-gray-400 leading-relaxed text-sm">{step.description}</p>
               </div>
-              {index < 2 && (
-                <div className="hidden md:block absolute top-12 left-2/3 w-full">
-                  <ChevronRight className="w-8 h-8 text-green-700 mx-auto" />
+              {index < steps.length - 1 && (
+                <div className="hidden lg:block absolute top-12 -right-4">
+                  <ChevronRight className="w-8 h-8 text-green-700" />
                 </div>
               )}
             </motion.div>

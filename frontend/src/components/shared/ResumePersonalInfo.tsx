@@ -8,17 +8,22 @@ interface ResumePersonalInfoProps {
   forPdf?: boolean;
 }
 
-export default function ResumePersonalInfo({ content, forPdf = false }: ResumePersonalInfoProps) {
+export default function ResumePersonalInfo({
+  content,
+  forPdf = false,
+}: ResumePersonalInfoProps) {
   // Format phone number with (+880) prefix
   const formatPhoneNumber = (phone: string) => {
-    const cleanNumber = phone.replace(/^(\+880|880)/, '');
+    const cleanNumber = phone.replace(/^(\+880|880)/, "");
     return `(+880) ${cleanNumber}`;
   };
 
   // Format LinkedIn URL - just show the path
   const formatLinkedIn = (linkedIn: string) => {
-    const clean = linkedIn.replace(/^https?:\/\//, '').replace(/^www\./, '');
-    return clean.startsWith('linkedin.com/in/') ? clean : `linkedin.com/in/${linkedIn}`;
+    const clean = linkedIn.replace(/^https?:\/\//, "").replace(/^www\./, "");
+    return clean.startsWith("linkedin.com/in/")
+      ? clean
+      : `linkedin.com/in/${linkedIn}`;
   };
 
   // Build location string (comma after city, then spaces)
@@ -39,11 +44,11 @@ export default function ResumePersonalInfo({ content, forPdf = false }: ResumePe
       <div className="flex justify-between items-start">
         {/* Left Side - Name and Title */}
         <div className="min-w-[220px]">
-          <h1 className="text-2xl font-bold text-[#222222] uppercase tracking-wide leading-tight">
+          <h1 className="text-5xl font-bold text-[#222222] uppercase tracking-wide leading-tight">
             {content.personalInfo.fullName || "MOHOSIN HASAN AKASH"}
           </h1>
           {content.personalInfo.jobTitle && (
-            <p className="text-base font-medium text-[#222222] mt-1 leading-tight">
+            <p className="text-lg font-medium text-[#222222] mt-1.5 leading-tight">
               {content.personalInfo.jobTitle}
             </p>
           )}
@@ -52,21 +57,29 @@ export default function ResumePersonalInfo({ content, forPdf = false }: ResumePe
         {/* Right Side - Contact Info */}
         <div className="mt-auto items-end text-right min-w-[200px]">
           {/* First Line: Location • Phone */}
-          <div className="text-xs text-[#222222] leading-snug">
+          <div className="text-sm text-[#222222] leading-snug">
             <span>
               {[
                 locationString || "",
-                content.personalInfo.whatsapp ? formatPhoneNumber(content.personalInfo.whatsapp) : "",
-              ].filter(Boolean).join(" • ")}
+                content.personalInfo.whatsapp
+                  ? formatPhoneNumber(content.personalInfo.whatsapp)
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" • ")}
             </span>
           </div>
           {/* Second Line: Email • LinkedIn */}
-          <div className="text-xs text-[#222222] leading-snug mt-0.5">
+          <div className="text-sm text-[#222222] leading-snug mt-0.5">
             <span>
               {[
                 content.personalInfo.email || "",
-                content.personalInfo.linkedIn ? formatLinkedIn(content.personalInfo.linkedIn) : "",
-              ].filter(Boolean).join(" • ")}
+                content.personalInfo.linkedIn
+                  ? formatLinkedIn(content.personalInfo.linkedIn)
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" • ")}
             </span>
           </div>
         </div>

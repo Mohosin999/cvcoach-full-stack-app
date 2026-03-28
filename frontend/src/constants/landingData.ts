@@ -6,6 +6,10 @@ import {
   Flame,
   TrendingUp,
   Wand2,
+  User,
+  Briefcase,
+  FileCheck,
+  Sparkles,
 } from "lucide-react";
 
 export const steps = [
@@ -96,19 +100,22 @@ export const analysisSteps = [
   {
     number: "01",
     title: "Upload Resume",
-    description: "Drag and drop your PDF or DOCX resume into the upload zone.",
+    description: "Upload your existing resume (PDF or DOCX) to analyze.",
   },
   {
     number: "02",
-    title: "Add Job Description",
-    description:
-      "Paste the job description you want to target with your resume.",
+    title: "Paste Job Description",
+    description: "Add the job description you want to target your resume for.",
   },
   {
     number: "03",
-    title: "Get AI Analysis",
-    description:
-      "Receive comprehensive feedback with scores and actionable suggestions.",
+    title: "Get ATS Score",
+    description: "Receive detailed ATS compatibility score with section-by-section breakdown.",
+  },
+  {
+    number: "04",
+    title: "Smart Suggestions",
+    description: "Get AI-powered suggestions to optimize your resume for the job.",
   },
 ];
 
@@ -116,20 +123,46 @@ export const analysisSteps = [
 export const creationSteps = [
   {
     number: "01",
-    title: "Fill in Your Details",
-    description:
-      "Enter your information such as personal details, experience, education, and skills using our simple input forms.",
+    title: "Fill Personal Info",
+    description: "Enter your name, job title, contact details, and professional summary.",
   },
   {
     number: "02",
-    title: "Preview Your Resume",
-    description:
-      "Instantly see how your resume looks in a clean and professional format.",
+    title: "Add Experience & Education",
+    description: "Add your work experience, projects, achievements, and education details.",
   },
   {
     number: "03",
-    title: "Download PDF",
-    description:
-      "Download your resume as a professional PDF ready to share with employers.",
+    title: "AI Enhancement",
+    description: "Use AI to generate professional summaries and improve your content.",
+  },
+  {
+    number: "04",
+    title: "Preview & Download",
+    description: "Preview your resume in real-time and download as PDF with clickable links.",
+  },
+];
+
+// Steps for job match
+export const jobMatchSteps = [
+  {
+    number: "01",
+    title: "Upload Resume",
+    description: "Upload your resume (PDF or DOCX) that you want to match against jobs.",
+  },
+  {
+    number: "02",
+    title: "Paste Job Descriptions",
+    description: "Add multiple job descriptions to compare your resume against.",
+  },
+  {
+    number: "03",
+    title: "Get Match Score",
+    description: "See how well your resume matches each job with detailed compatibility scores.",
+  },
+  {
+    number: "04",
+    title: "Improve & Apply",
+    description: "Get suggestions to improve your resume and apply with confidence.",
   },
 ];

@@ -10,28 +10,45 @@ interface ResumeSummaryProps {
 
 export default function ResumeSummary({ content, forPdf }: ResumeSummaryProps) {
   const textColor = forPdf
-    ? "text-gray-700"
-    : "text-gray-700 dark:text-gray-300";
+    ? "text-gray-900"
+    : "text-gray-900 dark:text-gray-100";
   const titleColor = forPdf ? "text-black" : "text-gray-900 dark:text-white";
-  const borderColor = forPdf ? "border-gray-600" : "border-gray-700 dark:border-gray-600";
+  const borderColor = forPdf
+    ? "border-gray-700"
+    : "border-gray-700 dark:border-gray-600";
+
+  const cleanHtmlContent = (html: string) => {
+    return html
+      .replace(/<p[^>]*>/gi, '<p>')
+      .replace(/<span[^>]*>/gi, '<span>')
+      .replace(/<strong[^>]*>/gi, '<strong>')
+      .replace(/<em[^>]*>/gi, '<em>')
+      .replace(/<u[^>]*>/gi, '<u>')
+      .replace(/<ul[^>]*>/gi, '<ul>')
+      .replace(/<ol[^>]*>/gi, '<ol>')
+      .replace(/<li[^>]*>/gi, '<li>')
+      .replace(/<br[^>]*>/gi, '<br>');
+  };
 
   if (!content.summary) return null;
 
   return (
     <div className="mb-4">
       <h2
-        className={`text-sm font-bold ${titleColor} uppercase tracking-wide border-b ${borderColor} pb-2 mb-3`}
+        className={`text-base font-bold ${titleColor} uppercase tracking-wide border-b ${borderColor} pb-1 mb-3`}
       >
         SUMMARY
       </h2>
       {content.summary.includes("<") && content.summary.includes(">") ? (
         <div
-          className={`${textColor} text-xs ql-editor leading-relaxed`}
-          style={{ padding: 0 }}
-          dangerouslySetInnerHTML={{ __html: content.summary }}
+          className="text-sm ql-editor leading-relaxed"
+          style={{ padding: 0, color: '#000000' }}
+          dangerouslySetInnerHTML={{
+            __html: cleanHtmlContent(content.summary),
+          }}
         />
       ) : (
-        <p className={`${textColor} text-xs leading-relaxed`}>
+        <p className={`${textColor} text-sm leading-relaxed`}>
           {content.summary}
         </p>
       )}

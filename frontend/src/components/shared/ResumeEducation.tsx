@@ -9,22 +9,22 @@ interface ResumeEducationProps {
 }
 
 export default function ResumeEducation({ education, forPdf }: ResumeEducationProps) {
-  const textColor = forPdf ? "text-gray-600" : "text-gray-600 dark:text-gray-400";
+  const textColor = forPdf ? "text-gray-900" : "text-gray-900 dark:text-gray-100";
   const titleColor = forPdf ? "text-black" : "text-gray-900 dark:text-white";
-  const borderColor = forPdf ? "border-gray-600" : "border-gray-300 dark:border-gray-600";
+  const borderColor = forPdf ? "border-gray-700" : "border-gray-700 dark:border-gray-600";
 
   return (
     <div className="mb-4">
-      <h2 className={`text-sm font-bold ${titleColor} uppercase tracking-wide border-b ${borderColor} pb-2 mb-3`}>
+      <h2 className={`text-base font-bold ${titleColor} uppercase tracking-wide border-b ${borderColor} pb-1 mb-3`}>
         EDUCATION
       </h2>
       {education.map((edu, index) => (
         <div key={index} className="mb-2">
           <div className="flex justify-between items-start gap-2">
-            <span className={`font-bold ${titleColor} text-sm`}>{edu.degree}</span>
-            <span className={`text-xs ${textColor} flex-shrink-0`}>{edu.date}</span>
+            <span className={`font-bold ${titleColor} text-base`}>{edu.degree}</span>
+            <span className={`text-sm ${textColor} flex-shrink-0`}>{edu.date}</span>
           </div>
-          <p className={`${textColor} text-xs mt-0.5`}>{edu.institution}</p>
+          <p className={`${textColor} text-sm mt-0.5`}>{edu.institution}</p>
         </div>
       ))}
     </div>

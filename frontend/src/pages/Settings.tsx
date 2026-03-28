@@ -55,7 +55,7 @@ export default function Settings() {
           <SubscriptionSection user={user} />
           <DangerZone onDelete={() => setShowDeleteConfirm(true)} />
           <div className="flex justify-end">
-            <button onClick={handleSaveProfile} disabled={saving} className="btn-primary flex items-center gap-2">
+            <button onClick={handleSaveProfile} disabled={saving} className="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white hover:from-emerald-700 hover:to-emerald-500 shadow-lg shadow-emerald-700/30 disabled:opacity-50 disabled:cursor-not-allowed gap-2">
               <Save className="w-4 h-4" />{saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
@@ -126,7 +126,7 @@ const SubscriptionSection = ({ user }: { user: any }) => (
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Current plan: <span className="font-medium capitalize">{user?.subscription.plan}</span></p>
         <p className="text-sm text-gray-500 dark:text-gray-400">Credits remaining: <span className="font-medium">{user?.subscription.credits}</span></p>
       </div>
-      {user?.subscription.plan === "free" && <Link to="/plans" className="btn-primary">Upgrade to Pro</Link>}
+      {user?.subscription.plan === "free" && <Link to="/plans" className="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white hover:from-emerald-700 hover:to-emerald-500 shadow-lg shadow-emerald-700/30">Upgrade to Pro</Link>}
     </div>
   </motion.div>
 );

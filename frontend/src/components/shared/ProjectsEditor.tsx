@@ -56,7 +56,7 @@ export default function ProjectsEditor({ projects, onAdd, onUpdate, onRemove }: 
           </div>
         </div>
       ))}
-      <button onClick={onAdd} className="btn-outline w-full flex items-center justify-center gap-2 py-2">
+      <button onClick={onAdd} className="w-full inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 border-2 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300">
         <Plus className="w-4 h-4" /> Add Project
       </button>
     </div>
