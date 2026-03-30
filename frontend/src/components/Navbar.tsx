@@ -1,6 +1,3 @@
-/* ===================================
-Navbar Component
-=================================== */
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flame, FileText } from "lucide-react";
@@ -10,8 +7,13 @@ import { logoutUser } from "../store/slices/authSlice";
 import ConfirmModal from "./ui/ConfirmModal";
 import HistoryDropdown from "./ui/HistoryDropdown";
 import {
-  NavLinks, UpgradeButton, CreditsBadge, ProfileMenu,
-  MobileMenuButton, MobileMenu, AuthButtons,
+  NavLinks,
+  UpgradeButton,
+  CreditsBadge,
+  ProfileMenu,
+  MobileMenuButton,
+  MobileMenu,
+  AuthButtons,
 } from "./shared";
 
 interface NavLink {
@@ -49,7 +51,9 @@ export default function Navbar() {
               <div className="w-8 h-8 bg-gradient-to-br from-green-500 via-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
                 <Flame className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">CV<span className="text-green-500">Coach</span></span>
+              <span className="text-xl font-bold text-white">
+                CV<span className="text-green-500">Coach</span>
+              </span>
             </Link>
             <div className="flex items-center gap-4">
               {user ? (
@@ -60,8 +64,16 @@ export default function Navbar() {
                   </div>
                   <UpgradeButton />
                   <CreditsBadge user={user} />
-                  <ProfileMenu user={user} profileMenuOpen={profileMenuOpen} setProfileMenuOpen={setProfileMenuOpen} onLogout={() => setShowLogoutConfirm(true)} />
-                  <MobileMenuButton mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
+                  <ProfileMenu
+                    user={user}
+                    profileMenuOpen={profileMenuOpen}
+                    setProfileMenuOpen={setProfileMenuOpen}
+                    onLogout={() => setShowLogoutConfirm(true)}
+                  />
+                  <MobileMenuButton
+                    mobileMenuOpen={mobileMenuOpen}
+                    setMobileMenuOpen={setMobileMenuOpen}
+                  />
                 </>
               ) : (
                 <AuthButtons />
@@ -70,10 +82,24 @@ export default function Navbar() {
           </div>
         </div>
         <AnimatePresence>
-          {mobileMenuOpen && user && <MobileMenu navLinks={NAV_LINKS} user={user} setMobileMenuOpen={setMobileMenuOpen} />}
+          {mobileMenuOpen && user && (
+            <MobileMenu
+              navLinks={NAV_LINKS}
+              user={user}
+              setMobileMenuOpen={setMobileMenuOpen}
+            />
+          )}
         </AnimatePresence>
       </nav>
-      <ConfirmModal isOpen={showLogoutConfirm} title="Logout" message="Are you sure you want to logout?" confirmText="Logout" cancelText="Cancel" onConfirm={handleLogout} onCancel={() => setShowLogoutConfirm(false)} />
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        title="Logout"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </>
   );
 }
