@@ -12,7 +12,7 @@ interface NavLink {
 export default function NavLinks({ navLinks }: { navLinks: NavLink[] }) {
   const location = useLocation();
   return (
-    <div className="hidden md:flex items-center gap-1">
+    <div className="hidden lg:flex items-center gap-1">
       {navLinks.map((link) => (
         <Link
           key={link.path}

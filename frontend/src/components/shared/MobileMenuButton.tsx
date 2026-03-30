@@ -5,7 +5,7 @@ import { Menu, X } from "lucide-react";
 
 export default function MobileMenuButton({ mobileMenuOpen, setMobileMenuOpen }: { mobileMenuOpen: boolean; setMobileMenuOpen: (v: boolean) => void }) {
   return (
-    <button className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+    <button className="lg:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
       {mobileMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
     </button>
   );

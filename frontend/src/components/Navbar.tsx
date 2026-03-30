@@ -59,7 +59,7 @@ export default function Navbar() {
               {user ? (
                 <>
                   <NavLinks navLinks={NAV_LINKS} />
-                  <div className="hidden md:flex">
+                  <div className="hidden lg:flex">
                     <HistoryDropdown />
                   </div>
                   <UpgradeButton />
