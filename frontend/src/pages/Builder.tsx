@@ -234,7 +234,9 @@ export default function Builder() {
       await exportToPdf(builder.content);
     } catch (error) {
       console.error("PDF Export Error:", error);
-      toast.error(`Failed to export PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        `Failed to export PDF: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   };
 
@@ -646,15 +648,15 @@ interface ResumePreviewProps {
 function ResumePreview({ content, forPdf = false }: ResumePreviewProps) {
   const cleanHtmlContent = (html: string) => {
     return html
-      .replace(/<p[^>]*>/gi, '<p>')
-      .replace(/<span[^>]*>/gi, '<span>')
-      .replace(/<strong[^>]*>/gi, '<strong>')
-      .replace(/<em[^>]*>/gi, '<em>')
-      .replace(/<u[^>]*>/gi, '<u>')
-      .replace(/<ul[^>]*>/gi, '<ul>')
-      .replace(/<ol[^>]*>/gi, '<ol>')
-      .replace(/<li[^>]*>/gi, '<li>')
-      .replace(/<br[^>]*>/gi, '<br>');
+      .replace(/<p[^>]*>/gi, "<p>")
+      .replace(/<span[^>]*>/gi, "<span>")
+      .replace(/<strong[^>]*>/gi, "<strong>")
+      .replace(/<em[^>]*>/gi, "<em>")
+      .replace(/<u[^>]*>/gi, "<u>")
+      .replace(/<ul[^>]*>/gi, "<ul>")
+      .replace(/<ol[^>]*>/gi, "<ol>")
+      .replace(/<li[^>]*>/gi, "<li>")
+      .replace(/<br[^>]*>/gi, "<br>");
   };
 
   const formatDescription = (desc: string): React.ReactNode => {
@@ -863,15 +865,15 @@ function SummaryPreview({
 }) {
   const cleanHtmlContent = (html: string) => {
     return html
-      .replace(/<p[^>]*>/gi, '<p>')
-      .replace(/<span[^>]*>/gi, '<span>')
-      .replace(/<strong[^>]*>/gi, '<strong>')
-      .replace(/<em[^>]*>/gi, '<em>')
-      .replace(/<u[^>]*>/gi, '<u>')
-      .replace(/<ul[^>]*>/gi, '<ul>')
-      .replace(/<ol[^>]*>/gi, '<ol>')
-      .replace(/<li[^>]*>/gi, '<li>')
-      .replace(/<br[^>]*>/gi, '<br>');
+      .replace(/<p[^>]*>/gi, "<p>")
+      .replace(/<span[^>]*>/gi, "<span>")
+      .replace(/<strong[^>]*>/gi, "<strong>")
+      .replace(/<em[^>]*>/gi, "<em>")
+      .replace(/<u[^>]*>/gi, "<u>")
+      .replace(/<ul[^>]*>/gi, "<ul>")
+      .replace(/<ol[^>]*>/gi, "<ol>")
+      .replace(/<li[^>]*>/gi, "<li>")
+      .replace(/<br[^>]*>/gi, "<br>");
   };
 
   if (!content.summary) return null;
@@ -886,8 +888,10 @@ function SummaryPreview({
       {content.summary.includes("<") && content.summary.includes(">") ? (
         <div
           className={`text-black text-[10px] leading-relaxed ql-editor`}
-          style={{ padding: 0, color: '#000000' }}
-          dangerouslySetInnerHTML={{ __html: cleanHtmlContent(content.summary) }}
+          style={{ padding: 0, color: "#000000" }}
+          dangerouslySetInnerHTML={{
+            __html: cleanHtmlContent(content.summary),
+          }}
         />
       ) : (
         <p className={`text-black text-[10px] leading-relaxed`}>
@@ -980,8 +984,7 @@ function ProjectsPreview({
                   href={project.links.live}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[9px] text-black underline"
-                  style={{ color: "#000000" }}
+                  className="text-[9px] text-blue-600"
                 >
                   Live
                 </a>
@@ -991,8 +994,7 @@ function ProjectsPreview({
                   href={project.links.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[9px] text-black underline"
-                  style={{ color: "#000000" }}
+                  className="text-[9px] text-blue-600"
                 >
                   GitHub
                 </a>
@@ -1087,17 +1089,16 @@ function SkillsPreview({
       <h2 className="text-[10px] font-bold text-black uppercase tracking-wide border-b border-gray-700 mb-1.5">
         SKILLS
       </h2>
-      <div className="space-y-1.5 pl-3">
+      <div className="space-y-1.5">
         {technicalSkills.length > 0 && (
           <p className="text-[10px] text-black">
-            <span>•</span>{" "}
-            <span className="font-bold pl-2"> Technical Skills:</span>{" "}
+            <span className="font-bold"> Technical Skills:</span>{" "}
             {technicalSkills.join(", ")}
           </p>
         )}
         {softSkills.length > 0 && (
           <p className="text-[10px] text-black">
-            <span>•</span> <span className="font-bold pl-2"> Soft Skills:</span>{" "}
+            <span className="font-bold"> Soft Skills:</span>{" "}
             {softSkills.join(", ")}
           </p>
         )}
