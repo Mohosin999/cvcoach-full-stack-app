@@ -80,7 +80,7 @@ export default function ResumeBuildHistoryPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex items-center justify-between"
+          className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
         >
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">

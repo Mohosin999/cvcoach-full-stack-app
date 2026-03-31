@@ -121,7 +121,7 @@ export default function Navbar() {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white shadow-lg shadow-emerald-700/30"
+                  className="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-emerald-700/30"
                 >
                   Get Started
                 </Link>

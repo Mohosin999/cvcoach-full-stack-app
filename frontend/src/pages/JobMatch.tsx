@@ -1,18 +1,26 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FileText, Briefcase, CheckCircle, Upload } from 'lucide-react';
-import { toast } from 'react-toastify';
-import { jobMatchApi, resumeParserApi } from '../api/api';
-import { BackButton, ScoreCard, MatchBreakdown, SuggestionList, LoadingSpinner } from '../components/ui';
-import { JobMatchHistory, ResumeContent } from '../types';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { FileText, Briefcase, CheckCircle, Upload } from "lucide-react";
+import { toast } from "react-toastify";
+import { jobMatchApi, resumeParserApi } from "../api/api";
+import {
+  BackButton,
+  ScoreCard,
+  MatchBreakdown,
+  SuggestionList,
+  LoadingSpinner,
+} from "../components/ui";
+import { JobMatchHistory, ResumeContent } from "../types";
 
 export default function JobMatchPage() {
   const navigate = useNavigate();
   const { id: analysisId } = useParams<{ id: string }>();
-  const [resumeName, setResumeName] = useState('');
-  const [resumeContent, setResumeContent] = useState<ResumeContent | null>(null);
-  const [jobDescription, setJobDescription] = useState('');
+  const [resumeName, setResumeName] = useState("");
+  const [resumeContent, setResumeContent] = useState<ResumeContent | null>(
+    null,
+  );
+  const [jobDescription, setJobDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<JobMatchHistory | null>(null);
@@ -22,9 +30,9 @@ export default function JobMatchPage() {
       loadAnalysis(analysisId);
     } else {
       setResult(null);
-      setResumeName('');
+      setResumeName("");
       setResumeContent(null);
-      setJobDescription('');
+      setJobDescription("");
     }
   }, [analysisId]);
 
@@ -36,11 +44,11 @@ export default function JobMatchPage() {
         setResult(response.data.data);
         setResumeName(response.data.data.resumeName);
         setResumeContent(response.data.data.resumeContent);
-        setJobDescription(response.data.data.jobDescription || '');
+        setJobDescription(response.data.data.jobDescription || "");
       }
     } catch (error) {
-      toast.error('Failed to load analysis');
-      navigate('/job-match');
+      toast.error("Failed to load analysis");
+      navigate("/job-match");
     } finally {
       setLoading(false);
     }
@@ -50,12 +58,12 @@ export default function JobMatchPage() {
     try {
       setLoading(true);
       const formData = new FormData();
-      formData.append('resume', file);
+      formData.append("resume", file);
       const response = await resumeParserApi.parse(formData);
       setResumeName(response.data.data.resumeName);
       setResumeContent(response.data.data.resumeContent);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to upload resume');
+      toast.error(error.response?.data?.message || "Failed to upload resume");
     } finally {
       setLoading(false);
     }
@@ -63,12 +71,12 @@ export default function JobMatchPage() {
 
   const handleAnalyze = async () => {
     if (!resumeContent) {
-      toast.error('Please upload a resume');
+      toast.error("Please upload a resume");
       return;
     }
 
     if (!jobDescription.trim()) {
-      toast.error('Please paste the job description');
+      toast.error("Please paste the job description");
       return;
     }
 
@@ -80,9 +88,11 @@ export default function JobMatchPage() {
         jobDescription,
       });
       setResult(response.data.data);
-      toast.success('Job match analysis completed');
+      toast.success("Job match analysis completed");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to analyze job match');
+      toast.error(
+        error.response?.data?.message || "Failed to analyze job match",
+      );
     } finally {
       setAnalyzing(false);
     }
@@ -90,9 +100,9 @@ export default function JobMatchPage() {
 
   const handleReset = () => {
     setResult(null);
-    setResumeName('');
+    setResumeName("");
     setResumeContent(null);
-    setJobDescription('');
+    setJobDescription("");
   };
 
   return (
@@ -107,9 +117,12 @@ export default function JobMatchPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-white mb-2">Job Match Analysis</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Job Match Analysis
+          </h1>
           <p className="text-gray-400">
-            Compare your resume against a job description to see how well you match
+            Compare your resume against a job description to see how well you
+            match
           </p>
         </motion.div>
 
@@ -134,9 +147,12 @@ export default function JobMatchPage() {
                       <>
                         <Upload className="w-8 h-8 text-gray-400 mb-2" />
                         <p className="text-sm text-gray-400">
-                          <span className="font-semibold">Click to upload</span> or drag and drop
+                          <span className="font-semibold">Click to upload</span>{" "}
+                          or drag and drop
                         </p>
-                        <p className="text-xs text-gray-500">PDF, DOCX (MAX. 10MB)</p>
+                        <p className="text-xs text-gray-500">
+                          PDF, DOCX (MAX. 10MB)
+                        </p>
                       </>
                     )}
                   </div>
@@ -156,9 +172,7 @@ export default function JobMatchPage() {
                 <div className="mt-4 p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
                   <div className="flex items-center gap-2 text-green-400">
                     <CheckCircle className="w-5 h-5" />
-                    <span className="font-medium">
-                      Selected: {resumeName}
-                    </span>
+                    <span className="font-medium">Selected: {resumeName}</span>
                   </div>
                 </div>
               )}
@@ -185,7 +199,7 @@ export default function JobMatchPage() {
               <button
                 onClick={handleAnalyze}
                 disabled={!resumeContent || !jobDescription.trim() || analyzing}
-                className="w-full mt-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-all disabled:cursor-not-allowed"
+                className="w-full mt-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-all disabled:cursor-not-allowed"
               >
                 {analyzing ? (
                   <span className="flex items-center justify-center gap-2">
@@ -215,7 +229,9 @@ export default function JobMatchPage() {
                 />
               </div>
               <div className="md:col-span-2 bg-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-white mb-4">Analysis Complete</h2>
+                <h2 className="text-xl font-semibold text-white mb-4">
+                  Analysis Complete
+                </h2>
                 <p className="text-gray-400 mb-4">Resume: {resumeName}</p>
                 <div className="flex gap-3">
                   <button
@@ -233,7 +249,9 @@ export default function JobMatchPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h2 className="text-xl font-semibold text-white mb-4">Match Breakdown</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">
+                Match Breakdown
+              </h2>
               <MatchBreakdown breakdown={result.breakdown} />
             </motion.div>
 
@@ -243,7 +261,9 @@ export default function JobMatchPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <h2 className="text-xl font-semibold text-white mb-4">Missing Skills</h2>
+                <h2 className="text-xl font-semibold text-white mb-4">
+                  Missing Skills
+                </h2>
                 <div className="bg-gray-800 rounded-lg p-6">
                   <div className="flex flex-wrap gap-2">
                     {result.missingSkills.map((skill, idx) => (
@@ -264,8 +284,13 @@ export default function JobMatchPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <h2 className="text-xl font-semibold text-white mb-4">Tailoring Suggestions</h2>
-              <SuggestionList suggestions={result.suggestions} title="AI Suggestions" />
+              <h2 className="text-xl font-semibold text-white mb-4">
+                Tailoring Suggestions
+              </h2>
+              <SuggestionList
+                suggestions={result.suggestions}
+                title="AI Suggestions"
+              />
             </motion.div>
           </div>
         )}

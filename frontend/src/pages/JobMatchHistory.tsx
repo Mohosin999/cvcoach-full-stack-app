@@ -88,7 +88,7 @@ export default function JobMatchHistoryPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex items-center justify-between"
+          className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
         >
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">
@@ -127,7 +127,7 @@ export default function JobMatchHistoryPage() {
             </p>
             <button
               onClick={() => navigate("/job-match")}
-              className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium rounded-xl transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-all flex items-center gap-2"
             >
               <Briefcase className="w-5 h-5" />
               Analyze Your First Job Match

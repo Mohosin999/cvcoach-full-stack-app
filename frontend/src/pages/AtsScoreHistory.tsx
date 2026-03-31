@@ -88,7 +88,7 @@ export default function AtsScoreHistoryPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex items-center justify-between"
+          className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
         >
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">
@@ -115,8 +115,8 @@ export default function AtsScoreHistoryPage() {
           </div>
         ) : history.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-4">
-              <FileText className="w-8 h-8 text-purple-400" />
+            <div className="w-16 h-16 rounded-2xl bg-green-500/20 flex items-center justify-center mb-4">
+              <FileText className="w-8 h-8 text-green-400" />
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">
               No ATS Score History
@@ -127,7 +127,7 @@ export default function AtsScoreHistoryPage() {
             </p>
             <button
               onClick={() => navigate("/ats-score")}
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-xl transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-all flex items-center gap-2"
             >
               <FileText className="w-5 h-5" />
               Analyze Your First Resume
