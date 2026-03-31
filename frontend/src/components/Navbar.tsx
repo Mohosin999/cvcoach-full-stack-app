@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame } from "lucide-react";
+import { Flame, X, Menu } from "lucide-react";
 import { useState } from "react";
 import { useAppSelector, useAppDispatch } from "../hooks/redux";
 import { logoutUser } from "../store/slices/authSlice";
@@ -76,7 +76,21 @@ export default function Navbar() {
                   />
                 </>
               ) : (
-                <AuthButtons />
+                <>
+                  <div className="hidden md:flex items-center gap-4">
+                    <AuthButtons />
+                  </div>
+                  <button
+                    className="md:hidden"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  >
+                    {mobileMenuOpen ? (
+                      <X className="w-6 h-6 text-white" />
+                    ) : (
+                      <Menu className="w-6 h-6 text-white" />
+                    )}
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -88,6 +102,31 @@ export default function Navbar() {
               user={user}
               setMobileMenuOpen={setMobileMenuOpen}
             />
+          )}
+          {mobileMenuOpen && !user && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="md:hidden absolute top-16 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-b border-gray-800 py-6 px-4"
+            >
+              <div className="flex flex-col gap-4">
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 border-2 border-emerald-700 text-emerald-400 hover:bg-emerald-900/30"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white shadow-lg shadow-emerald-700/30"
+                >
+                  Get Started
+                </Link>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </nav>

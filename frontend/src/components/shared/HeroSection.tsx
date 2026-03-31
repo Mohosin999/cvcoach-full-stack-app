@@ -3,7 +3,15 @@ Hero Section Component
 =================================== */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Play, Users, CheckCircle, Shield, Zap } from "lucide-react";
+import {
+  Sparkles,
+  ArrowRight,
+  Play,
+  Users,
+  CheckCircle,
+  Shield,
+  Zap,
+} from "lucide-react";
 import HeroCards from "./HeroCards";
 
 interface HeroSectionProps {
@@ -13,7 +21,7 @@ interface HeroSectionProps {
 
 export default function HeroSection({ user, onLogout }: HeroSectionProps) {
   return (
-    <section className="pt-40 pb-24 section-container">
+    <section className="pt-28 md:pt-36 pb-24 section-container">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <motion.div
@@ -40,7 +48,8 @@ export default function HeroSection({ user, onLogout }: HeroSectionProps) {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="text-4xl xl:text-5xl font-bold text-white leading-tight"
             >
-              Land Your First Job with <span className="text-amber-500">AI-Optimized Resumes</span>
+              Land Your First Job with{" "}
+              <span className="text-amber-500">AI-Optimized Resumes</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 30 }}
@@ -48,7 +57,9 @@ export default function HeroSection({ user, onLogout }: HeroSectionProps) {
               transition={{ duration: 0.8, delay: 0.5 }}
               className="mt-8 text-xl text-gray-300 max-w-xl"
             >
-              Analyze your resume against job descriptions and receive actionable feedback. Build a professionally formatted resume with custom inputs that helps you stand out from the competition.
+              Analyze your resume against job descriptions and receive
+              actionable feedback. Build a professionally formatted resume with
+              custom inputs that helps you stand out from the competition.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -56,10 +67,17 @@ export default function HeroSection({ user, onLogout }: HeroSectionProps) {
               transition={{ duration: 0.8, delay: 0.7 }}
               className="mt-10 flex flex-col sm:flex-row gap-4"
             >
-              <Link to="/login" className="group inline-flex items-center justify-center px-8 py-4 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white hover:from-emerald-700 hover:to-emerald-500 shadow-xl shadow-emerald-700/40 hover:shadow-emerald-700/60 text-lg gap-2">
-                Start Free Analysis <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Link
+                to="/login"
+                className="group inline-flex items-center justify-center px-8 py-4 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 text-white hover:from-emerald-700 hover:to-emerald-500 shadow-xl shadow-emerald-700/40 hover:shadow-emerald-700/60 text-lg gap-2"
+              >
+                Start Free Analysis{" "}
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link to="/login" className="group text-lg px-8 py-4 border-2 border-emerald-700 text-emerald-400 rounded-lg hover:bg-emerald-900/30 transition-all duration-300 flex items-center justify-center gap-2 font-semibold">
+              <Link
+                to="/login"
+                className="group text-lg px-8 py-4 border-2 border-emerald-700 text-emerald-400 rounded-lg hover:bg-emerald-900/30 transition-all duration-300 flex items-center justify-center gap-2 font-semibold"
+              >
                 <Play className="w-5 h-5" /> Watch Demo
               </Link>
             </motion.div>
@@ -93,7 +111,11 @@ export default function HeroSection({ user, onLogout }: HeroSectionProps) {
               transition={{ duration: 0.6, delay: 1.2 }}
               className="mt-10 flex flex-wrap gap-6"
             >
-              {[{ icon: CheckCircle, text: "Free to start" }, { icon: Shield, text: "Secure & Private" }, { icon: Zap, text: "Instant Results" }].map((item) => (
+              {[
+                { icon: CheckCircle, text: "Free to start" },
+                { icon: Shield, text: "Secure & Private" },
+                { icon: Zap, text: "Instant Results" },
+              ].map((item) => (
                 <motion.div
                   key={item.text}
                   initial={{ opacity: 0, x: -20 }}
