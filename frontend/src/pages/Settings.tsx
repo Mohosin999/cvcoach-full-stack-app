@@ -147,7 +147,7 @@ const SubscriptionSection = ({ user }: { user: any }) => (
     transition={{ delay: 0.2 }}
     className="bg-gray-800 rounded-xl border border-gray-700 p-6"
   >
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div>
         <h2 className="text-lg font-semibold text-white">Subscription</h2>
         <p className="text-sm text-gray-400 mt-1">

@@ -520,13 +520,13 @@ export default function Builder() {
 
               {/* Form Footer - Navigation Buttons */}
               <div className="p-4 border-t border-emerald-700/20 bg-gray-900/50">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <motion.button
                     whileHover={{ scale: isFirstStep ? 1 : 1.02 }}
                     whileTap={{ scale: isFirstStep ? 1 : 0.98 }}
                     onClick={goToPreviousStep}
                     disabled={isFirstStep}
-                    className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all text-sm ${
+                    className={`hidden sm:flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all text-sm ${
                       isFirstStep
                         ? "bg-gray-800 text-gray-600 cursor-not-allowed border border-gray-700"
                         : "bg-gray-800 text-white hover:bg-gray-700 border border-emerald-700/30"
@@ -534,13 +534,26 @@ export default function Builder() {
                   >
                     <ChevronLeft className="w-4 h-4" /> Previous
                   </motion.button>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
+                    <motion.button
+                      whileHover={{ scale: isFirstStep ? 1 : 1.02 }}
+                      whileTap={{ scale: isFirstStep ? 1 : 0.98 }}
+                      onClick={goToPreviousStep}
+                      disabled={isFirstStep}
+                      className={`sm:hidden flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all text-sm ${
+                        isFirstStep
+                          ? "bg-gray-800 text-gray-600 cursor-not-allowed border border-gray-700"
+                          : "bg-gray-800 text-white hover:bg-gray-700 border border-emerald-700/30"
+                      }`}
+                    >
+                      <ChevronLeft className="w-4 h-4" /> Previous
+                    </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleSave}
                       disabled={builder.saving}
-                      className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Save className="w-4 h-4" /> Save
                     </motion.button>
@@ -549,7 +562,7 @@ export default function Builder() {
                       whileTap={{ scale: 0.98 }}
                       onClick={isLastStep ? handleExportPDF : goToNextStep}
                       disabled={builder.saving}
-                      className="flex items-center justify-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm"
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm"
                     >
                       {isLastStep ? (
                         <>
@@ -576,7 +589,7 @@ export default function Builder() {
             <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-2xl shadow-emerald-500/10 border border-emerald-500/20 overflow-hidden lg:sticky lg:top-24">
               {/* Preview Header */}
               <div className="bg-cyan-900 p-4 relative overflow-hidden">
-                <div className="flex items-center justify-between relative z-10">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between relative z-10 gap-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
                       <FileText className="w-5 h-5 text-white" />

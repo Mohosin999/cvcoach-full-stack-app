@@ -56,18 +56,18 @@ export default function SummaryEditor({
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-gray-300">
-          Professional Summary
+          Summary
         </label>
         <button
           type="button"
           onClick={handleAIGenerate}
           disabled={generating}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:from-gray-600 disabled:to-gray-600 text-white text-sm rounded-lg transition-all disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1 px-2 py-1 bg-purple-600 hover:bg-purple-700 disabled:from-gray-600 disabled:to-gray-600 text-white text-xs rounded transition-all disabled:cursor-not-allowed"
         >
           {generating ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="w-3 h-3 animate-spin" />
           ) : (
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-3 h-3" />
           )}
           {generating ? "Generating..." : "AI Generate"}
         </button>
