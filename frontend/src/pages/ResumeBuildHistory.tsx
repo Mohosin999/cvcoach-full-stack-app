@@ -4,7 +4,7 @@ Resume Build History Page
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Trash2, Calendar, FileText } from "lucide-react";
+import { ArrowLeft, Trash2, Calendar, FileText, Pencil } from "lucide-react";
 import { toast } from "react-toastify";
 import { resumeBuildHistoryApi } from "../api/api";
 import { ResumeBuildHistory } from "../types";
@@ -181,8 +181,9 @@ export default function ResumeBuildHistoryPage() {
                     <div className="flex gap-3">
                       <button
                         onClick={() => handleLoadToBuilder(item)}
-                        className="px-4 py-2 bg-green-500/20 border border-green-500/30 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+                        className="px-4 py-2 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg hover:bg-orange-500/30 transition-colors flex items-center gap-2"
                       >
+                        <Pencil className="w-4 h-4" />
                         Edit Resume
                       </button>
                     </div>

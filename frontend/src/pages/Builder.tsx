@@ -361,7 +361,7 @@ export default function Builder() {
           >
             <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-2xl shadow-emerald-500/10 border border-emerald-500/20 overflow-hidden">
               {/* Progress Stepper - Green Gradient */}
-              <div className="bg-cyan-900 p-4 relative overflow-hidden">
+              <div className="bg-gradient-to-r from-emerald-700 via-emerald-800 to-emerald-900 p-4 relative overflow-hidden">
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-2 lg:mb-3">
                     <p className="text-emerald-100 text-xs">
@@ -588,7 +588,7 @@ export default function Builder() {
           >
             <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-2xl shadow-emerald-500/10 border border-emerald-500/20 overflow-hidden lg:sticky lg:top-24">
               {/* Preview Header */}
-              <div className="bg-cyan-900 p-4 relative overflow-hidden">
+              <div className="bg-gradient-to-r from-emerald-700 via-emerald-800 to-emerald-900 p-4 relative overflow-hidden">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between relative z-10 gap-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
@@ -605,7 +605,7 @@ export default function Builder() {
                   </div>
                   <button
                     onClick={handleExportPDF}
-                    className="flex items-center gap-2 px-4 py-2 gradient-btn rounded-lg text-white transition-all text-sm font-medium"
+                    className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white rounded-lg text-white transition-all text-sm font-medium hover:bg-white/10"
                   >
                     <svg
                       className="w-4 h-4"

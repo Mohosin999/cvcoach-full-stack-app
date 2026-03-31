@@ -18,7 +18,7 @@ function InitializeApp() {
 
     const interval = setInterval(() => {
       dispatch(tokenRefresh());
-    }, 10 * 60 * 1000);
+    }, 14 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [dispatch]);

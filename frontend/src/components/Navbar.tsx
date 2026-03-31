@@ -62,8 +62,12 @@ export default function Navbar() {
                   <div className="hidden lg:flex">
                     <HistoryDropdown />
                   </div>
-                  <UpgradeButton />
-                  <CreditsBadge user={user} />
+                  <div className="hidden lg:flex">
+                    <UpgradeButton />
+                  </div>
+                  <div className="hidden lg:flex">
+                    <CreditsBadge user={user} />
+                  </div>
                   <ProfileMenu
                     user={user}
                     profileMenuOpen={profileMenuOpen}

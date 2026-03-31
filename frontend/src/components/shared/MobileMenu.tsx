@@ -85,6 +85,21 @@ export default function MobileMenu({ navLinks, user, setMobileMenuOpen }: { navL
           Upgrade Plan
         </Link>
         <div className="px-3 py-2 text-sm text-gray-400">{user.subscription.credits} credits</div>
+        
+        <div className="border-t border-gray-700 mt-2 pt-2">
+          <div className="flex items-center gap-3 px-3 py-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-600 flex items-center justify-center text-white text-sm font-medium">
+              {user.name?.charAt(0).toUpperCase() || "U"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{user.name}</p>
+              <p className="text-xs text-gray-400 truncate">{user.email}</p>
+            </div>
+          </div>
+          <Link to="/settings" className="block px-3 py-2 text-sm text-gray-300 hover:bg-gray-800" onClick={() => setMobileMenuOpen(false)}>
+            Settings
+          </Link>
+        </div>
       </div>
     </motion.div>
   );

@@ -180,7 +180,7 @@ export const exportToPdf = async (content: ResumeContent): Promise<void> => {
       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div style="min-width: 220px;">
           <h1 class="resume-name" style="font-weight: bold; color: #222222; text-transform: uppercase;">
-            ${content.personalInfo.fullName || "YOUR NAME"}
+            ${content.personalInfo.fullName || ""}
           </h1>
           ${content.personalInfo.jobTitle ? `<p class="resume-job-title" style="color: #222222;">${content.personalInfo.jobTitle}</p>` : ""}
         </div>

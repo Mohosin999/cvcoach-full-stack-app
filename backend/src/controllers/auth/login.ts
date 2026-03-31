@@ -47,6 +47,7 @@ export const login = async (req: AuthRequest, res: Response) => {
       httpOnly: true,
       secure: env.nodeEnv === 'production',
       sameSite: 'lax',
+      path: '/',
       maxAge: 15 * 60 * 1000,
     });
 
