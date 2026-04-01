@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../../middlewares';
+import { User } from '../../models/User';
 import {
   createResumeBuildHistory,
   getResumeBuildHistory,
@@ -20,14 +21,29 @@ export const saveResumeBuild = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Check user credits (Resume Build costs 10 credits)
+    const user = await User.findById(req.user._id);
+    if (!user || user.subscription.credits < 10) {
+      return res.status(403).json({
+        success: false,
+        message: `Insufficient credits. This task requires 10 credits. You have ${user?.subscription.credits || 0} credits.`,
+      });
+    }
+
     const build = await createResumeBuildHistory(
       req.user._id.toString(),
       resumeContent
     );
 
+    // Deduct 10 credits for Resume Build
+    user.subscription.credits -= 10;
+    await user.save();
+
     res.status(201).json({
       success: true,
       data: build,
+      credits: user.subscription.credits,
+      message: "✅ Credit deducted successfully! Task: Resume Build, Credits deducted: 10",
     });
   } catch (error: any) {
     console.error('Save resume build error:', error);

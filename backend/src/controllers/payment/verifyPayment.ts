@@ -4,7 +4,7 @@ import { User } from "../../models/User";
 import { Payment } from "../../models/Payment";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2024-06-20",
+  apiVersion: "2024-06-20" as any,
 });
 
 const PRO_PLAN_CREDITS = 500;
@@ -14,7 +14,7 @@ export const verifyPaymentController = async (req: Request, res: Response) => {
   try {
     console.log("=== Payment Verification Started ===");
     console.log("Query params:", req.query);
-    console.log("User:", req.user?._id);
+    console.log("User:", (req.user as any)?._id);
     
     const { session_id } = req.query;
 

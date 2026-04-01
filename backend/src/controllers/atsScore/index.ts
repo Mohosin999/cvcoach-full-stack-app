@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../../middlewares';
+import { User } from '../../models/User';
 import {
   calculateAtsScore,
   getAtsScoreHistory,
@@ -18,15 +19,17 @@ export const analyzeAtsScore = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const score = await calculateAtsScore(req.user._id.toString(), resumeId);
+    const { atsScore, credits } = await calculateAtsScore(req.user._id.toString(), resumeId);
 
     res.status(201).json({
       success: true,
-      data: score,
+      data: atsScore,
+      credits,
     });
   } catch (error: any) {
     console.error('ATS Score analysis error:', error);
-    res.status(500).json({
+    const status = error.message.includes('Insufficient credits') ? 403 : 500;
+    res.status(status).json({
       success: false,
       message: error.message || 'Failed to analyze ATS score',
     });

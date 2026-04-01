@@ -3,7 +3,7 @@ import { User } from "../../models/User";
 import { Payment } from "../../models/Payment";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2024-06-20",
+  apiVersion: "2024-06-20" as any,
 });
 
 const PRO_PLAN_CREDITS = 500;

@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { FileText, Briefcase, CheckCircle, Upload } from "lucide-react";
 import { toast } from "react-toastify";
 import { jobMatchApi, resumeParserApi } from "../api/api";
+import { useAppDispatch } from "../hooks/redux";
+import { setUserCredits } from "../store/slices/authSlice";
 import BackButton from "../components/ui/BackButton";
 import ScoreCard from "../components/ui/ScoreCard";
 import MatchBreakdown from "../components/MatchBreakdown";
@@ -14,6 +16,7 @@ import { JobMatchHistory, ResumeContent } from "../types";
 export default function JobMatchPage() {
   const navigate = useNavigate();
   const { id: analysisId } = useParams<{ id: string }>();
+  const dispatch = useAppDispatch();
   const [resumeName, setResumeName] = useState("");
   const [resumeContent, setResumeContent] = useState<ResumeContent | null>(
     null,
@@ -86,7 +89,13 @@ export default function JobMatchPage() {
         jobDescription,
       });
       setResult(response.data.data);
-      toast.success("Job match analysis completed");
+      
+      if (response.data.credits !== undefined) {
+        dispatch(setUserCredits(response.data.credits));
+        toast.success(`Job match analysis completed! 5 credits deducted. New balance: ${response.data.credits}`);
+      } else {
+        toast.success("Job match analysis completed");
+      }
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || "Failed to analyze job match",

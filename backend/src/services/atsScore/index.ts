@@ -2,6 +2,7 @@ import { AtsScore } from '../../models/AtsScore';
 import { Resume } from '../../models/Resume';
 import { analyzeAtsScore as analyzeWithGemini } from '../aiAnalysis/gemini';
 import { ResumeContent } from '../../types';
+import { useUserCredits, getUserCredits } from '../users';
 
 const validErrorTypes = ['spelling', 'grammar', 'punctuation', 'formatting', 'redundancy'];
 
@@ -28,6 +29,15 @@ export const calculateAtsScore = async (
     throw new Error('Resume not found');
   }
 
+  // Check credits before analysis (ATS Score costs 5 credits)
+  const currentCredits = await getUserCredits(userId);
+  if (currentCredits < 5) {
+    throw new Error(`Insufficient credits. This task requires 5 credits. You have ${currentCredits} credits.`);
+  }
+
+  // Deduct 5 credits for ATS Score Analysis
+  const { credits } = await useUserCredits(userId, 5);
+
   // Analyze with Gemini AI
   const analysis = await analyzeWithGemini(resume.content);
 
@@ -45,7 +55,7 @@ export const calculateAtsScore = async (
     suggestions: analysis.suggestions,
   });
 
-  return atsScore;
+  return { atsScore, credits };
 };
 
 export const getAtsScoreHistory = async (userId: string, page = 1, limit = 10) => {

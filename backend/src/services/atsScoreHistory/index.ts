@@ -24,7 +24,7 @@ export const createAtsScoreHistory = async (
   if (!analysis.sectionScores.contactInfo.hasContactInfo) {
     analysis.sectionScores.contactInfo.hasContactInfo = Boolean(
       resumeContent.personalInfo?.email ||
-      resumeContent.personalInfo?.phone ||
+      (resumeContent.personalInfo as any)?.phone ||
       resumeContent.personalInfo?.linkedIn
     );
   }

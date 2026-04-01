@@ -54,7 +54,13 @@ export function useResumeActions() {
           resumeContent: content,
           resumeName: content.personalInfo?.fullName || 'Untitled Resume',
         });
-        toast.success("Resume saved to history successfully!");
+        
+        if (response.data.credits !== undefined) {
+          dispatch(setUserCredits(response.data.credits));
+          toast.success(`Resume saved! 10 credits deducted. New balance: ${response.data.credits}`);
+        } else {
+          toast.success("Resume saved to history successfully!");
+        }
       }
       return response.data.data;
     } catch (error: any) {

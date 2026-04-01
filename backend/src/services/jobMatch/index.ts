@@ -1,6 +1,7 @@
 import { JobMatch } from '../../models/JobMatch';
 import { Resume } from '../../models/Resume';
 import { analyzeJobMatch as analyzeWithGemini } from '../aiAnalysis/gemini';
+import { useUserCredits, getUserCredits } from '../users';
 
 export const calculateJobMatch = async (
   userId: string,
@@ -17,6 +18,15 @@ export const calculateJobMatch = async (
   if (!resume) {
     throw new Error('Resume not found');
   }
+
+  // Check credits before analysis (Job Match costs 5 credits)
+  const currentCredits = await getUserCredits(userId);
+  if (currentCredits < 5) {
+    throw new Error(`Insufficient credits. This task requires 5 credits. You have ${currentCredits} credits.`);
+  }
+
+  // Deduct 5 credits for Job Match Analysis
+  const { credits } = await useUserCredits(userId, 5);
 
   // Analyze with Gemini AI
   const analysis = await analyzeWithGemini(
@@ -40,7 +50,7 @@ export const calculateJobMatch = async (
     suggestions: analysis.suggestions,
   });
 
-  return jobMatch;
+  return { jobMatch, credits };
 };
 
 export const getJobMatchHistory = async (userId: string, page = 1, limit = 10) => {

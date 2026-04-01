@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../../middlewares';
+import { User } from '../../models/User';
 import {
   calculateJobMatch,
   getJobMatchHistory,
@@ -25,7 +26,7 @@ export const analyzeJobMatch = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const match = await calculateJobMatch(
+    const { jobMatch, credits } = await calculateJobMatch(
       req.user._id.toString(),
       resumeId,
       jobDescription,
@@ -35,11 +36,13 @@ export const analyzeJobMatch = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json({
       success: true,
-      data: match,
+      data: jobMatch,
+      credits,
     });
   } catch (error: any) {
     console.error('Job Match analysis error:', error);
-    res.status(500).json({
+    const status = error.message.includes('Insufficient credits') ? 403 : 500;
+    res.status(status).json({
       success: false,
       message: error.message || 'Failed to analyze job match',
     });

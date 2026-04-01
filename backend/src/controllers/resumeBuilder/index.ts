@@ -132,15 +132,21 @@ export const generateSection = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const suggestion = await generateSectionContent(section, context);
+    const { suggestion, credits } = await generateSectionContent(
+      req.user._id.toString(),
+      section,
+      context
+    );
 
     res.json({
       success: true,
       data: suggestion,
+      credits,
     });
   } catch (error: any) {
     console.error('Generate section error:', error);
-    res.status(500).json({
+    const status = error.message.includes('Insufficient credits') ? 403 : 500;
+    res.status(status).json({
       success: false,
       message: error.message || 'Failed to generate section content',
     });
@@ -158,15 +164,21 @@ export const improveSection = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const improvement = await improveResumeSection(section, content);
+    const { improvement, credits } = await improveResumeSection(
+      req.user._id.toString(),
+      section,
+      content
+    );
 
     res.json({
       success: true,
       data: improvement,
+      credits,
     });
   } catch (error: any) {
     console.error('Improve section error:', error);
-    res.status(500).json({
+    const status = error.message.includes('Insufficient credits') ? 403 : 500;
+    res.status(status).json({
       success: false,
       message: error.message || 'Failed to improve section content',
     });

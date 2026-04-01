@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../../middlewares';
+import { User } from '../../models/User';
 import {
   createJobMatchHistory,
   getJobMatchHistory,
@@ -26,6 +27,15 @@ export const analyzeJobMatch = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Check user credits (Job Match costs 5 credits)
+    const user = await User.findById(req.user._id);
+    if (!user || user.subscription.credits < 5) {
+      return res.status(403).json({
+        success: false,
+        message: `Insufficient credits. This task requires 5 credits. You have ${user?.subscription.credits || 0} credits.`,
+      });
+    }
+
     const match = await createJobMatchHistory(
       req.user._id.toString(),
       resumeName || 'Untitled Resume',
@@ -33,13 +43,20 @@ export const analyzeJobMatch = async (req: AuthRequest, res: Response) => {
       jobDescription
     );
 
+    // Deduct 5 credits for Job Match Analysis
+    user.subscription.credits -= 5;
+    await user.save();
+
     res.status(201).json({
       success: true,
       data: match,
+      credits: user.subscription.credits,
+      message: "✅ Credit deducted successfully! Task: Job Match Analysis, Credits deducted: 5",
     });
   } catch (error: any) {
     console.error('Job Match analysis error:', error);
-    res.status(500).json({
+    const status = error.message.includes('Insufficient credits') ? 403 : 500;
+    res.status(status).json({
       success: false,
       message: error.message || 'Failed to analyze job match',
     });

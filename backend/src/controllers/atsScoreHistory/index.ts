@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../../middlewares';
+import { User } from '../../models/User';
 import {
   createAtsScoreHistory,
   getAtsScoreHistory,
@@ -19,19 +20,35 @@ export const analyzeAtsScore = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Check user credits (ATS Score costs 5 credits)
+    const user = await User.findById(req.user._id);
+    if (!user || user.subscription.credits < 5) {
+      return res.status(403).json({
+        success: false,
+        message: `Insufficient credits. This task requires 5 credits. You have ${user?.subscription.credits || 0} credits.`,
+      });
+    }
+
     const score = await createAtsScoreHistory(
       req.user._id.toString(),
       resumeName || 'Untitled Resume',
       resumeContent
     );
 
+    // Deduct 5 credits for ATS Score Analysis
+    user.subscription.credits -= 5;
+    await user.save();
+
     res.status(201).json({
       success: true,
       data: score,
+      credits: user.subscription.credits,
+      message: "✅ Credit deducted successfully! Task: ATS Score Analysis, Credits deducted: 5",
     });
   } catch (error: any) {
     console.error('ATS Score analysis error:', error);
-    res.status(500).json({
+    const status = error.message.includes('Insufficient credits') ? 403 : 500;
+    res.status(status).json({
       success: false,
       message: error.message || 'Failed to analyze ATS score',
     });

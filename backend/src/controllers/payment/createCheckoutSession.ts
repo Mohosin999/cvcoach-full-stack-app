@@ -12,7 +12,7 @@ export const createCheckoutSessionController = async (
       return res.status(400).json({ message: "Invalid plan ID" });
     }
 
-    const userId = req.user?._id;
+    const userId = (req.user as any)?._id;
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }

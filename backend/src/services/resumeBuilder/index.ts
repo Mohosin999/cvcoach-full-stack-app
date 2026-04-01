@@ -5,6 +5,7 @@ import {
 } from '../aiAnalysis/gemini';
 import { ResumeContent } from '../../types';
 import { IResumeTemplate } from '../../models/ResumeTemplate';
+import { useUserCredits, getUserCredits } from '../users';
 
 export const createResumeTemplate = async (
   userId: string,
@@ -111,6 +112,7 @@ export const deleteResumeTemplate = async (
 };
 
 export const generateSectionContent = async (
+  userId: string,
   section: string,
   context?: {
     jobTitle?: string;
@@ -119,16 +121,26 @@ export const generateSectionContent = async (
     skills?: string[];
   }
 ) => {
+  // Resume Build costs 10 credits
+  const currentCredits = await getUserCredits(userId);
+  if (currentCredits < 10) {
+    throw new Error(`Insufficient credits. This task requires 10 credits. You have ${currentCredits} credits.`);
+  }
+
+  // Deduct 10 credits for Resume Build
+  const { credits } = await useUserCredits(userId, 10);
   const suggestion = await generateWithGemini(section, context);
-  return suggestion;
+  return { suggestion, credits };
 };
 
 export const improveResumeSection = async (
+  userId: string,
   section: string,
   currentContent: string
 ) => {
+  // Resume Rewrite/Optimization is FREE - no credit deduction
   const improvement = await improveWithGemini(section, currentContent);
-  return improvement;
+  return { improvement, credits: await getUserCredits(userId) };
 };
 
 export const checkAtsFriendliness = async (content: ResumeContent) => {

@@ -31,10 +31,11 @@ export const generateAnalysis = async (req: AuthRequest, res: Response) => {
 
     const user = await User.findById(userId);
 
+    // Analysis costs 1 credit
     if (!user || user.subscription.credits < 1) {
       return res.status(403).json({
         success: false,
-        message: "Insufficient credits. Please upgrade your plan.",
+        message: `Insufficient credits. This task requires 1 credit. You have ${user?.subscription.credits || 0} credits.`,
       });
     }
 
@@ -101,6 +102,8 @@ export const generateAnalysis = async (req: AuthRequest, res: Response) => {
     return res.status(201).json({
       success: true,
       data: analysis,
+      credits: user.subscription.credits,
+      message: "✅ Credit deducted successfully! Task: Resume Analysis, Credits deducted: 1",
     });
   } catch (error: any) {
     console.error("Analysis error:", error);
