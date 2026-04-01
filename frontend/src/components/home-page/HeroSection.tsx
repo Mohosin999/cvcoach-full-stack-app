@@ -49,7 +49,7 @@ export default function HeroSection({ user, onLogout }: HeroSectionProps) {
               className="text-4xl xl:text-5xl font-bold text-white leading-tight"
             >
               Land Your First Job with{" "}
-              <span className="text-amber-500">AI-Optimized Resumes</span>
+              <span className="text-lime-500">AI-Optimized Resumes</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 30 }}
