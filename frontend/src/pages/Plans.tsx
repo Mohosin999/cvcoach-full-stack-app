@@ -13,7 +13,7 @@ import {
 import { toast } from "react-toastify";
 import { useAppSelector, useAppDispatch } from "../hooks/redux";
 import { fetchUser } from "../store/slices/authSlice";
-import { showUpgradePlan } from "../components/Toast";
+import { showUpgradePlan } from "../components/ui/Toast";
 import BackButton from "../components/ui/BackButton";
 
 interface Plan {
