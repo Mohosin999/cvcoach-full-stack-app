@@ -5,7 +5,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { env } from './env';
 import { AuthRequest } from '../types';
 
-const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+const isVercel = process.env.VERCEL === '1';
+
+let uploadsDir: string;
+
+if (isVercel) {
+  uploadsDir = '/tmp/uploads';
+} else {
+  uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+}
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
