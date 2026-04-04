@@ -1,16 +1,16 @@
-import jwt from 'jsonwebtoken';
-import { env } from './env';
-import { JWTPayload } from '../types';
+import jwt from "jsonwebtoken";
+import { env } from "./env";
+import { JWTPayload } from "../types";
 
 export const generateAccessToken = (payload: JWTPayload): string => {
   return jwt.sign(payload, env.jwtSecret, {
-    expiresIn: '15m',
+    expiresIn: "15m",
   });
 };
 
 export const generateRefreshToken = (payload: JWTPayload): string => {
   return jwt.sign(payload, env.jwtRefreshSecret, {
-    expiresIn: '7d',
+    expiresIn: "7d",
   });
 };
 

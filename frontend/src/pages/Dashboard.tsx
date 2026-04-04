@@ -20,30 +20,56 @@ export default function Dashboard() {
   const [totalResumes, setTotalResumes] = useState(0);
   const [totalAtsHistory, setTotalAtsHistory] = useState(0);
   const [totalJobMatchHistory, setTotalJobMatchHistory] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loadingBuilds, setLoadingBuilds] = useState(true);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  const fetchData = async () => {
+    setLoadingBuilds(true);
+    setLoadingStats(true);
+    try {
+      const [buildRes, atsRes, jobMatchRes] = await Promise.all([
+        resumeBuildHistoryApi.getAll(1, 5),
+        atsScoreApi.getAll(1, 1),
+        jobMatchApi.getAll(1, 1),
+      ]);
+      const data = {
+        recentBuilds: buildRes.data.data || [],
+        totalResumes: buildRes.data.pagination?.total || 0,
+        totalAtsHistory: atsRes.data.pagination?.total || 0,
+        totalJobMatchHistory: jobMatchRes.data.pagination?.total || 0,
+      };
+      localStorage.setItem('dashboardData', JSON.stringify(data));
+      setRecentBuilds(data.recentBuilds);
+      setTotalResumes(data.totalResumes);
+      setTotalAtsHistory(data.totalAtsHistory);
+      setTotalJobMatchHistory(data.totalJobMatchHistory);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoadingBuilds(false);
+      setLoadingStats(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [buildRes, atsRes, jobMatchRes] = await Promise.all([
-          resumeBuildHistoryApi.getAll(1, 5),
-          atsScoreApi.getAll(1, 1),
-          jobMatchApi.getAll(1, 1),
-        ]);
-        setRecentBuilds(buildRes.data.data || []);
-        setTotalResumes(buildRes.data.pagination?.total || 0);
-        setTotalAtsHistory(atsRes.data.pagination?.total || 0);
-        setTotalJobMatchHistory(jobMatchRes.data.pagination?.total || 0);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const cached = localStorage.getItem('dashboardData');
+    if (cached) {
+      const data = JSON.parse(cached);
+      setRecentBuilds(data.recentBuilds);
+      setTotalResumes(data.totalResumes);
+      setTotalAtsHistory(data.totalAtsHistory);
+      setTotalJobMatchHistory(data.totalJobMatchHistory);
+      setLoadingBuilds(false);
+      setLoadingStats(false);
+    }
     fetchData();
   }, []);
 
-  if (loading) return <LoadingSpinner fullScreen />;
+  useEffect(() => {
+    const handleFocus = () => fetchData();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, []);
 
   const features = [
     {
@@ -86,7 +112,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
           <div className="lg:col-span-2">
-            <RecentBuilds builds={recentBuilds} />
+            <RecentBuilds builds={recentBuilds} loading={loadingBuilds} />
           </div>
           <div>
             <QuickStats
@@ -94,6 +120,7 @@ export default function Dashboard() {
               totalResumes={totalResumes}
               totalAtsHistory={totalAtsHistory}
               totalJobMatchHistory={totalJobMatchHistory}
+              loading={loadingStats}
             />
           </div>
         </div>
@@ -157,7 +184,7 @@ const FeaturesGrid = ({ features }: { features: any[] }) => (
   </div>
 );
 
-const RecentBuilds = ({ builds }: { builds: any[] }) => (
+const RecentBuilds = ({ builds, loading }: { builds: any[]; loading: boolean }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -176,7 +203,11 @@ const RecentBuilds = ({ builds }: { builds: any[] }) => (
         <ChevronRight className="w-4 h-4" />
       </Link>
     </div>
-    {builds.length > 0 ? (
+    {loading ? (
+      <div className="flex items-center justify-center py-8">
+        <LoadingSpinner />
+      </div>
+    ) : builds.length > 0 ? (
       <div className="space-y-4">
         {builds.map((item) => (
           <Link
@@ -228,11 +259,13 @@ const QuickStats = ({
   totalResumes,
   totalAtsHistory,
   totalJobMatchHistory,
+  loading,
 }: {
   credits: number;
   totalResumes: number;
   totalAtsHistory: number;
   totalJobMatchHistory: number;
+  loading: boolean;
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -243,71 +276,77 @@ const QuickStats = ({
     <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
       Your Stats
     </h2>
-    <div className="space-y-4">
-      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-            <Zap className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Available Credits
-            </p>
-            <p className="font-semibold text-gray-900 dark:text-white">
-              {credits}
-            </p>
+    {loading ? (
+      <div className="flex items-center justify-center py-8">
+        <LoadingSpinner />
+      </div>
+    ) : (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Available Credits
+              </p>
+              <p className="font-semibold text-gray-900 dark:text-white">
+                {credits}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              ATS Analyses
-            </p>
-            <p className="font-semibold text-gray-900 dark:text-white">
-              {totalAtsHistory}
-            </p>
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                ATS Analyses
+              </p>
+              <p className="font-semibold text-gray-900 dark:text-white">
+                {totalAtsHistory}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-            <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Job Matches
-            </p>
-            <p className="font-semibold text-gray-900 dark:text-white">
-              {totalJobMatchHistory}
-            </p>
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+              <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Job Matches
+              </p>
+              <p className="font-semibold text-gray-900 dark:text-white">
+                {totalJobMatchHistory}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <FileText className="w-5 h-5 text-green-600 dark:text-green-400" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Total Resumes
-            </p>
-            <p className="font-semibold text-gray-900 dark:text-white">
-              {totalResumes}
-            </p>
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Total Resumes
+              </p>
+              <p className="font-semibold text-gray-900 dark:text-white">
+                {totalResumes}
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    )}
 
     {credits < 5 && (
       <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg">
