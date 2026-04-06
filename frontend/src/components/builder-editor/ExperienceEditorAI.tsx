@@ -105,67 +105,26 @@ export default function ExperienceEditorAI({
 
             <div>
               <label className="text-xs text-gray-400">Top Skills</label>
-              <div className="flex gap-2">
-                <div
-                  className="input flex-1 text-sm min-h-[42px] flex flex-wrap gap-2 p-2 cursor-text"
-                  onClick={() =>
-                    document.getElementById(`skills-${index}`)?.focus()
-                  }
-                >
-                  {exp.topSkills?.map((skill, i) => (
-                    <span
-                      key={i}
-                      className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-600/30 text-emerald-300 text-xs rounded"
-                    >
-                      {skill}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const newSkills = [...(exp.topSkills || [])];
-                          newSkills.splice(i, 1);
-                          onUpdate(index, "topSkills", newSkills);
-                        }}
-                        className="hover:text-white"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                  <input
-                    id={`skills-${index}`}
-                    type="text"
-                    onKeyDown={(e) => {
-                      const value = (e.target as HTMLInputElement).value.trim();
-                      if ((e.key === "Enter" || e.key === " ") && value) {
-                        e.preventDefault();
-                        if (value && !exp.topSkills?.includes(value)) {
-                          onUpdate(index, "topSkills", [
-                            ...(exp.topSkills || []),
-                            value,
-                          ]);
-                          (e.target as HTMLInputElement).value = "";
-                        }
+              <div className="flex gap-2 mb-2">
+                <input
+                  id={`skills-${index}`}
+                  type="text"
+                  onKeyDown={(e) => {
+                    const value = (e.target as HTMLInputElement).value.trim();
+                    if (e.key === "Enter" && value) {
+                      e.preventDefault();
+                      if (!exp.topSkills?.includes(value)) {
+                        onUpdate(index, "topSkills", [
+                          ...(exp.topSkills || []),
+                          value,
+                        ]);
+                        (e.target as HTMLInputElement).value = "";
                       }
-                      if (
-                        e.key === "Backspace" &&
-                        !value &&
-                        exp.topSkills &&
-                        exp.topSkills.length > 0
-                      ) {
-                        const newSkills = [...exp.topSkills];
-                        newSkills.pop();
-                        onUpdate(index, "topSkills", newSkills);
-                      }
-                    }}
-                    className="flex-1 min-w-[100px] bg-transparent outline-none placeholder-gray-500"
-                    placeholder={
-                      exp.topSkills?.length === 0
-                        ? "Type skill and press enter..."
-                        : ""
                     }
-                  />
-                </div>
+                  }}
+                  className="input flex-1 text-sm"
+                  placeholder="Type skill and press enter"
+                />
                 <button
                   type="button"
                   onClick={() => {
@@ -186,6 +145,29 @@ export default function ExperienceEditorAI({
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
+              {exp.topSkills && exp.topSkills.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {exp.topSkills.map((skill, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-600/30 text-emerald-300 text-xs rounded"
+                    >
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newSkills = [...(exp.topSkills || [])];
+                          newSkills.splice(i, 1);
+                          onUpdate(index, "topSkills", newSkills);
+                        }}
+                        className="hover:text-white"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

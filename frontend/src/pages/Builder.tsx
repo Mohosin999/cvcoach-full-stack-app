@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 import { useAppSelector } from "../hooks/redux";
 import { useResumeBuilder, useResumeContent } from "../hooks/useResumeBuilder";
 import { Resume, ResumeContent } from "../types";
-import { exportToPdf, exportToPdfMobile } from "../utils/pdfExport";
+import { exportToPdf } from "../utils/pdfExport";
 import BackButton from "../components/ui/BackButton";
 import { resumeBuildHistoryApi } from "../api/api";
 import PersonalInfoEditor from "../components/builder-editor/PersonalInfoEditor";
@@ -226,17 +226,9 @@ export default function Builder() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
-  const isMobileDevice = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  };
-
   const handleExportPDF = async () => {
     try {
-      if (isMobileDevice()) {
-        await exportToPdfMobile("resume-preview-content");
-      } else {
-        await exportToPdf(builder.content);
-      }
+      await exportToPdf(builder.content);
     } catch (error) {
       console.error("PDF Export Error:", error);
       toast.error(
