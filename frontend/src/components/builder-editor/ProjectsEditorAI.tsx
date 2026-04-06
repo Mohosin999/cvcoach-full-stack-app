@@ -121,7 +121,7 @@ export default function ProjectsEditorAI({
                   }
                   className="input w-full text-sm"
                   style={{ minHeight: "200px", height: "auto" }}
-                  placeholder="Describe the project, your role, and technologies used..."
+                  placeholder="Use (•) bullet points or each line will be a separate bullet point."
                 />
               </div>
             </div>

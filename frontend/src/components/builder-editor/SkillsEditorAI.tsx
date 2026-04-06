@@ -27,16 +27,34 @@ export default function SkillsEditorAI({
   const [newSoftSkill, setNewSoftSkill] = useState("");
   const [generating, setGenerating] = useState(false);
 
+  const capitalizeSkill = (skill: string): string => {
+    return skill.replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  const cleanSkillName = (skill: string): string => {
+    const cleaned = skill
+      .replace(/\s+(with|and|using|in|of|for|to)\s+/gi, " ")
+      .replace(
+        /^(experience|knowledge|skills?|proficiency)\s+(in|with|of)?/gi,
+        "",
+      )
+      .replace(/\s+(experience|knowledge|skills?|proficiency)$/gi, "")
+      .trim();
+    return cleaned.length > 2 && cleaned.length < 40
+      ? capitalizeSkill(cleaned)
+      : "";
+  };
+
   const handleAddTechnicalSkill = () => {
     if (newTechnicalSkill.trim()) {
-      onAddTechnicalSkill(newTechnicalSkill.trim());
+      onAddTechnicalSkill(capitalizeSkill(newTechnicalSkill.trim()));
       setNewTechnicalSkill("");
     }
   };
 
   const handleAddSoftSkill = () => {
     if (newSoftSkill.trim()) {
-      onAddSoftSkill(newSoftSkill.trim());
+      onAddSoftSkill(capitalizeSkill(newSoftSkill.trim()));
       setNewSoftSkill("");
     }
   };
@@ -60,18 +78,29 @@ export default function SkillsEditorAI({
 
       const suggestion = response.data.data as AISectionSuggestion;
       const suggestedSkills = suggestion.content
-        .split(/[,\n•-]/)
-        .map((s: string) => s.trim())
-        .filter((s: string) => s.length > 0 && s.length < 50);
+        .split(/[,\n•]/)
+        .map((s: string) => cleanSkillName(s))
+        .filter((s: string) => s.length > 0)
+        .filter(
+          (s: string) =>
+            !s.match(
+              /^(hands?|typing|developing|working|building|creating|experience|knowledge)$/i,
+            ),
+        )
+        .filter((s: string) => !s.toLowerCase().includes("hands"))
+        .filter((s: string) => !s.toLowerCase().includes("developing"))
+        .filter((s: string) => !s.toLowerCase().includes("pipelines"))
+        .filter((s: string) => !s.toLowerCase().includes("containerization"));
 
-      suggestedSkills.slice(0, 5).forEach((skill: string) => {
+      const uniqueSkills = [...new Set(suggestedSkills)];
+      uniqueSkills.slice(0, 10).forEach((skill: string) => {
         if (!technicalSkills.includes(skill)) {
           onAddTechnicalSkill(skill);
         }
       });
 
       toast.success(
-        `${Math.min(5, suggestedSkills.length)} technical skills added!`,
+        `${Math.min(10, uniqueSkills.length)} technical skills added!`,
       );
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to suggest skills");
@@ -120,31 +149,23 @@ export default function SkillsEditorAI({
           </button>
         </div>
 
-        {technicalSkills.length === 0 ? (
-          <p className="text-gray-400 text-sm">No technical skills added yet</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {technicalSkills.map((skill, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-900/30 border border-emerald-500/30 text-emerald-300 rounded-lg text-sm"
+        <div className="flex flex-wrap gap-2">
+          {technicalSkills.map((skill, index) => (
+            <span
+              key={index}
+              className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-900/30 border border-emerald-500/30 text-emerald-300 rounded-lg text-sm"
+            >
+              {skill}
+              <button
+                type="button"
+                onClick={() => onRemoveTechnicalSkill(skill)}
+                className="hover:text-emerald-100 transition-colors"
               >
-                {skill}
-                <button
-                  type="button"
-                  onClick={() => onRemoveTechnicalSkill(skill)}
-                  className="hover:text-emerald-100 transition-colors"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-
-        <p className="text-xs text-gray-400">
-          Tip: Add programming languages, frameworks, tools, and technologies
-        </p>
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -167,32 +188,23 @@ export default function SkillsEditorAI({
           </button>
         </div>
 
-        {softSkills.length === 0 ? (
-          <p className="text-gray-400 text-sm">No soft skills added yet</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {softSkills.map((skill, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-violet-900/30 border border-violet-500/30 text-violet-300 rounded-lg text-sm"
+        <div className="flex flex-wrap gap-2">
+          {softSkills.map((skill, index) => (
+            <span
+              key={index}
+              className="inline-flex items-center gap-1 px-3 py-1.5 bg-violet-900/30 border border-violet-500/30 text-violet-300 rounded-lg text-sm"
+            >
+              {skill}
+              <button
+                type="button"
+                onClick={() => onRemoveSoftSkill(skill)}
+                className="hover:text-violet-100 transition-colors"
               >
-                {skill}
-                <button
-                  type="button"
-                  onClick={() => onRemoveSoftSkill(skill)}
-                  className="hover:text-violet-100 transition-colors"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-
-        <p className="text-xs text-gray-400">
-          Tip: Add interpersonal skills like communication, teamwork,
-          problem-solving
-        </p>
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );

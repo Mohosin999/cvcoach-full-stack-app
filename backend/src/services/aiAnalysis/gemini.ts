@@ -266,6 +266,31 @@ Provide your response in the following JSON format ONLY:
 
 Return ONLY valid JSON.
 `;
+  } else if (section === 'Technical Skills') {
+    prompt = `
+Generate exactly 10 technical skills for a ${context?.jobTitle || 'Software Developer'}.
+
+${contextStr}
+
+Follow this exact format (10 skills separated by commas, no bullet points):
+Example: "React, JavaScript, Node.js, TypeScript, MongoDB, Docker, AWS, Git, REST APIs, GraphQL"
+
+The skills should be:
+- Exactly 10 skills
+- Only use direct technology names, frameworks, or tools
+- NO phrases like "with hands", "experience in", "developing skills", "proficiency in"
+- NO descriptions, only pure skill names like: React, Python, Docker, AWS, Git, SQL, etc.
+- Each skill should be a single technology, framework, or tool name
+
+Provide your response in the following JSON format ONLY:
+{
+  "section": "${section}",
+  "content": string (exactly 10 skills separated by commas, no bullet points),
+  "tips": [string] (tips for customizing this section)
+}
+
+Return ONLY valid JSON.
+`;
   } else {
     prompt = `
 Generate a professional ${section} for a ${context?.jobTitle || 'professional'} based on their job title and skills.

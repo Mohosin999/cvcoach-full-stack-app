@@ -1,22 +1,73 @@
 import { ResumeContent } from "../types";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 let printWindow: Window | null = null;
 
 export const exportToPdf = async (content: ResumeContent): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    try {
-      if (printWindow && !printWindow.closed) {
-        printWindow.close();
-      }
+  try {
+    const printContent = generateHtmlContent(content);
+    
+    if (printWindow && !printWindow.closed) {
+      printWindow.close();
+    }
 
-      printWindow = window.open("", "_blank", "width=800,height=900");
+    printWindow = window.open("", "_blank", "width=800,height=900");
 
-      if (!printWindow) {
-        throw new Error("Unable to open print window. Please allow popups.");
-      }
+    if (!printWindow) {
+      throw new Error("Unable to open print window. Please allow popups.");
+    }
 
-      const printContent = `
-<!DOCTYPE html>
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+
+    printWindow.onafterprint = () => {
+      printWindow?.close();
+    };
+  } catch (error) {
+    console.error("PDF export error:", error);
+    throw error;
+  }
+};
+
+export const exportToPdfMobile = async (elementId: string): Promise<void> => {
+  const element = document.getElementById(elementId);
+  if (!element) {
+    throw new Error("Resume element not found");
+  }
+
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+    backgroundColor: "#ffffff"
+  });
+
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF("p", "mm", "a4");
+  
+  const imgWidth = 210;
+  const pageHeight = 297;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  pdf.save("resume.pdf");
+};
+
+function generateHtmlContent(content: ResumeContent): string {
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -391,22 +442,8 @@ export const exportToPdf = async (content: ResumeContent): Promise<void> => {
     };
   </script>
 </body>
-</html>
-      `;
-
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-
-      printWindow.onafterprint = () => {
-        printWindow?.close();
-        resolve();
-      };
-    } catch (error) {
-      console.error("PDF export error:", error);
-      reject(error);
-    }
-  });
-};
+</html>`;
+}
 
 function buildContactInfo(content: ResumeContent): string {
   const parts: string[] = [];

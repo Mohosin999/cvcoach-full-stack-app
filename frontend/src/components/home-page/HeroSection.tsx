@@ -46,7 +46,7 @@ export default function HeroSection({ user, onLogout }: HeroSectionProps) {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-4xl xl:text-5xl font-bold text-white leading-tight"
+              className="text-5xl font-bold text-white leading-tight"
             >
               Land Your First Job with{" "}
               <span className="text-lime-500">AI-Optimized Resumes</span>
