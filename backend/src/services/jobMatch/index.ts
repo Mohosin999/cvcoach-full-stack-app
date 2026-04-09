@@ -19,14 +19,14 @@ export const calculateJobMatch = async (
     throw new Error('Resume not found');
   }
 
-  // Check credits before analysis (Job Match costs 5 credits)
+  // Check credits before analysis (Job Match costs 1 credit)
   const currentCredits = await getUserCredits(userId);
-  if (currentCredits < 5) {
-    throw new Error(`Insufficient credits. This task requires 5 credits. You have ${currentCredits} credits.`);
+  if (currentCredits < 1) {
+    throw new Error(`Insufficient credits. This task requires 1 credit. You have ${currentCredits} credits.`);
   }
 
-  // Deduct 5 credits for Job Match Analysis
-  const { credits } = await useUserCredits(userId, 5);
+  // Deduct 1 credit for Job Match Analysis
+  const { credits } = await useUserCredits(userId, 1);
 
   // Analyze with Gemini AI
   const analysis = await analyzeWithGemini(

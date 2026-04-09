@@ -27,12 +27,12 @@ export const analyzeJobMatch = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Check user credits (Job Match costs 5 credits)
+    // Check user credits (Job Match costs 1 credit)
     const user = await User.findById(req.user._id);
-    if (!user || user.subscription.credits < 5) {
+    if (!user || user.subscription.credits < 1) {
       return res.status(403).json({
         success: false,
-        message: `Insufficient credits. This task requires 5 credits. You have ${user?.subscription.credits || 0} credits.`,
+        message: `Insufficient credits. This task requires 1 credit. You have ${user?.subscription.credits || 0} credits.`,
       });
     }
 
@@ -43,15 +43,15 @@ export const analyzeJobMatch = async (req: AuthRequest, res: Response) => {
       jobDescription
     );
 
-    // Deduct 5 credits for Job Match Analysis
-    user.subscription.credits -= 5;
+    // Deduct 1 credit for Job Match Analysis
+    user.subscription.credits -= 1;
     await user.save();
 
     res.status(201).json({
       success: true,
       data: match,
       credits: user.subscription.credits,
-      message: "✅ Credit deducted successfully! Task: Job Match Analysis, Credits deducted: 5",
+      message: "✅ Credit deducted successfully! Task: Job Match Analysis, Credits deducted: 1",
     });
   } catch (error: any) {
     console.error('Job Match analysis error:', error);

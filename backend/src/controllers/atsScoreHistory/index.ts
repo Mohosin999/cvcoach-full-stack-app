@@ -20,12 +20,12 @@ export const analyzeAtsScore = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Check user credits (ATS Score costs 5 credits)
+    // Check user credits (ATS Score costs 1 credit)
     const user = await User.findById(req.user._id);
-    if (!user || user.subscription.credits < 5) {
+    if (!user || user.subscription.credits < 1) {
       return res.status(403).json({
         success: false,
-        message: `Insufficient credits. This task requires 5 credits. You have ${user?.subscription.credits || 0} credits.`,
+        message: `Insufficient credits. This task requires 1 credit. You have ${user?.subscription.credits || 0} credits.`,
       });
     }
 
@@ -35,15 +35,15 @@ export const analyzeAtsScore = async (req: AuthRequest, res: Response) => {
       resumeContent
     );
 
-    // Deduct 5 credits for ATS Score Analysis
-    user.subscription.credits -= 5;
+    // Deduct 1 credit for ATS Score Analysis
+    user.subscription.credits -= 1;
     await user.save();
 
     res.status(201).json({
       success: true,
       data: score,
       credits: user.subscription.credits,
-      message: "✅ Credit deducted successfully! Task: ATS Score Analysis, Credits deducted: 5",
+      message: "✅ Credit deducted successfully! Task: ATS Score Analysis, Credits deducted: 1",
     });
   } catch (error: any) {
     console.error('ATS Score analysis error:', error);

@@ -83,7 +83,7 @@ export default function AtsScorePage() {
       
       if (response.data.credits !== undefined) {
         dispatch(setUserCredits(response.data.credits));
-        toast.success(`ATS analysis completed! 5 credits deducted. New balance: ${response.data.credits}`);
+        toast.success(`ATS analysis completed! 1 credit deducted. New balance: ${response.data.credits}`);
       } else {
         toast.success("ATS analysis completed");
       }

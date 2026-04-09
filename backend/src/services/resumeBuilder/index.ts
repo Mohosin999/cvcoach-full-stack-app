@@ -121,14 +121,14 @@ export const generateSectionContent = async (
     skills?: string[];
   }
 ) => {
-  // Resume Build costs 10 credits
+  // Resume Build costs 1 credit
   const currentCredits = await getUserCredits(userId);
-  if (currentCredits < 10) {
-    throw new Error(`Insufficient credits. This task requires 10 credits. You have ${currentCredits} credits.`);
+  if (currentCredits < 1) {
+    throw new Error(`Insufficient credits. This task requires 1 credit. You have ${currentCredits} credits.`);
   }
 
-  // Deduct 10 credits for Resume Build
-  const { credits } = await useUserCredits(userId, 10);
+  // Deduct 1 credit for Resume Build
+  const { credits } = await useUserCredits(userId, 1);
   const suggestion = await generateWithGemini(section, context);
   return { suggestion, credits };
 };

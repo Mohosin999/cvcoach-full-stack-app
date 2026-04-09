@@ -57,7 +57,7 @@ export function useResumeActions() {
         
         if (response.data.credits !== undefined) {
           dispatch(setUserCredits(response.data.credits));
-          toast.success(`Resume saved! 10 credits deducted. New balance: ${response.data.credits}`);
+          toast.success(`Resume saved! 1 credit deducted. New balance: ${response.data.credits}`);
         } else {
           toast.success("Resume saved to history successfully!");
         }

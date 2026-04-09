@@ -21,12 +21,12 @@ export const saveResumeBuild = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Check user credits (Resume Build costs 10 credits)
+    // Check user credits (Resume Build costs 1 credit)
     const user = await User.findById(req.user._id);
-    if (!user || user.subscription.credits < 10) {
+    if (!user || user.subscription.credits < 1) {
       return res.status(403).json({
         success: false,
-        message: `Insufficient credits. This task requires 10 credits. You have ${user?.subscription.credits || 0} credits.`,
+        message: `Insufficient credits. This task requires 1 credit. You have ${user?.subscription.credits || 0} credits.`,
       });
     }
 
@@ -35,15 +35,15 @@ export const saveResumeBuild = async (req: AuthRequest, res: Response) => {
       resumeContent
     );
 
-    // Deduct 10 credits for Resume Build
-    user.subscription.credits -= 10;
+    // Deduct 1 credit for Resume Build
+    user.subscription.credits -= 1;
     await user.save();
 
     res.status(201).json({
       success: true,
       data: build,
       credits: user.subscription.credits,
-      message: "✅ Credit deducted successfully! Task: Resume Build, Credits deducted: 10",
+      message: "✅ Credit deducted successfully! Task: Resume Build, Credits deducted: 1",
     });
   } catch (error: any) {
     console.error('Save resume build error:', error);
