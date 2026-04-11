@@ -1,4 +1,10 @@
+import mongoose from "mongoose";
 import { User } from "../../models/User";
+import { Resume } from "../../models/Resume";
+import { AtsScore } from "../../models/AtsScore";
+import { JobMatch } from "../../models/JobMatch";
+import { Analysis } from "../../models/Analysis";
+import { Payment } from "../../models/Payment";
 
 interface UpdateProfileData {
   name?: string;
@@ -24,6 +30,14 @@ export const updateUserProfile = async (
 };
 
 export const deleteUserAccount = async (userId: string) => {
+  const userObjectId = new mongoose.Types.ObjectId(userId);
+
+  await Resume.deleteMany({ userId: userObjectId });
+  await AtsScore.deleteMany({ userId: userObjectId });
+  await JobMatch.deleteMany({ userId: userObjectId });
+  await Analysis.deleteMany({ userId: userObjectId });
+  await Payment.deleteMany({ user: userObjectId });
+
   return User.findByIdAndDelete(userId);
 };
 

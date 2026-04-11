@@ -1,151 +1,224 @@
-# ResumeAI - AI-Powered Resume Analysis & Generation
+# CVCoach - AI-Powered Resume Analysis & Builder Platform
 
-A professional MERN stack web application for AI-powered resume analysis and generation. The app allows users to upload resumes, paste job descriptions, get AI feedback, and generate improved resumes while maintaining original formatting.
+CVCoach is a comprehensive full-stack web application that helps users analyze, optimize, and build professional resumes using artificial intelligence. The platform provides features like ATS scoring, job matching, AI-powered content generation, and professional resume building.
+
+![Tech Stack](https://img.shields.io/badge/Stack-React%20%7C%20Node.js%20%7C%20MongoDB%20%7C%20Gemini%20AI-blue)
+
+![Project Screenshot](./frontend//public/cvcoach.png)
+
+## Table of Contents
+
+- [Live Demo](#live-demo)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [API Endpoints](#api-endpoints)
+
+## Live Demo
+
+[CVCoach App](https://cvcoach-client.vercel.app/) - Try the live application
 
 ## Features
 
-- **Google OAuth 2.0 Authentication** - Secure login with Google
-- **Resume Upload** - Drag and drop PDF/DOCX files (max 10MB)
-- **AI Analysis** - Compare resume with job description using Google Gemini
-- **ATS Optimization** - Get ATS compatibility scores and recommendations
-- **Resume Builder** - Create and edit professional resumes
-- **Multiple Export Formats** - Download as PDF or DOCX
-- **Dark/Light Theme** - Professional UI with theme switching
+### Resume Analysis
+
+- **ATS Score Calculator** - Evaluate resume compatibility with Applicant Tracking Systems
+- **Job Match Analysis** - Compare resume against job descriptions
+- **Keyword Extraction** - Identify missing keywords and optimization opportunities
+- **AI-Powered Feedback** - Get intelligent suggestions to improve your resume
+
+### Resume Builder
+
+- **Drag-and-drop Interface** - Create professional resumes easily
+- **AI Content Generation** - Generate professional summaries, experience descriptions, and skills
+- **Live Preview** - See your resume in real-time as you edit
+- **Export Options** - Download as PDF, DOCX, or PNG
+
+### User Management
+
+- **Authentication** - Email/password and Google OAuth login
+- **Credit System** - Purchase credits for premium features
+- **History Tracking** - View past analysis and built resumes
 
 ## Tech Stack
 
-### Backend
-- Node.js 20 + Express.js
-- TypeScript
-- MongoDB with Mongoose
-- Google OAuth 2.0 + JWT
-- Google Gemini AI
-- PDF/DOCX parsing
-
 ### Frontend
-- React 18 + TypeScript
-- Tailwind CSS
-- Framer Motion
-- React Router v6
-- React Query
-- jsPDF + docx
 
-### DevOps
-- Docker & Docker Compose
-- GitHub Actions CI/CD
+- **React 18** with TypeScript
+- **Vite** for build tooling
+- **Redux Toolkit** for state management
+- **TailwindCSS** for styling
+- **React Router** for navigation
+- **Framer Motion** for animations
+- **React Quill** for rich text editing
 
-## Getting Started
+### Backend
 
-### Prerequisites
-- Node.js 20+
-- MongoDB
-- Docker & Docker Compose
-- Google Cloud Console project
-- Gemini API key
-
-### Environment Setup
-
-1. **Backend**
-```bash
-cd backend
-cp .env.example .env
-# Edit .env with your credentials
-```
-
-2. **Frontend**
-```bash
-cd frontend
-cp .env.example .env
-# Edit .env with your credentials
-```
-
-### Running with Docker
-
-```bash
-# Start all services
-docker compose up -d
-
-# View logs
-docker compose logs -f
-
-# Stop services
-docker compose down
-```
-
-### Running Locally
-
-**Backend:**
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## API Endpoints
-
-### Authentication
-- `GET /api/auth/google` - Google OAuth login
-- `GET /api/auth/google/callback` - OAuth callback
-- `GET /api/auth/me` - Get current user
-- `POST /api/auth/logout` - Logout
-- `POST /api/auth/refresh` - Refresh token
-
-### Users
-- `GET /api/users/profile` - Get profile
-- `PUT /api/users/profile` - Update profile
-- `DELETE /api/users/account` - Delete account
-
-### Resumes
-- `GET /api/resumes` - List resumes
-- `POST /api/resumes` - Upload resume
-- `GET /api/resumes/:id` - Get resume
-- `PUT /api/resumes/:id` - Update resume
-- `DELETE /api/resumes/:id` - Delete resume
-
-### Analysis
-- `GET /api/analysis` - List analyses
-- `POST /api/analysis` - Create analysis
-- `GET /api/analysis/:id` - Get analysis
-- `DELETE /api/analysis/:id` - Delete analysis
-
-### Job Descriptions
-- `GET /api/jobs` - List jobs
-- `POST /api/jobs` - Save job
-- `PUT /api/jobs/:id` - Update job
-- `DELETE /api/jobs/:id` - Delete job
+- **Express.js** with TypeScript
+- **MongoDB** with Mongoose
+- **Google Gemini AI** for AI-powered features
+- **Stripe** for payment processing
+- **Passport.js** for authentication
+- **Multer** for file uploads
 
 ## Project Structure
 
 ```
-├── backend/
+app/
+├── backend/                 # Express.js backend API
 │   ├── src/
 │   │   ├── config/         # Configuration files
-│   │   ├── controllers/    # Route controllers
-│   │   ├── middleware/    # Express middleware
-│   │   ├── models/        # Mongoose models
-│   │   ├── routes/        # API routes
-│   │   ├── services/      # Business logic
-│   │   └── types/         # TypeScript types
-│   └── Dockerfile
-├── frontend/
-│   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── contexts/      # React contexts
-│   │   ├── pages/         # Page components
-│   │   ├── services/      # API services
-│   │   └── types/         # TypeScript types
-│   └── Dockerfile
-├── docker-compose.yml
-└── README.md
+│   │   ├── controllers/    # Request handlers
+│   │   ├── middlewares/    # Express middlewares
+│   │   ├── models/         # Mongoose models
+│   │   ├── routes/         # API routes
+│   │   ├── services/       # Business logic
+│   │   ├── db/             # Database connection
+│   │   └── utils/          # Utility functions
+│   └── package.json
+│
+└── frontend/               # React frontend application
+    ├── src/
+    │   ├── api/           # API client
+    │   ├── components/    # React components
+    │   ├── hooks/         # Custom hooks
+    │   ├── pages/         # Page components
+    │   ├── store/         # Redux store
+    │   ├── types/         # TypeScript types
+    │   └── utils/         # Utility functions
+    └── package.json
 ```
 
-## License
+## Getting Started
 
-MIT
+### Prerequisites
+
+- Node.js 18+
+- MongoDB (local or Atlas)
+- Google Cloud Platform account (for Gemini AI)
+- Stripe account (for payments)
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd app
+   ```
+
+2. **Install backend dependencies**
+
+   ```bash
+   cd backend
+   npm install
+   ```
+
+3. **Install frontend dependencies**
+
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+4. **Configure environment variables**
+
+   Create `backend/.env`:
+
+   ```env
+   PORT=5000
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   GEMINI_API_KEY=your_gemini_api_key
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+   FRONTEND_URL=http://localhost:5173
+   ```
+
+   Create `frontend/.env`:
+
+   ```env
+   VITE_API_URL=http://localhost:5000/api
+   VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+   ```
+
+### Running the Application
+
+1. **Start the backend**
+
+   ```bash
+   cd backend
+   npm run dev
+   ```
+
+   Backend runs on http://localhost:5000
+
+2. **Start the frontend**
+
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+   Frontend runs on http://localhost:5173
+
+3. **Build for production**
+
+   ```bash
+   # Backend
+   cd backend
+   npm run build
+   npm start
+
+   # Frontend
+   cd frontend
+   npm run build
+   npm run start
+   ```
+
+## API Endpoints
+
+### Authentication
+
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - User login
+- `GET /api/auth/me` - Get current user
+- `POST /api/auth/refresh-token` - Refresh access token
+- `POST /api/auth/logout` - User logout
+
+### Resumes
+
+- `POST /api/resumes/upload` - Upload resume file
+- `GET /api/resumes` - Get all user resumes
+- `GET /api/resumes/:id` - Get single resume
+- `PUT /api/resumes/:id` - Update resume
+- `DELETE /api/resumes/:id` - Delete resume
+
+### Analysis
+
+- `POST /api/analysis/generate` - Generate AI analysis
+- `GET /api/analysis` - Get all analyses
+- `GET /api/analysis/:id` - Get single analysis
+- `DELETE /api/analysis/:id` - Delete analysis
+
+### ATS Score
+
+- `POST /api/ats-score` - Calculate ATS score
+
+### Job Match
+
+- `POST /api/job-match` - Match resume to job
+
+### Resume Builder
+
+- `POST /api/resume-builder` - Create resume from content
+- `GET /api/resume-builder/templates` - Get available templates
+
+### Payment
+
+- `POST /api/payment/create-checkout-session` - Create Stripe checkout
+- `POST /api/payment/webhook` - Stripe webhook handler
+- `GET /api/payment/verify/:id` - Verify payment status
